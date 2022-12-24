@@ -1,0 +1,569 @@
+/* Formatted on 9/15/2022 10:16:33 AM (QP5 v5.326) */
+  SELECT 'New Portfolio'                     AS portfolio_type,
+         REG_NM,
+         AREA_NM,
+         BRNCH_NM,
+         emp_nm,
+         NULL                                no_of_dues,
+         SUM (NVL (rec_typ_cash, 0))         rec_typ_cash,
+         SUM (NVL (rec_typ_oths, 0))         rec_typ_oths,
+         SUM (NVL (rec_typ_mw, 0))           rec_typ_mw,
+         SUM (NVL (rec_typ_cash_amt, 0))     rec_typ_cash_amt,
+         SUM (NVL (rec_typ_oths_amt, 0))     rec_typ_oths_amt,
+         SUM (NVL (rec_typ_mw_amt, 0))       rec_typ_mw_amt,
+         SUM (NVL (od_1_30_dys, 0))          od_1_30_dys,
+         SUM (NVL (od_above_30_dys, 0))      od_above_30_dys,
+         SUM (NVL (same_dy, 0))              same_dy,
+         SUM (NVL (adc_1_3_dy, 0))           adc_1_3_dy,
+         SUM (NVL (adc_4_7_dy, 0))           adc_4_7_dy,
+         SUM (NVL (adc_8_15_dy, 0))          adc_8_15_dy,
+         SUM (NVL (adc_16_30_dy, 0))         adc_16_30_dy,
+         SUM (NVL (adc_above_30_dy, 0))      adc_above_30_dy,
+         port_seq
+    FROM (  SELECT mr.REG_NM,
+                   ma.AREA_NM,
+                   mb.BRNCH_NM,
+                   CASE
+                       WHEN :role_type = 'bm' THEN me.emp_nm
+                       WHEN :brnchSeq <> -1 THEN me.emp_nm
+                       ELSE mb.brnch_nm
+                   END
+                       emp_nm,
+                   CASE
+                       WHEN :role_type = 'bm' THEN mp.port_seq
+                       WHEN :brnchSeq <> -1 THEN mp.port_seq
+                       ELSE mb.brnch_seq
+                   END
+                       port_seq,
+                   pgrp.PRD_GRP_SEQ,
+                     NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN -30
+                                                                             AND -1
+                                               AND rch.RCVRY_TYP_SEQ = 161
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) <
+                                                   -30
+                                               AND rch.RCVRY_TYP_SEQ = 161
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) =
+                                                   0
+                                               AND rch.RCVRY_TYP_SEQ = 161
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN 1
+                                                                             AND 3
+                                               AND rch.RCVRY_TYP_SEQ = 161
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN 4
+                                                                             AND 7
+                                               AND rch.RCVRY_TYP_SEQ = 161
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN 8
+                                                                             AND 15
+                                               AND rch.RCVRY_TYP_SEQ = 161
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN 16
+                                                                             AND 30
+                                               AND rch.RCVRY_TYP_SEQ = 161
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) >
+                                                   30
+                                               AND rch.RCVRY_TYP_SEQ = 161
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                       rec_typ_cash,
+                     NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN -30
+                                                                             AND -1
+                                               AND rch.RCVRY_TYP_SEQ <> 161
+                                               AND rch.rcvry_typ_seq NOT IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) <
+                                                   -30
+                                               AND rch.RCVRY_TYP_SEQ <> 161
+                                               AND rch.rcvry_typ_seq NOT IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) =
+                                                   0
+                                               AND rch.RCVRY_TYP_SEQ <> 161
+                                               AND rch.rcvry_typ_seq NOT IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN 1
+                                                                             AND 3
+                                               AND rch.RCVRY_TYP_SEQ <> 161
+                                               AND rch.rcvry_typ_seq NOT IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN 4
+                                                                             AND 7
+                                               AND rch.RCVRY_TYP_SEQ <> 161
+                                               AND rch.rcvry_typ_seq NOT IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN 8
+                                                                             AND 15
+                                               AND rch.RCVRY_TYP_SEQ <> 161
+                                               AND rch.rcvry_typ_seq NOT IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN 16
+                                                                             AND 30
+                                               AND rch.RCVRY_TYP_SEQ <> 161
+                                               AND rch.rcvry_typ_seq NOT IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) >
+                                                   30
+                                               AND rch.RCVRY_TYP_SEQ <> 161
+                                               AND rch.rcvry_typ_seq NOT IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                       rec_typ_oths,
+                     NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN -30
+                                                                             AND -1
+                                               AND rch.RCVRY_TYP_SEQ IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) <
+                                                   -30
+                                               AND rch.RCVRY_TYP_SEQ IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) =
+                                                   0
+                                               AND rch.RCVRY_TYP_SEQ IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN 1
+                                                                             AND 3
+                                               AND rch.RCVRY_TYP_SEQ IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN 4
+                                                                             AND 7
+                                               AND rch.RCVRY_TYP_SEQ IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN 8
+                                                                             AND 15
+                                               AND rch.RCVRY_TYP_SEQ IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) BETWEEN 16
+                                                                             AND 30
+                                               AND rch.RCVRY_TYP_SEQ IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                   + NVL (
+                         COUNT (
+                             DISTINCT CASE
+                                          WHEN       TRUNC (psd.DUE_DT)
+                                                   - TRUNC (rch.PYMT_DT) >
+                                                   30
+                                               AND rch.RCVRY_TYP_SEQ IN
+                                                       (SELECT typ_seq
+                                                          FROM mw_typs
+                                                         WHERE typ_str LIKE
+                                                                   '%Mobile Wallet')
+                                          THEN
+                                              rch.RCVRY_TRX_SEQ
+                                      END),
+                         0)
+                       rec_typ_mw,
+                   NVL (
+                       SUM (
+                           CASE
+                               WHEN rch.RCVRY_TYP_SEQ = 161 THEN rcd.pymt_amt
+                           END),
+                       0)
+                       rec_typ_cash_amt,
+                   NVL (
+                       SUM (
+                           CASE
+                               WHEN     rch.RCVRY_TYP_SEQ <> 161
+                                    AND rch.rcvry_typ_seq NOT IN
+                                            (SELECT typ_seq
+                                               FROM mw_typs
+                                              WHERE typ_str LIKE '%Mobile Wallet')
+                               THEN
+                                   rcd.pymt_amt
+                           END),
+                       0)
+                       rec_typ_oths_amt,
+                   NVL (
+                       SUM (
+                           CASE
+                               WHEN     rch.rcvry_typ_seq <> 161
+                                    AND rch.rcvry_typ_seq IN
+                                            (SELECT typ_seq
+                                               FROM mw_typs
+                                              WHERE typ_str LIKE '%Mobile Wallet')
+                               THEN
+                                   rcd.pymt_amt
+                           END),
+                       0)
+                       rec_typ_mw_amt,
+                   NVL (
+                       COUNT (
+                           DISTINCT CASE
+                                        WHEN   TRUNC (psd.DUE_DT)
+                                             - TRUNC (rch.PYMT_DT) BETWEEN -30
+                                                                       AND -1
+                                        THEN
+                                            rch.RCVRY_TRX_SEQ
+                                    END),
+                       0)
+                       od_1_30_dys,
+                   NVL (
+                       COUNT (
+                           DISTINCT CASE
+                                        WHEN   TRUNC (psd.DUE_DT)
+                                             - TRUNC (rch.PYMT_DT) <
+                                             -30
+                                        THEN
+                                            rch.RCVRY_TRX_SEQ
+                                    END),
+                       0)
+                       od_above_30_dys,
+                   NVL (
+                       COUNT (
+                           DISTINCT CASE
+                                        WHEN   TRUNC (psd.DUE_DT)
+                                             - TRUNC (rch.PYMT_DT) =
+                                             0
+                                        THEN
+                                            rch.RCVRY_TRX_SEQ
+                                    END),
+                       0)
+                       same_dy,
+                   NVL (
+                       COUNT (
+                           DISTINCT CASE
+                                        WHEN   TRUNC (psd.DUE_DT)
+                                             - TRUNC (rch.PYMT_DT) BETWEEN 1
+                                                                       AND 3
+                                        THEN
+                                            rch.RCVRY_TRX_SEQ
+                                    END),
+                       0)
+                       Adc_1_3_dy,
+                   NVL (
+                       COUNT (
+                           DISTINCT CASE
+                                        WHEN   TRUNC (psd.DUE_DT)
+                                             - TRUNC (rch.PYMT_DT) BETWEEN 4
+                                                                       AND 7
+                                        THEN
+                                            rch.RCVRY_TRX_SEQ
+                                    END),
+                       0)
+                       Adc_4_7_dy,
+                   NVL (
+                       COUNT (
+                           DISTINCT CASE
+                                        WHEN   TRUNC (psd.DUE_DT)
+                                             - TRUNC (rch.PYMT_DT) BETWEEN 8
+                                                                       AND 15
+                                        THEN
+                                            rch.RCVRY_TRX_SEQ
+                                    END),
+                       0)
+                       Adc_8_15_dy,
+                   NVL (
+                       COUNT (
+                           DISTINCT CASE
+                                        WHEN   TRUNC (psd.DUE_DT)
+                                             - TRUNC (rch.PYMT_DT) BETWEEN 16
+                                                                       AND 30
+                                        THEN
+                                            rch.RCVRY_TRX_SEQ
+                                    END),
+                       0)
+                       Adc_16_30_dy,
+                   NVL (
+                       COUNT (
+                           DISTINCT CASE
+                                        WHEN   TRUNC (psd.DUE_DT)
+                                             - TRUNC (rch.PYMT_DT) >
+                                             30
+                                        THEN
+                                            rch.RCVRY_TRX_SEQ
+                                    END),
+                       0)
+                       Adc_above_30_dy
+              FROM mw_rcvry_trx   rch,
+                   mw_rcvry_dtl   rcd,
+                   mw_pymt_sched_dtl psd,
+                   mw_pymt_sched_hdr psh,
+                   mw_loan_app    ap,
+                   mw_port        mp,
+                   mw_port_emp_rel mrl,
+                   mw_emp         me,
+                   mw_brnch       mb,
+                   mw_area        ma,
+                   mw_reg         mr,
+                   mw_prd         pprd,
+                   mw_prd_grp     pgrp,
+                   MW_DSBMT_VCHR_HDR dsb
+             WHERE     rch.RCVRY_TRX_SEQ = rcd.RCVRY_TRX_SEQ
+                   AND rch.CRNT_REC_FLG = 1
+                   AND rcd.PYMT_SCHED_DTL_SEQ = psd.PYMT_SCHED_DTL_SEQ
+                   AND rcd.CRNT_REC_FLG = 1
+                   AND psd.PYMT_SCHED_HDR_SEQ = psh.PYMT_SCHED_HDR_SEQ
+                   AND psd.CRNT_REC_FLG = 1
+                   AND psh.LOAN_APP_SEQ = ap.LOAN_APP_SEQ
+                   AND psh.CRNT_REC_FLG = 1
+                   AND ap.CRNT_REC_FLG = 1
+                   AND mp.PORT_SEQ = mrl.PORT_SEQ
+                   AND mrl.CRNT_REC_FLG = 1
+                   AND mrl.emp_seq = me.emp_seq
+                   AND ap.PORT_SEQ = mp.PORT_SEQ
+                   AND mp.CRNT_REC_FLG = 1
+                   AND mp.BRNCH_SEQ = mb.BRNCH_SEQ
+                   AND mb.CRNT_REC_FLG = 1
+                   AND mb.AREA_SEQ = ma.AREA_SEQ
+                   AND ma.CRNT_REC_FLG = 1
+                   AND ma.REG_SEQ = mr.REG_SEQ
+                   AND mr.CRNT_REC_FLG = 1
+                   AND ap.PRD_SEQ = pprd.PRD_SEQ
+                   AND pprd.CRNT_REC_FLG = 1
+                   AND pprd.PRD_GRP_SEQ = pgrp.PRD_GRP_SEQ
+                   AND pgrp.CRNT_REC_FLG = 1
+                   AND ap.LOAN_APP_SEQ = dsb.LOAN_APP_SEQ
+                   AND dsb.CRNT_REC_FLG = 1
+                   AND  (   :P_TYPE = 1
+                OR ( :P_TYPE = 2 AND ap.rs_filter_seq > 0)
+                OR ( :P_TYPE = 3 AND ap.rs_filter_seq = 0))
+                   AND TRUNC (dsb.dsbmt_dt) >= '01-may-2020'
+                   AND mp.brnch_seq =
+                       (CASE
+                            WHEN :brnchSeq = -1 THEN mp.brnch_seq
+                            ELSE :brnchSeq
+                        END)
+                   AND mp.PORT_SEQ IN (SELECT port_seq
+                                         FROM mw_acl acl
+                                        WHERE acl.user_id = :p_user)
+                   AND TRUNC (rch.PYMT_DT) BETWEEN TO_DATE ( :frmdt,
+                                                            'dd-MM-yyyy')
+                                               AND TO_DATE ( :todt, 'dd-MM-yyyy')
+          GROUP BY mr.REG_NM,
+                   ma.AREA_NM,
+                   mb.BRNCH_NM,
+                   me.emp_nm,
+                   mp.port_seq,
+                   mb.brnch_nm,
+                   mb.brnch_seq,
+                   --case when :role_type = 'bm' then me.emp_nm else mb.brnch_nm end,
+                   --case when :role_type = 'bm' then mp.port_seq else mb.brnch_seq end,
+                   pgrp.PRD_GRP_SEQ)
+GROUP BY REG_NM,
+         AREA_NM,
+         BRNCH_NM,
+         emp_nm,
+         port_seq
+        

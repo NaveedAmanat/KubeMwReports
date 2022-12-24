@@ -1,0 +1,322 @@
+/* Formatted on 10/31/2022 11:55:14 AM (QP5 v5.326) */
+  SELECT tot_due.brnch_seq,
+         tot_due.prd_grp_seq,
+         tot_due.prd_grp_nm,
+         SUM (count_dues),
+         SUM (count_rec)
+    FROM (  SELECT br.brnch_seq,
+                   pgrpp.prd_grp_seq,
+                   pgrpp.prd_grp_nm,
+                   mp.port_seq,
+                   COUNT (pdtl.PYMT_SCHED_DTL_SEQ)     count_dues
+              FROM mw_loan_app lapp
+                   JOIN mw_port mp ON lapp.port_seq = mp.port_seq
+                   JOIN mw_brnch br ON lapp.brnch_seq = br.BRNCH_SEQ
+                   JOIN mw_area ar ON br.AREA_SEQ = ar.AREA_SEQ
+                   JOIN mw_reg reg ON ar.REG_SEQ = reg.REG_SEQ
+                   JOIN mw_prd prd ON lapp.PRD_SEQ = prd.PRD_SEQ
+                   JOIN mw_prd_grp pgrpp ON PRD.PRD_GRP_SEQ = PGRPp.PRD_GRP_SEQ
+                   JOIN mw_pymt_sched_hdr pdhr
+                       ON lapp.LOAN_APP_SEQ = pdhr.LOAN_APP_SEQ
+                   JOIN mw_pymt_sched_dtl pdtl
+                       ON     pdhr.PYMT_SCHED_HDR_SEQ = pdtl.PYMT_SCHED_HDR_SEQ
+                          AND pdtl.CRNT_REC_FLG = 1
+             WHERE     pdhr.CRNT_REC_FLG = 1
+                   AND mp.CRNT_REC_FLG = 1
+                   AND lapp.CRNT_REC_FLG = 1
+                   AND br.CRNT_REC_FLG = 1
+                   AND PRD.CRNT_REC_FLG = 1
+                   AND pgrpp.CRNT_REC_FLG = 1
+                   AND TRUNC (pdtl.due_dt) BETWEEN TO_DATE ( :frmdt,
+                                                            'dd-MM-yyyy')
+                                               AND TO_DATE ( :todt, 'dd-MM-yyyy')
+                   AND lapp.PRD_SEQ <> 29                      ------------KSK
+                   AND reg.reg_seq = ar.reg_seq
+                   AND ar.area_seq = br.area_seq
+                   AND br.brnch_seq =
+                       (CASE
+                            WHEN :brnchSeq = -1 THEN br.brnch_seq
+                            ELSE :brnchSeq
+                        END)
+                   AND EXISTS
+                           (SELECT port_seq
+                              FROM mw_acl acl
+                             WHERE     acl.user_id = :p_user
+                                   AND acl.port_seq = mp.port_seq)
+          GROUP BY br.brnch_seq,
+                   pgrpp.prd_grp_seq,
+                   pgrpp.prd_grp_nm,
+                   mp.PORT_SEQ) tot_due
+         LEFT OUTER JOIN
+         (  SELECT br.brnch_seq,
+                   pgrpp.prd_grp_nm,
+                   pgrpp.prd_grp_seq,
+                   mp.port_seq,
+                   COUNT (DISTINCT rdtl.PYMT_SCHED_DTL_SEQ)     count_rec
+              FROM mw_loan_app lapp
+                   JOIN mw_port mp ON lapp.port_seq = mp.port_seq
+                   JOIN mw_brnch br ON lapp.brnch_seq = br.BRNCH_SEQ
+                   JOIN mw_area ar ON br.AREA_SEQ = ar.AREA_SEQ
+                   JOIN mw_reg reg ON ar.REG_SEQ = reg.REG_SEQ
+                   JOIN mw_prd prd ON lapp.PRD_SEQ = prd.PRD_SEQ
+                   JOIN mw_prd_grp pgrpp ON PRD.PRD_GRP_SEQ = PGRPp.PRD_GRP_SEQ
+                   JOIN mw_pymt_sched_hdr pdhr
+                       ON lapp.LOAN_APP_SEQ = pdhr.LOAN_APP_SEQ
+                   JOIN mw_pymt_sched_dtl pdtl
+                   JOIN mw_rcvry_dtl rdtl
+                       ON pdtl.PYMT_SCHED_DTL_SEQ = rdtl.PYMT_SCHED_DTL_SEQ
+                   JOIN mw_rcvry_trx trx
+                       ON     rdtl.RCVRY_TRX_SEQ = trx.RCVRY_TRX_SEQ
+                          AND trx.CRNT_REC_FLG = 1
+                       ON     pdhr.PYMT_SCHED_HDR_SEQ = pdtl.PYMT_SCHED_HDR_SEQ
+                          AND pdhr.CRNT_REC_FLG = pdtl.CRNT_REC_FLG
+             WHERE     pdhr.CRNT_REC_FLG = 1
+                   AND mp.CRNT_REC_FLG = 1
+                   AND rdtl.CRNT_REC_FLG = 1
+                   AND lapp.CRNT_REC_FLG = 1
+                   AND br.CRNT_REC_FLG = 1
+                   AND PRD.CRNT_REC_FLG = 1
+                   AND pgrpp.CRNT_REC_FLG = 1
+                   AND lapp.PRD_SEQ <> 29                        ----------KSK
+                   AND pdtl.PYMT_STS_KEY <> 1145 ----------no partial payments----
+                   AND TRUNC (trx.pymt_dt) <= TO_DATE ( :todt, 'dd-MM-yyyy')
+                   AND TRUNC (pdtl.due_dt) BETWEEN TO_DATE ( :frmdt,
+                                                            'dd-MM-yyyy')
+                                               AND TO_DATE ( :todt, 'dd-MM-yyyy')
+                   AND reg.reg_seq = ar.reg_seq
+                   AND ar.area_seq = br.area_seq
+                   AND br.brnch_seq =
+                       (CASE
+                            WHEN :brnchSeq = -1 THEN br.brnch_seq
+                            ELSE :brnchSeq
+                        END)
+                   AND EXISTS
+                           (SELECT port_seq
+                              FROM mw_acl acl
+                             WHERE     acl.user_id = :p_user
+                                   AND acl.port_seq = mp.port_seq)
+          GROUP BY br.brnch_seq,
+                   pgrpp.prd_grp_nm,
+                   pgrpp.prd_grp_seq,
+                   mp.PORT_SEQ) tot_rcv
+             ON     tot_rcv.prd_grp_seq = tot_due.prd_grp_seq
+                AND tot_rcv.brnch_seq = tot_due.brnch_seq
+                AND tot_rcv.port_seq = tot_due.port_seq
+   WHERE :P_TYPE = 1
+GROUP BY tot_due.brnch_seq, tot_due.prd_grp_seq, tot_due.prd_grp_nm
+UNION ALL
+  SELECT tot_due.brnch_seq,
+         tot_due.prd_grp_seq,
+         tot_due.prd_grp_nm,
+         SUM (count_dues),
+         SUM (count_rec)
+    FROM (  SELECT br.brnch_seq,
+                   pgrpp.prd_grp_seq,
+                   pgrpp.prd_grp_nm,
+                   mp.port_seq,
+                   COUNT (pdtl.PYMT_SCHED_DTL_SEQ)     count_dues
+              FROM mw_loan_app lapp
+                   JOIN mw_port mp ON lapp.port_seq = mp.port_seq
+                   JOIN mw_brnch br ON lapp.brnch_seq = br.BRNCH_SEQ
+                   JOIN mw_area ar ON br.AREA_SEQ = ar.AREA_SEQ
+                   JOIN mw_reg reg ON ar.REG_SEQ = reg.REG_SEQ
+                   JOIN mw_prd prd ON lapp.PRD_SEQ = prd.PRD_SEQ
+                   JOIN mw_prd_grp pgrpp ON PRD.PRD_GRP_SEQ = PGRPp.PRD_GRP_SEQ
+                   JOIN mw_pymt_sched_hdr pdhr
+                       ON lapp.LOAN_APP_SEQ = pdhr.LOAN_APP_SEQ
+                   JOIN mw_pymt_sched_dtl pdtl
+                       ON     pdhr.PYMT_SCHED_HDR_SEQ = pdtl.PYMT_SCHED_HDR_SEQ
+                          AND pdtl.CRNT_REC_FLG = 1
+             WHERE     pdhr.CRNT_REC_FLG = 1
+                   AND mp.CRNT_REC_FLG = 1
+                   AND lapp.CRNT_REC_FLG = 1
+                   AND br.CRNT_REC_FLG = 1
+                   AND PRD.CRNT_REC_FLG = 1
+                   AND pgrpp.CRNT_REC_FLG = 1
+                   AND lapp.RS_FILTER_SEQ > 0
+                   AND TRUNC (pdtl.due_dt) BETWEEN TO_DATE ( :frmdt,
+                                                            'dd-MM-yyyy')
+                                               AND TO_DATE ( :todt, 'dd-MM-yyyy')
+                   AND lapp.PRD_SEQ <> 29                      ------------KSK
+                   AND reg.reg_seq = ar.reg_seq
+                   AND ar.area_seq = br.area_seq
+                   AND br.brnch_seq =
+                       (CASE
+                            WHEN :brnchSeq = -1 THEN br.brnch_seq
+                            ELSE :brnchSeq
+                        END)
+                   AND EXISTS
+                           (SELECT port_seq
+                              FROM mw_acl acl
+                             WHERE     acl.user_id = :p_user
+                                   AND acl.port_seq = mp.port_seq)
+          GROUP BY br.brnch_seq,
+                   pgrpp.prd_grp_seq,
+                   pgrpp.prd_grp_nm,
+                   mp.PORT_SEQ) tot_due
+         LEFT OUTER JOIN
+         (  SELECT br.brnch_seq,
+                   pgrpp.prd_grp_nm,
+                   pgrpp.prd_grp_seq,
+                   mp.port_seq,
+                   COUNT (DISTINCT rdtl.PYMT_SCHED_DTL_SEQ)     count_rec
+              FROM mw_loan_app lapp
+                   JOIN mw_port mp ON lapp.port_seq = mp.port_seq
+                   JOIN mw_brnch br ON lapp.brnch_seq = br.BRNCH_SEQ
+                   JOIN mw_area ar ON br.AREA_SEQ = ar.AREA_SEQ
+                   JOIN mw_reg reg ON ar.REG_SEQ = reg.REG_SEQ
+                   JOIN mw_prd prd ON lapp.PRD_SEQ = prd.PRD_SEQ
+                   JOIN mw_prd_grp pgrpp ON PRD.PRD_GRP_SEQ = PGRPp.PRD_GRP_SEQ
+                   JOIN mw_pymt_sched_hdr pdhr
+                       ON lapp.LOAN_APP_SEQ = pdhr.LOAN_APP_SEQ
+                   JOIN mw_pymt_sched_dtl pdtl
+                   JOIN mw_rcvry_dtl rdtl
+                       ON pdtl.PYMT_SCHED_DTL_SEQ = rdtl.PYMT_SCHED_DTL_SEQ
+                   JOIN mw_rcvry_trx trx
+                       ON     rdtl.RCVRY_TRX_SEQ = trx.RCVRY_TRX_SEQ
+                          AND trx.CRNT_REC_FLG = 1
+                       ON     pdhr.PYMT_SCHED_HDR_SEQ = pdtl.PYMT_SCHED_HDR_SEQ
+                          AND pdhr.CRNT_REC_FLG = pdtl.CRNT_REC_FLG
+             WHERE     pdhr.CRNT_REC_FLG = 1
+                   AND mp.CRNT_REC_FLG = 1
+                   AND rdtl.CRNT_REC_FLG = 1
+                   AND lapp.CRNT_REC_FLG = 1
+                   AND lapp.RS_FILTER_SEQ > 0
+                   AND br.CRNT_REC_FLG = 1
+                   AND PRD.CRNT_REC_FLG = 1
+                   AND pgrpp.CRNT_REC_FLG = 1
+                   AND lapp.PRD_SEQ <> 29                        ----------KSK
+                   AND pdtl.PYMT_STS_KEY <> 1145 ----------no partial payments----
+                   AND TRUNC (trx.pymt_dt) <= TO_DATE ( :todt, 'dd-MM-yyyy')
+                   AND TRUNC (pdtl.due_dt) BETWEEN TO_DATE ( :frmdt,
+                                                            'dd-MM-yyyy')
+                                               AND TO_DATE ( :todt, 'dd-MM-yyyy')
+                   AND reg.reg_seq = ar.reg_seq
+                   AND ar.area_seq = br.area_seq
+                   AND br.brnch_seq =
+                       (CASE
+                            WHEN :brnchSeq = -1 THEN br.brnch_seq
+                            ELSE :brnchSeq
+                        END)
+                   AND EXISTS
+                           (SELECT port_seq
+                              FROM mw_acl acl
+                             WHERE     acl.user_id = :p_user
+                                   AND acl.port_seq = mp.port_seq)
+          GROUP BY br.brnch_seq,
+                   pgrpp.prd_grp_nm,
+                   pgrpp.prd_grp_seq,
+                   mp.PORT_SEQ) tot_rcv
+             ON     tot_rcv.prd_grp_seq = tot_due.prd_grp_seq
+                AND tot_rcv.brnch_seq = tot_due.brnch_seq
+                AND tot_rcv.port_seq = tot_due.port_seq
+   WHERE :P_TYPE = 2
+GROUP BY tot_due.brnch_seq, tot_due.prd_grp_seq, tot_due.prd_grp_nm
+UNION ALL
+  SELECT tot_due.brnch_seq,
+         tot_due.prd_grp_seq,
+         tot_due.prd_grp_nm,
+         SUM (count_dues),
+         SUM (count_rec)
+    FROM (  SELECT br.brnch_seq,
+                   pgrpp.prd_grp_seq,
+                   pgrpp.prd_grp_nm,
+                   mp.port_seq,
+                   COUNT (pdtl.PYMT_SCHED_DTL_SEQ)     count_dues
+              FROM mw_loan_app lapp
+                   JOIN mw_port mp ON lapp.port_seq = mp.port_seq
+                   JOIN mw_brnch br ON lapp.brnch_seq = br.BRNCH_SEQ
+                   JOIN mw_area ar ON br.AREA_SEQ = ar.AREA_SEQ
+                   JOIN mw_reg reg ON ar.REG_SEQ = reg.REG_SEQ
+                   JOIN mw_prd prd ON lapp.PRD_SEQ = prd.PRD_SEQ
+                   JOIN mw_prd_grp pgrpp ON PRD.PRD_GRP_SEQ = PGRPp.PRD_GRP_SEQ
+                   JOIN mw_pymt_sched_hdr pdhr
+                       ON lapp.LOAN_APP_SEQ = pdhr.LOAN_APP_SEQ
+                   JOIN mw_pymt_sched_dtl pdtl
+                       ON     pdhr.PYMT_SCHED_HDR_SEQ = pdtl.PYMT_SCHED_HDR_SEQ
+                          AND pdtl.CRNT_REC_FLG = 1
+             WHERE     pdhr.CRNT_REC_FLG = 1
+                   AND mp.CRNT_REC_FLG = 1
+                   AND lapp.CRNT_REC_FLG = 1
+                   AND br.CRNT_REC_FLG = 1
+                   AND PRD.CRNT_REC_FLG = 1
+                   AND pgrpp.CRNT_REC_FLG = 1
+                   AND lapp.RS_FILTER_SEQ = 0
+                   AND TRUNC (pdtl.due_dt) BETWEEN TO_DATE ( :frmdt,
+                                                            'dd-MM-yyyy')
+                                               AND TO_DATE ( :todt, 'dd-MM-yyyy')
+                   AND lapp.PRD_SEQ <> 29                      ------------KSK
+                   AND reg.reg_seq = ar.reg_seq
+                   AND ar.area_seq = br.area_seq
+                   AND br.brnch_seq =
+                       (CASE
+                            WHEN :brnchSeq = -1 THEN br.brnch_seq
+                            ELSE :brnchSeq
+                        END)
+                   AND EXISTS
+                           (SELECT port_seq
+                              FROM mw_acl acl
+                             WHERE     acl.user_id = :p_user
+                                   AND acl.port_seq = mp.port_seq)
+          GROUP BY br.brnch_seq,
+                   pgrpp.prd_grp_seq,
+                   pgrpp.prd_grp_nm,
+                   mp.PORT_SEQ) tot_due
+         LEFT OUTER JOIN
+         (  SELECT br.brnch_seq,
+                   pgrpp.prd_grp_nm,
+                   pgrpp.prd_grp_seq,
+                   mp.port_seq,
+                   COUNT (DISTINCT rdtl.PYMT_SCHED_DTL_SEQ)     count_rec
+              FROM mw_loan_app lapp
+                   JOIN mw_port mp ON lapp.port_seq = mp.port_seq
+                   JOIN mw_brnch br ON lapp.brnch_seq = br.BRNCH_SEQ
+                   JOIN mw_area ar ON br.AREA_SEQ = ar.AREA_SEQ
+                   JOIN mw_reg reg ON ar.REG_SEQ = reg.REG_SEQ
+                   JOIN mw_prd prd ON lapp.PRD_SEQ = prd.PRD_SEQ
+                   JOIN mw_prd_grp pgrpp ON PRD.PRD_GRP_SEQ = PGRPp.PRD_GRP_SEQ
+                   JOIN mw_pymt_sched_hdr pdhr
+                       ON lapp.LOAN_APP_SEQ = pdhr.LOAN_APP_SEQ
+                   JOIN mw_pymt_sched_dtl pdtl
+                   JOIN mw_rcvry_dtl rdtl
+                       ON pdtl.PYMT_SCHED_DTL_SEQ = rdtl.PYMT_SCHED_DTL_SEQ
+                   JOIN mw_rcvry_trx trx
+                       ON     rdtl.RCVRY_TRX_SEQ = trx.RCVRY_TRX_SEQ
+                          AND trx.CRNT_REC_FLG = 1
+                       ON     pdhr.PYMT_SCHED_HDR_SEQ = pdtl.PYMT_SCHED_HDR_SEQ
+                          AND pdhr.CRNT_REC_FLG = pdtl.CRNT_REC_FLG
+             WHERE     pdhr.CRNT_REC_FLG = 1
+                   AND mp.CRNT_REC_FLG = 1
+                   AND rdtl.CRNT_REC_FLG = 1
+                   AND lapp.CRNT_REC_FLG = 1
+                   AND lapp.RS_FILTER_SEQ = 0
+                   AND br.CRNT_REC_FLG = 1
+                   AND PRD.CRNT_REC_FLG = 1
+                   AND pgrpp.CRNT_REC_FLG = 1
+                   AND lapp.PRD_SEQ <> 29                        ----------KSK
+                   AND pdtl.PYMT_STS_KEY <> 1145 ----------no partial payments----
+                   AND TRUNC (trx.pymt_dt) <= TO_DATE ( :todt, 'dd-MM-yyyy')
+                   AND TRUNC (pdtl.due_dt) BETWEEN TO_DATE ( :frmdt,
+                                                            'dd-MM-yyyy')
+                                               AND TO_DATE ( :todt, 'dd-MM-yyyy')
+                   AND reg.reg_seq = ar.reg_seq
+                   AND ar.area_seq = br.area_seq
+                   AND br.brnch_seq =
+                       (CASE
+                            WHEN :brnchSeq = -1 THEN br.brnch_seq
+                            ELSE :brnchSeq
+                        END)
+                   AND EXISTS
+                           (SELECT port_seq
+                              FROM mw_acl acl
+                             WHERE     acl.user_id = :p_user
+                                   AND acl.port_seq = mp.port_seq)
+          GROUP BY br.brnch_seq,
+                   pgrpp.prd_grp_nm,
+                   pgrpp.prd_grp_seq,
+                   mp.PORT_SEQ) tot_rcv
+             ON     tot_rcv.prd_grp_seq = tot_due.prd_grp_seq
+                AND tot_rcv.brnch_seq = tot_due.brnch_seq
+                AND tot_rcv.port_seq = tot_due.port_seq
+   WHERE :P_TYPE = 3
+GROUP BY tot_due.brnch_seq, tot_due.prd_grp_seq, tot_due.prd_grp_nm

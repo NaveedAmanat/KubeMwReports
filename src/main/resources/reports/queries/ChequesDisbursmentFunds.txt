@@ -1,0 +1,144 @@
+  SELECT DH.DSBMT_HDR_SEQ,
+         R.REG_NM,
+         A.AREA_NM,
+         B.BRNCH_NM,
+         BST.ACCT_NUM,
+         BST.BANK_NM BANK,
+         NULL STATUS,
+         BST.BANK_BRNCH,
+         BST.IBAN BANK_CODE,
+         SUM (dd.AMT) DISB_AMOUNT,
+         COUNT (DH.LOAN_APP_SEQ) CLIENTS,
+         PRD.PRD_NM,
+         TY.TYP_STR
+    FROM MW_REG R, MW_AREA A, MW_BRNCH B,
+         MW_BRNCH_ACCT_SET BST,MW_PORT P,
+         MW_LOAN_APP LA,MW_DSBMT_VCHR_HDR DH,MW_DSBMT_VCHR_DTL DD,
+         MW_PRD PRD, MW_TYPS TY
+   WHERE R.REG_SEQ = A.REG_SEQ
+         AND A.AREA_SEQ = B.AREA_SEQ
+         AND B.BRNCH_SEQ = BST.BRNCH_SEQ
+         AND B.BRNCH_SEQ = P.BRNCH_SEQ
+         AND P.PORT_SEQ = LA.PORT_SEQ
+         AND LA.LOAN_APP_SEQ = DH.LOAN_APP_SEQ
+         AND DH.DSBMT_HDR_SEQ = DD.DSBMT_HDR_SEQ
+         AND LA.PRD_SEQ = PRD.PRD_SEQ
+         AND DD.PYMT_TYPS_SEQ = TY.TYP_SEQ
+         AND TY.TYP_SEQ in (SELECT mt.TYP_SEQ FROM MW_TYPS mt where mt.brnch_seq = B.BRNCH_SEQ and typ_id = '0008' and mt.TYP_CTGRY_KEY = 3)
+         AND B.CRNT_REC_FLG = 1
+         and la.prd_seq not in (10,33,34)
+         AND DH.DSBMT_DT BETWEEN to_date(:frmdt||' 03:00:00 PM', 'DD-Mon-RRRR HH:MI:SS AM') AND to_date(:todt||' 03:01:00 PM', 'DD-Mon-RRRR HH:MI:SS AM')
+         AND B.CRNT_REC_FLG = A.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = A.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = BST.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = P.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = LA.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = DH.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = DD.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = PRD.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = TY.CRNT_REC_FLG
+GROUP BY R.REG_NM,A.AREA_NM,B.BRNCH_NM,BST.ACCT_NUM,BST.BANK_NM,
+         BST.BANK_BRNCH,PRD.PRD_NM,TY.TYP_STR,BST.IBAN
+        ,DH.DSBMT_HDR_SEQ
+  UNION ALL
+  SELECT DH.DSBMT_HDR_SEQ,
+         R.REG_NM,
+         A.AREA_NM,
+         B.BRNCH_NM,
+         BST.ACCT_NUM,
+         BST.BANK_NM BANK,
+         NULL STATUS,
+         BST.BANK_BRNCH,
+         BST.IBAN BANK_CODE,
+         SUM (dd.AMT) DISB_AMOUNT,
+         COUNT (DH.LOAN_APP_SEQ) CLIENTS,
+         PRD.PRD_NM,
+         TY.TYP_STR
+    FROM MW_REG R, MW_AREA A, MW_BRNCH B,
+         MW_BRNCH_ACCT_SET BST,MW_PORT P,
+         MW_LOAN_APP LA,MW_DSBMT_VCHR_HDR DH,MW_DSBMT_VCHR_DTL DD,
+         MW_PRD PRD, MW_TYPS TY,
+         mw_exp ep
+   WHERE R.REG_SEQ = A.REG_SEQ
+         AND A.AREA_SEQ = B.AREA_SEQ
+         AND B.BRNCH_SEQ = BST.BRNCH_SEQ
+         AND B.BRNCH_SEQ = P.BRNCH_SEQ
+         AND P.PORT_SEQ = LA.PORT_SEQ
+         AND LA.LOAN_APP_SEQ = DH.LOAN_APP_SEQ
+         AND DH.DSBMT_HDR_SEQ = DD.DSBMT_HDR_SEQ
+         AND LA.PRD_SEQ = PRD.PRD_SEQ
+         AND DD.PYMT_TYPS_SEQ = TY.TYP_SEQ
+         and la.prd_seq = 10
+         AND PYMT_TYP_SEQ in (SELECT mt.TYP_SEQ FROM MW_TYPS mt where mt.brnch_seq = B.BRNCH_SEQ and typ_id = '0008' and mt.TYP_CTGRY_KEY = 3)
+         AND B.CRNT_REC_FLG = 1
+         AND ep.EFF_START_DT BETWEEN to_date(:frmdt||' 03:00:00 PM', 'DD-Mon-RRRR HH:MI:SS AM') AND to_date(:todt||' 03:01:00 PM', 'DD-Mon-RRRR HH:MI:SS AM')
+         and ep.EXPNS_TYP_SEQ = 12595
+         and ep.EXP_REF = la.loan_app_seq
+         and ep.CRNT_REC_FLG = 1
+         AND B.CRNT_REC_FLG = A.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = A.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = BST.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = P.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = LA.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = DH.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = DD.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = PRD.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = TY.CRNT_REC_FLG
+GROUP BY R.REG_NM,A.AREA_NM,B.BRNCH_NM,BST.ACCT_NUM,BST.BANK_NM,
+         BST.BANK_BRNCH,PRD.PRD_NM,TY.TYP_STR,BST.IBAN
+        ,DH.DSBMT_HDR_SEQ
+union all
+SELECT DH.DSBMT_HDR_SEQ,
+         R.REG_NM,
+         A.AREA_NM,
+         B.BRNCH_NM,
+         BST.ACCT_NUM,
+         BST.BANK_NM BANK,
+         NULL STATUS,
+         BST.BANK_BRNCH,
+         BST.IBAN BANK_CODE,
+        sum((select SUM(NVL(CASE WHEN MJD.CRDT_DBT_FLG = 0 THEN MJD.AMT END,0) -
+                NVL(CASE WHEN MJD.CRDT_DBT_FLG = 1 THEN MJD.AMT END,0))
+                 from mw_jv_hdr mjh, mw_jv_dtl mjd
+        where mjh.JV_HDR_SEQ = mjd.JV_HDR_SEQ and mjh.ENTY_SEQ = dd.DSBMT_HDR_SEQ
+        and UPPER(mjh.ENTY_TYP) = 'DISBURSEMENT'
+        AND mjd.GL_ACCT_NUM = TY.GL_ACCT_NUM
+        )) DISB_AMOUNT,
+         COUNT (DH.LOAN_APP_SEQ) CLIENTS,
+         PRD.PRD_NM,
+         TY.TYP_STR
+    FROM MW_REG R, MW_AREA A, MW_BRNCH B,
+         MW_BRNCH_ACCT_SET BST,MW_PORT P,
+         MW_LOAN_APP LA,MW_DSBMT_VCHR_HDR DH,MW_DSBMT_VCHR_DTL DD,
+         MW_PRD PRD, MW_TYPS TY
+   WHERE R.REG_SEQ = A.REG_SEQ
+         AND A.AREA_SEQ = B.AREA_SEQ
+         AND B.BRNCH_SEQ = BST.BRNCH_SEQ
+         AND B.BRNCH_SEQ = P.BRNCH_SEQ
+         AND P.PORT_SEQ = LA.PORT_SEQ
+         AND LA.LOAN_APP_SEQ = DH.LOAN_APP_SEQ
+         AND DH.DSBMT_HDR_SEQ = DD.DSBMT_HDR_SEQ
+         AND LA.PRD_SEQ = PRD.PRD_SEQ
+         AND DD.PYMT_TYPS_SEQ = TY.TYP_SEQ
+         AND TY.TYP_SEQ in (SELECT mt.TYP_SEQ FROM MW_TYPS mt where mt.brnch_seq = B.BRNCH_SEQ and typ_id = '0008' and mt.TYP_CTGRY_KEY = 3)
+         AND B.CRNT_REC_FLG = 1
+         and la.prd_seq in (33,34)
+         AND DH.DSBMT_DT BETWEEN to_date( :frmdt||' 03:00:00 PM', 'DD-Mon-RRRR HH:MI:SS AM') AND to_date(:todt||' 03:01:00 PM', 'DD-Mon-RRRR HH:MI:SS AM')
+         AND B.CRNT_REC_FLG = A.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = A.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = BST.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = P.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = LA.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = DH.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = DD.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = PRD.CRNT_REC_FLG
+         AND R.CRNT_REC_FLG = TY.CRNT_REC_FLG
+GROUP BY R.REG_NM,A.AREA_NM,B.BRNCH_NM,BST.ACCT_NUM,BST.BANK_NM,
+         BST.BANK_BRNCH,PRD.PRD_NM,TY.TYP_STR,BST.IBAN
+        ,DH.DSBMT_HDR_SEQ       
+HAVING sum((select mjd.amt from mw_jv_hdr mjh, mw_jv_dtl mjd
+        where mjh.JV_HDR_SEQ = mjd.JV_HDR_SEQ and mjh.ENTY_SEQ = dd.DSBMT_HDR_SEQ 
+        and UPPER(mjh.ENTY_TYP) = 'DISBURSEMENT'
+        AND mjd.CRDT_DBT_FLG = 0 AND mjd.GL_ACCT_NUM = TY.GL_ACCT_NUM
+        )) > 0 
+        order by REG_NM, AREA_NM, BRNCH_NM, PRD_NM

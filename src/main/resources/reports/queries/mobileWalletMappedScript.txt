@@ -1,0 +1,6 @@
+select mb.BRNCH_NM, mt.TYP_STR M_Wallet
+from mw_typs mt
+join mw_brnch mb on mb.BRNCH_SEQ = mt.BRNCH_SEQ and mb.CRNT_REC_FLG = 1 and mb.brnch_seq <> -1
+where mt.TYP_ID = ( CASE WHEN :typId = -1 THEN( SELECT typ.TYP_ID FROM mw_typs typ WHERE typ.TYP_SEQ = MT.TYP_SEQ AND typ.BRNCH_SEQ <> -1 GROUP BY typ.TYP_ID) ELSE :typId END)
+and mt.TYP_CTGRY_KEY in (3) and mt.CRNT_REC_FLG = 1 AND UPPER (mt.TYP_STR) LIKE '%MOBILE WALLET%' AND mt.BRNCH_SEQ <> -1
+order by 1, 2

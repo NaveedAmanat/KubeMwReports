@@ -1,0 +1,69 @@
+--------------------CREATED BY AISHA KHAN 1/24/2022-------------Client with Active Loans in Other MFIs-----all prd exception ksk------------------------
+with 
+qry as
+(select reg.reg_nm region,ar.area_nm area,br.brnch_nm branch,lap.clnt_seq clnt,lap.loan_app_seq loan_app_seq,
+(select count(*) from  mw_mfcib_oth_outsd_loan mfc where lap.loan_app_seq=mfc.loan_app_seq and MFC.CRNT_REC_FLG=1
+group by lap.loan_app_seq) oth,prd.prd_nm PRODUCT,
+lap.prd_seq prd_seq ,loan_cycl_num
+from mw_loan_app lap  
+join mw_dsbmt_vchr_hdr dhdr on lap.loan_app_seq = dhdr.loan_app_seq
+and dhdr.crnt_rec_flg=lap.crnt_rec_flg 
+join mw_port prt on lap.PORT_SEQ = prt.PORT_SEQ
+and prt.crnt_rec_flg=dhdr.crnt_rec_flg 
+join mw_prd prd on lap.prd_seq = prd.prd_seq
+and prt.crnt_rec_flg=prd.crnt_rec_flg 
+join mw_brnch br on prt.brnch_seq = br.brnch_seq
+--AND br.brnch_seq =9
+and prt.crnt_rec_flg=br.crnt_rec_flg 
+join mw_area ar on ar.area_seq = br.area_seq
+and ar.crnt_rec_flg=br.crnt_rec_flg
+--AND AR.AREA_SEQ =4
+join mw_reg reg on reg.reg_seq=ar.reg_seq
+and ar.crnt_rec_flg=reg.crnt_rec_flg 
+where reg.reg_seq = DECODE(:REG_SEQ, -1, REG.REG_SEQ, :REG_SEQ) --NVL ( :reg_seq, reg.reg_seq)
+                AND ar.area_seq = DECODE(:AREA_SEQ, -1, AR.AREA_SEQ, :AREA_SEQ) --NVL ( :AREA_seq, ar.area_seq)  
+and lap.crnt_rec_flg=1 
+and lap.prd_seq<>29 and trunc(dhdr.DSBMT_DT) between TO_DATE(:fromdt, 'dd-MM-yyyy') and TO_DATE(:todt, 'dd-MM-yyyy')
+
+)
+
+-----------------------PRODUCT WISE--------------
+
+
+select a.region,a.area,--a.branch,
+                               a.product,b.TOT_CLNTS_DISB,
+                               nvl(ZERO_LOANS,0)ZERO_LOANS,NVL(round((("ZERO_LOANS"/b.TOT_CLNTS_DISB)*100),2),0) "ZERO_LOANS_%",
+                                nvl("1_LOANS",0)"1_LOANS",NVL(round((("1_LOANS"/b.TOT_CLNTS_DISB)*100),2),0) "1_LOANS_%",
+                                nvl("2_LOANS",0)"2_LOANS",NVL(round((("2_LOANS"/b.TOT_CLNTS_DISB)*100),2),0) "2_LOANS_%",
+                                nvl("3_LOANS_AND_ABOVE",0)"3_LOANS_AND_ABOVE",NVL(round((("3_LOANS_AND_ABOVE"/b.TOT_CLNTS_DISB)*100),2),0) "3_LOANS_AND_ABOVE%"
+from
+(select region,area,product, count(clnt) TOT_CLNTS_DISB
+from qry 
+group by REGION,AREA,product) b
+full outer join 
+(SELECT region,area,product,sum(ZERO_LOANS) ZERO_LOANS
+ from 
+    (select region,area,product, 
+        ( nvl(COUNT(clnt),0) ) ZERO_LOANS
+        from qry WHERE nvl(oth,0)=0
+        group by REGION,AREA,product)
+    group by REGION,AREA,product) C on b.area||b.product=c.area||c.product
+
+JOIN   
+
+(select region,area,product,
+   --                       sum(ZERO_LOANS) ZERO_LOANS,
+                          sum("1_LOANS") "1_LOANS",
+                          sum("2_LOANS") "2_LOANS",
+                          sum("3_LOANS_AND_ABOVE") "3_LOANS_AND_ABOVE"
+from 
+(select region,area,product, 
+ --(CASE WHEN loan_cycl_num =0 THEN nvl(COUNT(loan_app_seq),0) END) ZERO_LOANS,
+ (CASE WHEN oth =1 THEN COUNT(qry.clnt) END) "1_LOANS",
+ (CASE WHEN oth=2 THEN COUNT(qry.clnt) END) "2_LOANS",
+ (CASE WHEN oth>=3 THEN COUNT(qry.clnt) END) "3_LOANS_AND_ABOVE"
+from qry
+group by REGION,AREA,product,oth
+)
+group by REGION,AREA,product) a ON b.area||b.product=A.area||a.product
+order by REGION,AREA,product

@@ -1,0 +1,38 @@
+SELECT 
+/* FileName: UPaisaDuesUploader.txt
+        * Writted by: Yousaf Ali
+        * Review By: Ali Khubaib
+        * Date: 12-Dec-2022
+        * Reason: Email - New branches ADCs dues not showing */
+clnt_id ||'|'|| to_char(sysdate-1+25,'DDMMYYYY') ||'|'|| SUM(next_due)||'|'|| SUM(next_due)||'|'|| to_char(sysdate,'DDMMYYYY') ||'|'|| clnt_name ||'|'|| null data
+  FROM (
+        SELECT loan_disb.loan_app_seq, loan_disb.dsbmt_dt,clnt_id,
+            loan_disb.clnt_name,  loan_disb.spz_name,
+                NVL((SELECT NVL (psd.PPAL_AMT_DUE, 0) + NVL (psd.TOT_CHRG_DUE, 0) +
+                    NVL((SELECT sum(AMT) FROM MW_PYMT_SCHED_CHRG psc WHERE psc.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq AND crnt_rec_flg = 1),0) total
+                FROM MW_PYMT_SCHED_HDR  psh
+                    JOIN MW_PYMT_SCHED_DTL psd
+                        ON psh.PYMT_SCHED_HDR_SEQ = psd.PYMT_SCHED_HDR_SEQ
+                WHERE     psh.CRNT_REC_FLG = 1
+                    AND psd.CRNT_REC_FLG = 1
+                    AND psh.loan_app_seq = loan_disb.loan_app_seq
+                    AND psd.PYMT_SCHED_DTL_SEQ =
+                        (SELECT MIN (innpsd.PYMT_SCHED_DTL_SEQ)
+                            FROM MW_PYMT_SCHED_DTL innpsd
+                            WHERE innpsd.PYMT_SCHED_HDR_SEQ = psh.PYMT_SCHED_HDR_SEQ AND innpsd.CRNT_REC_FLG = 1
+                                AND innpsd.PYMT_STS_KEY = 945)),0) next_due
+        FROM (
+                SELECT  ap.loan_app_seq,
+                    mc.frst_nm || ' ' || mc.last_nm AS CLNT_NAME,
+                    (mc.spz_frst_nm || ' ' || mc.spz_last_nm) AS SPZ_NAME,
+                    trunc (ap.LOAN_APP_STS_DT) dsbmt_dt,
+                    case when length(clnt_id) < 12 then lpad(clnt_id,12,'0') else clnt_id end clnt_id
+                FROM mw_loan_app  ap
+                    JOIN mw_clnt mc ON ap.clnt_seq = mc.clnt_seq and ap.crnt_rec_flg = 1
+                WHERE ap.loan_app_sts = 703
+                    AND trunc (ap.LOAN_APP_STS_DT) <= sysdate -1
+                    --AND ap.BRNCH_SEQ = 1
+                    ) loan_disb
+        )
+        where next_due > 0
+group by clnt_name, clnt_id

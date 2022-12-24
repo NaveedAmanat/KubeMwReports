@@ -1,0 +1,147 @@
+----only ppal amt
+---->= 35 in abv 35 block
+SELECT
+  /* FileName: GENDER_AND_AGE_WISE_PORTFOLIO
+     * Writted by: Aisha Khan
+     * Review By: Ali Khubaib
+     * Date: 24-Nov-2022
+     * Reason: Finance Report (Portfolio) */
+
+     DECODE (ost_tot.gndr_key,
+               18, 'MALE',
+               19, 'FEMALE',
+               20, 'TRANSGENDER'),
+       dsb.dsb_clnts,
+       dsb.dsb_amt,
+       ost_tot.OST_CLIENTS
+           ost_tot_clnts,
+       ost_tot.OST_AMT
+           ost_tot_amt,
+       ost_bel35.OST_CLIENTS
+           ost_bel35_clnts,
+       ost_bel35.OST_AMT
+           ost_bel35_amt,
+       ost_abv35.OST_CLIENTS
+           ost_abv35_clnts,
+       ost_abv35.OST_AMT
+           ost_abv35_amt
+  FROM (  SELECT gndr_key, SUM (OST_CLIENTS) OST_CLIENTS, SUM (OST_AMT) OST_AMT
+            FROM (  SELECT gndr_key,
+                           CASE
+                               WHEN cpm.product_id <> 19
+                               THEN
+                                   COUNT ( LOAN_CYCLE_ID)
+                           END
+                               OST_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               OST_AMT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP CPM, mw_clnt cl
+                     WHERE     CPM.CUSTOMER_ID = cl.clnt_seq
+                           AND cl.crnt_rec_flg = 1
+                           AND (   CPM.LOAN_COMPLETION_DATE IS NULL
+                                OR CPM.LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                           AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                + NVL (OUTSTANDING_SC, 0)) >
+                               0
+                           AND cpm.DISBURSED_DATE <=
+                               TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND CPM.PRODUCT_ID NOT IN (8)
+                           AND TRUNC (cpm.trn_date) =
+                               TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                  GROUP BY cl.gndr_key, cpm.product_id)
+        GROUP BY gndr_key) ost_tot,
+       (  SELECT gndr_key, SUM (OST_CLIENTS) OST_CLIENTS, SUM (OST_AMT) OST_AMT
+            FROM (  SELECT gndr_key,
+                           CASE
+                               WHEN cpm.product_id <> 19
+                               THEN
+                                   COUNT ( LOAN_CYCLE_ID)
+                           END
+                               OST_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               OST_AMT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP CPM, mw_clnt cl
+                     WHERE     CPM.CUSTOMER_ID = cl.clnt_seq
+                           AND cl.crnt_rec_flg = 1
+                           AND (   CPM.LOAN_COMPLETION_DATE IS NULL
+                                OR CPM.LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                           AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                + NVL (OUTSTANDING_SC, 0)) >
+                               0
+                           AND CPM.PRODUCT_ID NOT IN (8)
+                           AND TRUNC (cpm.trn_date) =
+                               TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND ROUND (MONTHS_BETWEEN (SYSDATE, DOB) / 12, 3) < 35
+                  GROUP BY cl.gndr_key, cpm.product_id)
+        GROUP BY gndr_key) ost_bel35,
+       (  SELECT gndr_key, SUM (OST_CLIENTS) OST_CLIENTS, SUM (OST_AMT) OST_AMT
+            FROM (  SELECT gndr_key,
+                           CASE
+                               WHEN cpm.product_id <> 19
+                               THEN
+                                   COUNT (LOAN_CYCLE_ID)
+                           END
+                               OST_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               OST_AMT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP CPM, mw_clnt cl
+                     WHERE     CPM.CUSTOMER_ID = cl.clnt_seq
+                           AND cl.crnt_rec_flg = 1
+                           AND (   CPM.LOAN_COMPLETION_DATE IS NULL
+                                OR CPM.LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                           AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                + NVL (OUTSTANDING_SC, 0)) >
+                               0
+                           AND CPM.PRODUCT_ID NOT IN (8)
+                           AND TRUNC (cpm.trn_date) =
+                               TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND ROUND (MONTHS_BETWEEN (SYSDATE, DOB) / 12, 3) >=
+                               35
+                  GROUP BY cl.gndr_key, cpm.product_id)
+        GROUP BY gndr_key) ost_abv35,
+       (  SELECT gndr_key, SUM (dsb_clnts) dsb_clnts, SUM (dsb_amt) dsb_amt
+            FROM (  SELECT gndr_key,
+                           CASE
+                               WHEN CPM1.PRODUCT_ID <> 19
+                               THEN
+                                   COUNT (distinct LOAN_CYCLE_ID)
+                           END
+                               dsb_clnts,
+                           COUNT (LOAN_CYCLE_ID)
+                               dsb_LOANS,
+                           ROUND (SUM (NVL (cpm1.DISBURSED_AMOUNT, 0)))
+                               dsb_amt
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1, mw_clnt mc
+                     WHERE     CPM1.PRODUCT_ID NOT IN (8)
+                           AND cpm1.customer_id = mc.clnt_seq
+                           AND mc.crnt_rec_flg = 1
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                + NVL (OUTSTANDING_SC, 0)) >
+                               0
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                           AND cpm1.DISBURSED_DATE BETWEEN TRUNC (
+                                                               TRUNC (
+                                                                   TO_DATE (
+                                                                       :to_dt,
+                                                                       'dd-mm-RRRR'),
+                                                                   'month'),
+                                                               'month')
+                                                       AND TRUNC (
+                                                               TO_DATE (
+                                                                   :to_dt,
+                                                                   'dd-mm-RRRR'))
+                  GROUP BY CPM1.PRODUCT_ID, gndr_key)
+        GROUP BY gndr_key) dsb
+ WHERE     ost_tot.gndr_key = dsb.gndr_key(+)
+       AND ost_tot.gndr_key = ost_bel35.gndr_key(+)
+       AND ost_tot.gndr_key = ost_abv35.gndr_key(+)
+ ORDER BY 1

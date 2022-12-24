@@ -1,0 +1,26 @@
+--VERISYS TOTAL COUNT
+  SELECT to_char(TRUNC (trans_dt), 'dd/MM/yyyy') trans_dt,
+         SUM (DECODE (status, 'NEW', 1, 0))          pending_count,
+         SUM (DECODE (status, 'VERIFIED', 1, 0))     nadra_verified_count,
+         SUM (DECODE (status, 'ERROR', 1, 0))        nadra_error_count,
+         SUM (DECODE (kashf_status, 'Y', 1, 0))      kashf_verified_count,
+         SUM (DECODE (kashf_status, 'E', 1, 0))      kashf_error_count,
+         COUNT (1)                                   total_count
+     FROM mw_cnic_verisys mv
+         LEFT OUTER JOIN mw_loan_app la ON mv.loan_app_seq = la.loan_app_seq
+         LEFT OUTER JOIN mw_clnt mc ON mc.clnt_seq = la.clnt_seq
+         LEFT OUTER JOIN mw_port port ON port.port_seq = la.port_seq
+         LEFT OUTER JOIN mw_brnch brnch ON port.brnch_seq = brnch.brnch_seq
+         LEFT OUTER JOIN mw_area area ON brnch.area_seq = area.area_seq
+         LEFT OUTER JOIN mw_reg reg ON reg.reg_seq = area.reg_seq
+   WHERE reg.crnt_rec_flg = 1
+         AND area.crnt_rec_flg = 1
+         AND brnch.crnt_rec_flg = 1
+         AND port.crnt_rec_flg = 1
+         AND to_date (mv.trans_dt) BETWEEN TO_DATE ( :frmdt, 'dd-MM-yyyy') AND TO_DATE ( :todt, 'dd-MM-yyyy')
+         AND port.brnch_seq = (CASE WHEN :brnchSeq = -1 THEN port.brnch_seq ELSE :brnchSeq END)
+         AND area.area_seq = (CASE WHEN :areaSeq = -1 THEN area.area_seq ELSE :areaSeq END)
+         AND reg.reg_seq = (CASE WHEN :regSeq = -1 THEN reg.reg_seq ELSE :regSeq END)
+GROUP BY  TRUNC (trans_dt)
+--GROUP BY rollup(TRUNC (trans_dt))
+order by 1 desc

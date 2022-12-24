@@ -1,0 +1,41 @@
+select REG_NM, AREA_NM, BRNCH_NM, sum(nvl(bank, 0)) bank, sum(nvl(cash, 0)) cash,  sum(nvl(wallet, 0)) wallet, sum(nvl(mcb, 0)) mcb
+from (
+select mr.REG_NM, ma.AREA_NM, mb.BRNCH_NM,
+(select 1 from mw_typs mt where mt.TYP_SEQ = dsd.PYMT_TYPS_SEQ and dsd.amt <= 45000 and mt.CRNT_REC_FLG=1 and mt.typ_id = '0001') cash,
+(select 1 from mw_typs mt where mt.TYP_SEQ = dsd.PYMT_TYPS_SEQ and dsd.amt <= 45000 and mt.CRNT_REC_FLG=1 and mt.typ_id = '0007') mcb,
+(select 1 from mw_typs mt where mt.TYP_SEQ = dsd.PYMT_TYPS_SEQ and mt.CRNT_REC_FLG=1 and UPPER (mt.TYP_STR) LIKE '%MOBILE WALLET%') wallet,
+(select 1 from mw_typs mt where mt.TYP_SEQ = dsd.PYMT_TYPS_SEQ and dsd.amt <= 45000 and mt.CRNT_REC_FLG=1 and mt.typ_id in( '0008')) bank
+from mw_loan_app ap, MW_DSBMT_VCHR_HDR dsh, MW_DSBMT_VCHR_DTL dsd,
+mw_port mp, mw_brnch mb, mw_area ma, mw_reg mr,
+mw_prd mpd, mw_prd_grp mpg--, mw_typs
+where ap.LOAN_APP_SEQ = dsh.LOAN_APP_SEQ and ap.CRNT_REC_FLG = 1
+and dsh.DSBMT_HDR_SEQ = dsd.DSBMT_HDR_SEQ and dsh.CRNT_REC_FLG = 1 and dsd.CRNT_REC_FLG = 1
+and ap.PORT_SEQ = mp.PORT_SEQ and mp.CRNT_REC_FLG = 1
+and mp.BRNCH_SEQ = mb.BRNCH_SEQ and mb.CRNT_REC_FLG = 1
+and mb.AREA_SEQ = ma.AREA_SEQ and ma.CRNT_REC_FLG = 1
+and ma.REG_SEQ = mr.REG_SEQ and mr.CRNT_REC_FLG = 1
+and ap.PRD_SEQ = mpd.PRD_SEQ and mpd.CRNT_REC_FLG = 1
+and mpd.PRD_GRP_SEQ = mpg.PRD_GRP_SEQ and mpg.CRNT_REC_FLG = 1 and mpg.PRD_GRP_SEQ != 6
+and mb.brnch_seq = (CASE WHEN :brnchSeq = -1 THEN mb.brnch_seq ELSE :brnchSeq END)
+and trunc(dsh.DSBMT_DT) between TO_DATE(:frmDt, 'dd-MM-yyyy') and TO_DATE(:todt, 'dd-MM-yyyy')
+union all
+select mr.REG_NM, ma.AREA_NM, mb.BRNCH_NM,
+(select 1 from mw_typs mt where mt.TYP_SEQ = ep.PYMT_TYP_SEQ and ep.EXPNS_AMT <= 45000 and mt.CRNT_REC_FLG=1 and mt.typ_id = '0001') cash,
+(select 1 from mw_typs mt where mt.TYP_SEQ = ep.PYMT_TYP_SEQ and ep.EXPNS_AMT <= 45000 and mt.CRNT_REC_FLG=1 and mt.typ_id = '0007') mcb,
+(select 1 from mw_typs mt where mt.TYP_SEQ = ep.PYMT_TYP_SEQ and mt.CRNT_REC_FLG=1 and UPPER (mt.TYP_STR) LIKE '%MOBILE WALLET%') wallet,
+(select 1 from mw_typs mt where mt.TYP_SEQ = ep.PYMT_TYP_SEQ and ep.EXPNS_AMT <= 45000 and mt.CRNT_REC_FLG=1 and mt.typ_id in( '0008')) bank
+from mw_loan_app ap, mw_exp ep,
+mw_port mp, mw_brnch mb, mw_area ma, mw_reg mr,
+mw_prd mpd, mw_prd_grp mpg
+where ap.LOAN_APP_SEQ = to_number(ep.exp_ref) and ap.CRNT_REC_FLG = 1
+and ap.PORT_SEQ = mp.PORT_SEQ and mp.CRNT_REC_FLG = 1
+and mp.BRNCH_SEQ = mb.BRNCH_SEQ and mb.CRNT_REC_FLG = 1
+and mb.AREA_SEQ = ma.AREA_SEQ and ma.CRNT_REC_FLG = 1
+and ma.REG_SEQ = mr.REG_SEQ and mr.CRNT_REC_FLG = 1
+and ap.PRD_SEQ = mpd.PRD_SEQ and mpd.CRNT_REC_FLG = 1
+and mpd.PRD_GRP_SEQ = mpg.PRD_GRP_SEQ and mpg.CRNT_REC_FLG = 1 and mpg.PRD_GRP_SEQ = 6
+and mb.brnch_seq = (CASE WHEN :brnchSeq = -1 THEN mb.brnch_seq ELSE :brnchSeq END)
+and trunc(ep.EFF_START_DT) between TO_DATE(:frmDt, 'dd-MM-yyyy') and TO_DATE(:todt, 'dd-MM-yyyy')
+)
+group by REG_NM, AREA_NM, BRNCH_NM
+order by REG_NM, AREA_NM, BRNCH_NM

@@ -1,0 +1,39 @@
+SELECT mr.REG_NM,
+       ma.AREA_NM,
+       mb.BRNCH_NM,
+       rsch.CUSTOMER_ID,
+       rsch.CUSTOMER_NAME,
+       grp.PRD_GRP_NM,
+       rsch.DISBURSED_AMOUNT,
+       rsch.DISBURSED_DATE,
+       NVL (rsch.OVERDUE_AMOUNT, 0) + NVL (rsch.OVERDUE_AMOUNT_SC, 0)
+           overdue,
+       NVL (rsch.OUTSTANDING_PRINCIPAL, 0) + NVL (rsch.OUTSTANDING_SC, 0)
+           outs,
+       mc.PH_NUM clnt_cntct_number,
+       get_clnt_addr (TO_NUMBER (rsch.LOAN_CYCLE_ID))
+           clnt_home_address,
+       (SELECT ref_cd_dscr
+          FROM mw_ref_cd_val vl
+         WHERE vl.ref_cd_seq = mc.RES_TYP_KEY AND vl.crnt_Rec_flg = 1)
+           resident_status,
+       rsch.OVERDUE_DAYS,
+       (
+       select vl.REF_CD_DSCR from MW_LOAN_APP_MNTRNG_CHKS chk
+       join mw_ref_cd_val vl on vl.REF_CD_SEQ = chk.RSN and vl.CRNT_REC_FLG = 1
+       where chk.LOAN_APP_SEQ = to_number(rsch.loan_cycle_id) and chk.CRNT_REC_FLG = 1) od_reason,
+       (select CMNT from MW_LOAN_APP_MNTRNG_CHKS chk where chk.LOAN_APP_SEQ = to_number(rsch.loan_cycle_id) and chk.CRNT_REC_FLG = 1) od_cmnts
+  FROM KASHF_REPORTING.CON_MON_ASOFDATE_RSCHD  rsch
+       JOIN mw_clnt mc
+           ON     mc.clnt_seq = TO_NUMBER (rsch.CUSTOMER_ID)
+              AND mc.crnt_rec_flg = 1
+       JOIN mw_brnch mb
+           ON     mb.BRNCH_SEQ = TO_NUMBER (rsch.BRANCH_ID)
+              AND mb.CRNT_REC_FLG = 1
+       JOIN mw_area ma ON ma.AREA_SEQ = mb.AREA_SEQ AND ma.CRNT_REC_FLG = 1
+       JOIN mw_reg mr ON mr.REG_SEQ = ma.REG_SEQ AND mr.CRNT_REC_FLG = 1
+       JOIN mw_prd_grp grp
+           ON grp.PRD_GRP_SEQ = rsch.PRODUCT_ID AND grp.CRNT_REC_FLG = 1
+ WHERE     TRUNC (rsch.TRN_DATE) = TO_DATE (SYSDATE) - 1
+       AND rsch.OVERDUE_DAYS >= 29
+       AND TRUNC (rsch.DISBURSED_DATE) BETWEEN TO_DATE(:frmdt, 'dd/MM/yyyy') AND TO_DATE(:todt, 'dd/MM/yyyy')

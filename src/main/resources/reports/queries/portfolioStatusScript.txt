@@ -1,0 +1,435 @@
+WITH
+    qry
+    AS
+        (SELECT grp.prd_grp_nm,
+                case when :role_type = 'bm' then emp.emp_nm when :brnchSeq <> -1 then emp.emp_nm else mb.brnch_nm end emp_nm,
+                ap.loan_app_seq
+                    tot_clnt,
+                ap.clnt_seq
+                    tot_clnt_ads,
+                ap.prd_seq,
+                grp.prd_grp_seq,
+                ap.APRVD_LOAN_AMT
+                    tot_clnt_amt,
+                CASE WHEN ap.LOAN_CYCL_NUM = 1 THEN NVL (ap.loan_app_seq, 0) END
+                    new_clnt,
+                CASE WHEN ap.LOAN_CYCL_NUM = 1 THEN NVL (ap.clnt_seq, 0) END
+                    new_clnt_ads,
+                CASE WHEN ap.LOAN_CYCL_NUM = 1 THEN NVL (ap.APRVD_LOAN_AMT, 0) END
+                    new_clnt_amt,
+                CASE WHEN ap.LOAN_CYCL_NUM > 1 THEN NVL (ap.loan_app_seq, 0) END
+                    rpt_clnt,
+                CASE WHEN ap.LOAN_CYCL_NUM > 1 THEN NVL (ap.clnt_seq, 0) END
+                    rpt_clnt_ads,
+                CASE WHEN ap.LOAN_CYCL_NUM > 1 THEN NVL (ap.APRVD_LOAN_AMT, 0) END
+                    rpt_clnt_amt,
+                NVL (
+                    (SELECT   NVL (
+                                  SUM (
+                                        NVL (PPAL_AMT_DUE, 0)
+                                      + NVL (TOT_CHRG_DUE, 0)
+                                      + NVL (
+                                            (SELECT SUM (NVL (psc.AMT, 0))
+                                               FROM mw_pymt_sched_chrg psc
+                                              WHERE     psc.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                    AND psc.crnt_rec_flg = 1),
+                                            0)),
+                                  0)
+                            - NVL (
+                                  SUM (
+                                      (SELECT SUM (NVL (rdtl.pymt_amt, 0))
+                                         FROM mw_rcvry_dtl  rdtl
+                                              INNER JOIN mw_rcvry_trx rht
+                                                  ON rht.RCVRY_TRX_SEQ = rdtl.RCVRY_TRX_SEQ
+                                        WHERE     rdtl.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                              AND rdtl.crnt_rec_flg = 1
+                                              AND rht.crnt_rec_flg = 1
+                                              AND TRUNC (rht.PYMT_DT) <= TRUNC(to_date(:to_dt, 'dd-MM-yyyy')))),
+                                  0)
+                       FROM mw_loan_app  inap
+                            JOIN mw_pymt_sched_hdr psh
+                                ON psh.loan_app_seq = inap.loan_app_seq AND psh.crnt_rec_flg = 1
+                            JOIN mw_pymt_sched_dtl psd
+                                ON psd.pymt_sched_hdr_seq = psh.pymt_sched_hdr_seq AND psd.crnt_rec_flg = 1
+                      WHERE inap.LOAN_APP_SEQ = ap.LOAN_APP_SEQ AND inap.crnt_rec_flg = 1),
+                    0)
+                    ost_amt,
+                (CASE
+                     WHEN NVL (
+                              (SELECT   NVL (
+                                            SUM (
+                                                  NVL (PPAL_AMT_DUE, 0)
+                                                + NVL (TOT_CHRG_DUE, 0)
+                                                + NVL (
+                                                      (SELECT SUM (NVL (psc.AMT, 0))
+                                                         FROM mw_pymt_sched_chrg psc
+                                                        WHERE     psc.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                              AND psc.crnt_rec_flg = 1),
+                                                      0)),
+                                            0)
+                                      - NVL (
+                                            SUM (
+                                                (SELECT SUM (NVL (rdtl.pymt_amt, 0))
+                                                   FROM mw_rcvry_dtl  rdtl
+                                                        INNER JOIN mw_rcvry_trx rht
+                                                            ON rht.RCVRY_TRX_SEQ = rdtl.RCVRY_TRX_SEQ
+                                                  WHERE     rdtl.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                        AND rdtl.crnt_rec_flg = 1
+                                                        AND rht.crnt_rec_flg = 1
+                                                        AND TRUNC (rht.PYMT_DT) <= TRUNC(to_date(:to_dt, 'dd-MM-yyyy')))),
+                                            0)
+                                 FROM mw_loan_app  inap
+                                      JOIN mw_pymt_sched_hdr psh ON psh.loan_app_seq = inap.loan_app_seq
+                                      JOIN mw_pymt_sched_dtl psd
+                                          ON psd.pymt_sched_hdr_seq = psh.pymt_sched_hdr_seq
+                                WHERE     inap.LOAN_APP_SEQ = ap.LOAN_APP_SEQ
+                                      AND inap.crnt_rec_flg = 1
+                                      AND psh.crnt_rec_flg = 1
+                                      AND psd.crnt_rec_flg = 1
+                                      AND psd.pymt_sts_key IN (945, 948, 1145)
+                                      AND psd.due_dt <= to_date(:to_dt, 'dd-MM-yyyy')),
+                              0) >
+                          0
+                     THEN
+                         NVL (
+                             (SELECT   NVL (
+                                           SUM (
+                                                 NVL (PPAL_AMT_DUE, 0)
+                                               + NVL (TOT_CHRG_DUE, 0)
+                                               + NVL (
+                                                     (SELECT SUM (NVL (psc.AMT, 0))
+                                                        FROM mw_pymt_sched_chrg psc
+                                                       WHERE     psc.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                             AND psc.crnt_rec_flg = 1),
+                                                     0)),
+                                           0)
+                                     - NVL (
+                                           SUM (
+                                               (SELECT SUM (NVL (rdtl.pymt_amt, 0))
+                                                  FROM mw_rcvry_dtl  rdtl
+                                                       INNER JOIN mw_rcvry_trx rht
+                                                           ON rht.RCVRY_TRX_SEQ = rdtl.RCVRY_TRX_SEQ
+                                                 WHERE     rdtl.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                       AND rdtl.crnt_rec_flg = 1
+                                                       AND rht.crnt_rec_flg = 1
+                                                       AND TRUNC (rht.PYMT_DT) <= TRUNC(to_date(:to_dt, 'dd-MM-yyyy')))),
+                                           0)
+                                FROM mw_loan_app  inap
+                                     JOIN mw_pymt_sched_hdr psh
+                                         ON psh.loan_app_seq = inap.loan_app_seq AND psh.crnt_rec_flg = 1
+                                     JOIN mw_pymt_sched_dtl psd
+                                         ON     psd.pymt_sched_hdr_seq = psh.pymt_sched_hdr_seq
+                                            AND psd.crnt_rec_flg = 1
+                               WHERE inap.LOAN_APP_SEQ = ap.LOAN_APP_SEQ AND inap.crnt_rec_flg = 1),
+                             0)
+                 END)
+                    par_1_dy_amt,
+                (CASE
+                     WHEN GET_OD_INFO (ap.loan_app_seq, TO_DATE ( :to_dt, 'dd-MM-yyyy'), 'd') <= 28.5
+                     THEN
+                         NVL (
+                             (SELECT   NVL (
+                                           SUM (
+                                                 NVL (PPAL_AMT_DUE, 0)
+                                               + NVL (TOT_CHRG_DUE, 0)
+                                               + NVL (
+                                                     (SELECT SUM (NVL (psc.AMT, 0))
+                                                        FROM mw_pymt_sched_chrg psc
+                                                       WHERE     psc.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                             AND psc.crnt_rec_flg = 1),
+                                                     0)),
+                                           0)
+                                     - NVL (
+                                           SUM (
+                                               (SELECT SUM (NVL (rdtl.pymt_amt, 0))
+                                                  FROM mw_rcvry_dtl  rdtl
+                                                       INNER JOIN mw_rcvry_trx rht
+                                                           ON rht.RCVRY_TRX_SEQ = rdtl.RCVRY_TRX_SEQ
+                                                 WHERE     rdtl.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                       AND rdtl.crnt_rec_flg = 1
+                                                       AND rht.crnt_rec_flg = 1
+                                                       AND TRUNC (rht.PYMT_DT) <= TRUNC(to_date(:to_dt, 'dd-MM-yyyy')))),
+                                           0)
+                                FROM mw_loan_app  inap
+                                     JOIN mw_pymt_sched_hdr psh
+                                         ON psh.loan_app_seq = inap.loan_app_seq AND psh.crnt_rec_flg = 1
+                                     JOIN mw_pymt_sched_dtl psd
+                                         ON     psd.pymt_sched_hdr_seq = psh.pymt_sched_hdr_seq
+                                            AND psd.crnt_rec_flg = 1
+                               WHERE inap.LOAN_APP_SEQ = ap.LOAN_APP_SEQ AND inap.crnt_rec_flg = 1),
+                             0)
+                 END)
+                    par_1__29_day_amt,
+                (CASE
+                     WHEN GET_OD_INFO (ap.loan_app_seq, TO_DATE ( :to_dt, 'dd-MM-yyyy'), 'd') > 28.5
+                     THEN
+                         NVL (
+                             (SELECT   NVL (
+                                           SUM (
+                                                 NVL (PPAL_AMT_DUE, 0)
+                                               + NVL (TOT_CHRG_DUE, 0)
+                                               + NVL (
+                                                     (SELECT SUM (NVL (psc.AMT, 0))
+                                                        FROM mw_pymt_sched_chrg psc
+                                                       WHERE     psc.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                             AND psc.crnt_rec_flg = 1),
+                                                     0)),
+                                           0)
+                                     - NVL (
+                                           SUM (
+                                               (SELECT SUM (NVL (rdtl.pymt_amt, 0))
+                                                  FROM mw_rcvry_dtl  rdtl
+                                                       INNER JOIN mw_rcvry_trx rht
+                                                           ON rht.RCVRY_TRX_SEQ = rdtl.RCVRY_TRX_SEQ
+                                                 WHERE     rdtl.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                       AND rdtl.crnt_rec_flg = 1
+                                                       AND rht.crnt_rec_flg = 1
+                                                       AND TRUNC (rht.PYMT_DT) <= TRUNC(to_date(:to_dt, 'dd-MM-yyyy')))),
+                                           0)
+                                FROM mw_loan_app  inap
+                                     JOIN mw_pymt_sched_hdr psh
+                                         ON psh.loan_app_seq = inap.loan_app_seq AND psh.crnt_rec_flg = 1
+                                     JOIN mw_pymt_sched_dtl psd
+                                         ON     psd.pymt_sched_hdr_seq = psh.pymt_sched_hdr_seq
+                                            AND psd.crnt_rec_flg = 1
+                               WHERE inap.LOAN_APP_SEQ = ap.LOAN_APP_SEQ AND inap.crnt_rec_flg = 1),
+                             0)
+                 END)
+                    par_over_30_amt,
+                (CASE
+                     WHEN NVL (
+                              (SELECT   NVL (
+                                            SUM (
+                                                  NVL (PPAL_AMT_DUE, 0)
+                                                + NVL (TOT_CHRG_DUE, 0)
+                                                + NVL (
+                                                      (SELECT SUM (NVL (psc.AMT, 0))
+                                                         FROM mw_pymt_sched_chrg psc
+                                                        WHERE     psc.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                              AND psc.crnt_rec_flg = 1),
+                                                      0)),
+                                            0)
+                                      - NVL (
+                                            SUM (
+                                                (SELECT SUM (NVL (rdtl.pymt_amt, 0))
+                                                   FROM mw_rcvry_dtl  rdtl
+                                                        INNER JOIN mw_rcvry_trx rht
+                                                            ON rht.RCVRY_TRX_SEQ = rdtl.RCVRY_TRX_SEQ
+                                                  WHERE     rdtl.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                        AND rdtl.crnt_rec_flg = 1
+                                                        AND rht.crnt_rec_flg = 1
+                                                        AND TRUNC (rht.PYMT_DT) <= TRUNC(to_date(:to_dt, 'dd-MM-yyyy')))),
+                                            0)
+                                 FROM mw_loan_app  inap
+                                      JOIN mw_pymt_sched_hdr psh ON psh.loan_app_seq = inap.loan_app_seq
+                                      JOIN mw_pymt_sched_dtl psd
+                                          ON psd.pymt_sched_hdr_seq = psh.pymt_sched_hdr_seq
+                                WHERE     inap.LOAN_APP_SEQ = ap.LOAN_APP_SEQ
+                                      AND inap.crnt_rec_flg = 1
+                                      AND psh.crnt_rec_flg = 1
+                                      AND psd.crnt_rec_flg = 1
+                                      AND psd.pymt_sts_key IN (945, 948, 1145)
+                                      AND psd.due_dt <= to_date(:to_dt, 'dd-MM-yyyy')),
+                              0) >
+                          0
+                     THEN
+                         ap.loan_app_seq
+                 END)
+                    od_clnts,
+                (CASE WHEN GET_OD_INFO (ap.loan_app_seq, TO_DATE ( :to_dt, 'dd-MM-yyyy'), 'd') > 28.5 THEN ap.loan_app_seq END)
+                    od_clnts_30,
+                CASE
+                    WHEN (    ap.LOAN_CYCL_NUM > 1
+                          AND TRUNC (dvh.DSBMT_DT) BETWEEN TRUNC (TO_DATE ( :to_dt, 'dd-MM-yyyy'), 'month')
+                                                       AND LAST_DAY (TO_DATE ( :to_dt, 'dd-MM-yyyy')))
+                    THEN
+                        NVL (dvh.loan_app_seq, 0)
+                END
+                    rnw_clnt_month,
+                CASE
+                    WHEN (    ap.LOAN_CYCL_NUM > 1
+                          AND TRUNC (dvh.DSBMT_DT) BETWEEN TRUNC (TO_DATE ( :to_dt, 'dd-MM-yyyy'), 'month')
+                                                       AND LAST_DAY (TO_DATE ( :to_dt, 'dd-MM-yyyy')))
+                    THEN
+                        NVL (dvh.loan_app_seq, 0)
+                END
+                    rep_mnth,
+                CASE
+                    WHEN TRUNC (dvh.DSBMT_DT) BETWEEN TRUNC (TO_DATE ( :to_dt, 'dd-MM-yyyy'), 'month')
+                                                  AND LAST_DAY (TO_DATE ( :to_dt, 'dd-MM-yyyy'))
+                    THEN
+                        dvh.loan_app_seq
+                END
+                    dsbmt_mnth,
+                (SELECT apr.loan_app_seq
+                   FROM mw_biz_aprsl apr
+                  WHERE     apr.PRSN_RUN_THE_BIZ IN (190,
+                                                     1058,
+                                                     1056,
+                                                     1057,
+                                                     1059,
+                                                     191,
+                                                     1055)
+                        AND apr.loan_app_seq = ap.loan_app_seq
+                        AND apr.crnt_rec_flg = 1)
+                    fml_prt
+           FROM mw_loan_app  ap
+                INNER JOIN mw_prd prd ON prd.prd_seq = ap.prd_seq  and ap.prd_seq not in (2,3,5,13,14)
+                INNER JOIN mw_prd_grp grp ON grp.prd_grp_seq = prd.prd_grp_seq
+                INNER JOIN mw_port prt ON prt.port_seq = ap.port_seq AND prt.brnch_seq = (case when :brnchSeq = -1 then prt.brnch_seq else :brnchSeq end)
+                INNER JOIN mw_brnch mb on mb.BRNCH_SEQ = prt.BRNCH_SEQ and mb.CRNT_REC_FLG = 1
+                INNER JOIN mw_port_emp_rel erl ON erl.port_seq = prt.port_seq
+                INNER JOIN mw_emp emp ON emp.emp_seq = erl.emp_seq
+                INNER JOIN mw_dsbmt_vchr_hdr dvh ON dvh.loan_app_seq = ap.loan_app_seq
+          WHERE     (   (ap.loan_app_sts = 703 AND TRUNC (ap.loan_app_sts_dt) <= TO_DATE ( :to_dt, 'dd-MM-yyyy'))
+                     OR (    ap.loan_app_sts = 704
+                         AND TRUNC (ap.loan_app_sts_dt) > TRUNC(TO_DATE ( :to_dt, 'dd-MM-yyyy'))
+                         AND TRUNC (dvh.dsbmt_dt) <= TRUNC(TO_DATE ( :to_dt, 'dd-MM-yyyy')))
+                     OR (ap.loan_app_sts = 1245 AND TRUNC (ap.loan_app_sts_dt) > TRUNC(TO_DATE ( :to_dt, 'dd-MM-yyyy'))))
+                AND prd.crnt_rec_flg = 1 AND ap.prd_seq NOT IN(13, 14)
+                AND grp.crnt_rec_flg = 1
+                AND erl.crnt_rec_flg = 1
+                AND prt.crnt_rec_flg = 1
+                AND dvh.crnt_rec_flg = 1
+                AND ap.crnt_rec_flg = 1
+                AND prt.port_seq IN (SELECT port_seq
+                                       FROM mw_acl
+                                      WHERE user_id = :p_user)
+                AND NOT EXISTS
+                        (SELECT ctl.loan_app_seq
+                           FROM mw_clnt_tag_list ctl
+                          WHERE     ctl.loan_app_seq = ap.loan_app_seq
+                                AND TRUNC (ctl.eff_start_dt) <= TRUNC(TO_DATE ( :to_dt, 'dd-MM-yyyy'))
+                                AND ctl.tags_seq = 4
+                                AND ctl.crnt_rec_flg = 1))
+  SELECT 1
+             ord,
+         prd_grp_nm,
+         COUNT (tot_clnt)
+             tot_clnt,
+         count(distinct tot_clnt_ads) tot_clnt_ads,
+         SUM (tot_clnt_amt)
+             tot_clnt_amt,
+         COUNT (new_clnt)
+             new_clnt,
+         COUNT (distinct new_clnt_ads)
+             new_clnt_ads,
+         SUM (new_clnt_amt)
+             new_clnt_amt,
+         COUNT (rpt_clnt)
+             rpt_clnt,
+         COUNT (distinct rpt_clnt_ads)
+             rpt_clnt_ads,
+         SUM (rpt_clnt_amt)
+             rpt_clnt_amt,
+         SUM (ost_amt)
+             ost_amt,
+         SUM (par_1_dy_amt)
+             par_1_dy_amt,
+         SUM (par_1__29_day_amt)
+             par_1__29_day_amt,
+         SUM (par_over_30_amt)
+             par_over_30_amt,
+         COUNT (od_clnts)
+             od_clnts,
+         COUNT (od_clnts_30)
+             od_clnts_30,
+         COUNT (rnw_clnt_month)
+             rnw_clnt_month,
+         MAX (
+             (SELECT COUNT (ap1.loan_app_seq)     cmpltd_loans
+                FROM mw_loan_app ap1
+                     JOIN mw_prd prd1 ON prd1.prd_seq = ap1.prd_seq AND prd1.crnt_rec_flg = 1
+                     JOIN mw_prd_grp grp1 ON grp1.prd_grp_seq = prd1.prd_grp_seq AND grp1.crnt_rec_flg = 1
+                     JOIN mw_port prt1 ON prt1.port_seq = ap1.port_seq AND prt1.crnt_rec_flg = 1 --AND prt1.brnch_seq = :brnchSeq
+               WHERE     ap1.loan_app_sts = 704
+                     AND TRUNC (ap1.loan_app_sts_dt) BETWEEN TRUNC (TO_DATE ( :to_dt, 'dd-MM-yyyy'), 'month')
+                                                         AND LAST_DAY (TO_DATE ( :to_dt, 'dd-MM-yyyy'))
+                     AND grp1.prd_grp_nm = q.prd_grp_nm
+                     AND prt1.PORT_SEQ IN (SELECT port_seq
+                                            FROM mw_acl acl
+                                           WHERE acl.user_id = :p_user)
+                     AND ap1.crnt_rec_flg = 1))
+             CMPLTD_MNTH,
+         COUNT (rep_mnth)
+             rep_mnth,
+         COUNT (dsbmt_mnth)
+             dsbmt_mnth,
+         COUNT (fml_prt)
+             fml_prt,
+         case when COUNT (fml_prt) > 0 then COUNT (tot_clnt) else 0 end
+             fml_ttol
+    FROM qry q
+    where ost_amt > 0
+GROUP BY q.prd_grp_nm
+UNION ALL
+  SELECT 2
+             ord,
+         emp_nm,         
+         COUNT (tot_clnt)
+             tot_clnt,
+         count(distinct tot_clnt_ads) tot_clnt_ads,
+         SUM (tot_clnt_amt)
+             tot_clnt_amt,
+         COUNT (new_clnt)
+             new_clnt,
+         COUNT (distinct new_clnt_ads)
+             new_clnt_ads,
+         SUM (new_clnt_amt)
+             new_clnt_amt,
+         COUNT (rpt_clnt)
+             rpt_clnt,
+         COUNT (distinct rpt_clnt_ads)
+             rpt_clnt_ads,
+         SUM (rpt_clnt_amt)
+             rpt_clnt_amt,
+         SUM (ost_amt)
+             ost_amt,
+         SUM (par_1_dy_amt)
+             par_1_dy_amt,
+         SUM (par_1__29_day_amt)
+             par_1__29_day_amt,
+         SUM (par_over_30_amt)
+             par_over_30_amt,
+         COUNT (od_clnts)
+             od_clnts,
+         COUNT (od_clnts_30)
+             od_clnts_30,
+         COUNT (rnw_clnt_month)
+             rnw_clnt_month,
+         MAX (
+             (SELECT COUNT (ap1.loan_app_seq)     cmpltd_loans
+                FROM mw_loan_app ap1
+                     JOIN mw_prd prd1 ON prd1.prd_seq = ap1.prd_seq AND prd1.crnt_rec_flg = 1
+                     JOIN mw_prd_grp grp1 ON grp1.prd_grp_seq = prd1.prd_grp_seq AND grp1.crnt_rec_flg = 1
+                     JOIN mw_port prt1 ON prt1.port_seq = ap1.port_seq AND prt1.crnt_rec_flg = 1 --AND prt1.brnch_seq = :brnchSeq
+                     JOIN mw_port_emp_rel erl1 ON erl1.port_seq = prt1.port_seq AND erl1.crnt_rec_flg = 1
+                     JOIN mw_emp emp1 ON emp1.emp_seq = erl1.emp_seq
+               WHERE     ap1.loan_app_sts = 704
+                     AND TRUNC (ap1.loan_app_sts_dt) BETWEEN TRUNC (TO_DATE ( :to_dt, 'dd-MM-yyyy'), 'month')
+                                                         AND LAST_DAY (TO_DATE ( :to_dt, 'dd-MM-yyyy'))
+                     AND prt1.PORT_SEQ IN (SELECT port_seq
+                                             FROM mw_acl acl
+                                            WHERE acl.user_id = :p_user)
+                     AND emp1.emp_nm = q.emp_nm
+                     AND ap1.crnt_rec_flg = 1))
+             CMPLTD_MNTH,
+         COUNT (rep_mnth)
+             rep_mnth,
+         COUNT (dsbmt_mnth)
+             dsbmt_mnth,
+         COUNT (fml_prt)
+             fml_prt,
+         COUNT (CASE
+                    WHEN q.prd_grp_seq IN (1,
+                                       6,
+                                       16,
+                                       5765)
+                    THEN
+                        tot_clnt
+                END)
+             fml_ttol
+    FROM qry q
+    where ost_amt > 0
+GROUP BY q.emp_nm
+ORDER BY 1, 2

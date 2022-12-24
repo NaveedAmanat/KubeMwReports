@@ -1,0 +1,5 @@
+select mb.BRNCH_NM, mt.TYP_STR , brem.IBAN bank_code, upper(brem.BANK_BRNCH) bank_address
+from mw_typs mt
+join MW_BRNCH_REMIT_REL brem on brem.PYMT_TYP_SEQ = mt.TYP_SEQ and brem.CRNT_REC_FLG = 1
+join mw_brnch mb on mb.BRNCH_SEQ = mt.BRNCH_SEQ and mb.CRNT_REC_FLG = 1 and mb.brnch_seq <> -1
+where mt.TYP_ID = '0007' and mt.TYP_CTGRY_KEY in (3) and mt.CRNT_REC_FLG = 1

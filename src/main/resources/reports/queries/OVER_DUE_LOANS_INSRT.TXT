@@ -1,0 +1,40 @@
+insert into MW_OD_CREDIT_REPORT_TBL
+select prt.PORT_NM,emp.emp_nm, 
+     clnt.clnt_id,clnt.frst_nm || ' ' || clnt.last_nm clnt_nm,  
+     nvl(fthr_frst_nm,spz_frst_nm) ||' ' || nvl(fthr_last_nm,spz_last_nm) fs_nm, clnt.ph_num, 
+     get_clnt_addr(ap.loan_app_seq) addr,
+     vhdr.dsbmt_dt dsbmt_dt,  
+     ap.aprvd_loan_amt dsbmt_amt,
+     loan_app_ost(ap.loan_app_seq,to_date(:aDt,'dd-MM-yyyy'),'ri') ost_inst_num,  
+     loan_app_ost(ap.loan_app_seq,to_date(:aDt,'dd-MM-yyyy'),'p') ost_inst_prncp,  
+     loan_app_ost(ap.loan_app_seq,to_date(:aDt,'dd-MM-yyyy'),'s') ost_inst_srvc,  
+     get_od_info(ap.loan_app_seq,to_date(:aDt,'dd-MM-yyyy'),'i') od_inst_num,  
+     get_od_info(ap.loan_app_seq,to_date(:aDt,'dd-MM-yyyy'),'psc') od_amt,  
+     get_od_info(ap.loan_app_seq,to_date(:aDt,'dd-MM-yyyy'),'d') od_days, 
+     trx.pymt_dt cmp_dt,
+     chk.ref_cd_dscr rsn, 
+     chk.cmnt 
+from mw_loan_app ap, mw_clnt clnt, mw_port prt,mw_dsbmt_vchr_hdr vhdr,
+mw_ref_cd_val lsts,mw_prd prd, mw_port_emp_rel erl, mw_emp emp, mw_rcvry_trx trx,
+(select chks.loan_app_seq,rsn.ref_cd_dscr,chks.cmnt       
+    from MW_LOAN_APP_MNTRNG_CHKS chks 
+    join mw_ref_cd_val rsn on rsn.ref_cd_seq=chks.rsn and rsn.crnt_rec_flg=1 
+    where chks.crnt_rec_flg=1
+) chk
+where ap.clnt_seq=clnt.clnt_seq and ap.crnt_rec_flg=1 and clnt.crnt_rec_flg=1  
+and ap.PORT_SEQ = prt.PORT_SEQ and prt.CRNT_REC_FLG =1
+and ap.loan_app_seq = vhdr.loan_app_seq and vhdr.crnt_rec_flg=1
+and lsts.ref_cd_seq=ap.loan_app_sts and lsts.crnt_rec_flg=1
+and ap.PRD_SEQ = prd.PRD_SEQ and prd.crnt_rec_flg=1
+and prt.PORT_SEQ = erl.PORT_SEQ and erl.crnt_rec_flg=1
+and erl.EMP_SEQ = emp.EMP_SEQ
+and ap.loan_app_seq=chk.loan_app_seq(+)
+and to_char(ap.clnt_seq) = trx.pymt_ref and trx.crnt_rec_flg=1
+and trx.RCVRY_TRX_SEQ = (select max(RCVRY_TRX_SEQ) from mw_rcvry_trx rch where rch.pymt_ref = trx.pymt_ref and rch.crnt_rec_flg=1)
+and( (lsts.ref_cd='0005' and ap.loan_app_sts_dt <= to_date(:aDt,'dd-MM-yyyy') and ap.crnt_rec_flg=1) 
+    or (lsts.ref_cd='0006' and ap.loan_app_sts_dt > to_date(:aDt,'dd-MM-yyyy') and vhdr.dsbmt_dt <= to_date(:aDt,'dd-MM-yyyy')) 
+    or (lsts.ref_cd='1245' and ap.loan_app_sts_dt > to_date(:aDt,'dd-MM-yyyy')))  
+and not exists (select distinct ctl.loan_app_seq from mw_clnt_tag_list ctl where ctl.loan_app_seq = ap.loan_app_seq 
+and ctl.eff_start_dt <= to_date(:aDt,'dd-MM-yyyy') and ctl.tags_seq = 4)
+and prd.PRD_GRP_SEQ = :prdSeq 
+and prt.BRNCH_SEQ = :brnch

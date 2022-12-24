@@ -1,0 +1,38 @@
+ select par_ordr, par_month,  
+    case when sum(case when od_dys > 28.5 then ost_amt else 0 end) > 0
+    then
+        round((sum(case when od_dys > 28.5 then ost_amt else 0 end) /
+        sum(ost_amt)) * 100 ,2)
+    else
+        0.0
+    end par_perc,
+    case when sum(case when od_amt > 0 then ost_amt else 0 end) > 0
+    then
+        round((sum(case when od_amt > 0 then ost_amt else 0 end) /
+        sum(ost_amt)) * 100 ,2)
+    else
+        0.0
+    end par_perc1
+    from
+(
+ select /*+ materialize */  to_number(to_char(last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -5)),'RRRRMM')) par_ordr,
+    to_char(last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -5)),'Mon-RRRR') par_month,
+    ap.loan_app_seq loan_cnt, 
+    loan_app_ost(ap.loan_app_seq,last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -5)),'psc') ost_amt,
+    GET_OD_INFO(ap.loan_app_seq,last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -5)),'psc') od_amt, 
+    GET_OD_INFO(ap.loan_app_seq,last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -5)),'d') od_dys
+    from mw_loan_app ap    
+    join mw_port prt on prt.port_seq=ap.port_seq and prt.crnt_rec_flg=1 and prt.brnch_seq = :brnch_seq,
+    mw_dsbmt_vchr_hdr dvh
+    where ( (ap.loan_app_sts=703 and trunc(ap.loan_app_sts_dt) <= last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -5)) and ap.crnt_rec_flg=1) 
+    or (ap.loan_app_sts=704 and trunc(ap.loan_app_sts_dt) > last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -5)) and trunc(dvh.dsbmt_dt) <= last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -5))
+    and ap.crnt_rec_flg=1) 
+    or (ap.loan_app_sts=1245 and trunc(ap.loan_app_sts_dt) > last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -5)))) and dvh.loan_app_seq = ap.loan_app_seq 
+    and dvh.crnt_rec_flg = 1
+    and loan_app_ost(ap.loan_app_seq,last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -5)),'psc') > 0
+    and ap.PRD_SEQ not in (2,5)
+    and not exists (select ctl.loan_app_seq from mw_clnt_tag_list ctl where ctl.loan_app_seq = ap.loan_app_seq 
+    and trunc(ctl.eff_start_dt) <= last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -5)) and ctl.tags_seq = 4 and ctl.crnt_rec_flg=1)
+    )
+	group by par_ordr, par_month
+    

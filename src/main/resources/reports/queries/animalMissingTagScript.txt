@@ -1,0 +1,20 @@
+select me.EMP_NM, mc.CLNT_SEQ, mc.FRST_NM ||' '||mc.LAST_NM Clnt_nm, to_char(trunc(dsh.DSBMT_DT), 'dd-MM-yyyy') DSBMT_DT,
+mc.PH_NUM clnt_ph_num, get_clnt_addr(ap.LOAN_APP_SEQ) clnt_addr,
+(select mrl1.FRST_NM ||' '||mrl1.LAST_NM from mw_clnt_rel mrl1 where mrl1.LOAN_APP_SEQ = ap.LOAN_APP_SEQ and mrl1.CRNT_REC_FLG = 1 and mrl1.REL_TYP_FLG = 1) nom_nm,
+(select mrl1.PH_NUM from mw_clnt_rel mrl1 where mrl1.LOAN_APP_SEQ = ap.LOAN_APP_SEQ and mrl1.CRNT_REC_FLG = 1 and mrl1.REL_TYP_FLG = 1) nom_ph_num,
+round(to_date(:todt, 'dd-MM-yyyy') - to_date(dsh.DSBMT_DT)) pending_dys
+from mw_clnt mc, mw_loan_app ap, 
+MW_DSBMT_VCHR_HDR dsh, mw_port mp,
+mw_port_emp_rel mrl, mw_emp me
+where mc.CLNT_SEQ = ap.CLNT_SEQ and mc.CRNT_REC_FLG = 1
+and ap.LOAN_APP_SEQ = dsh.LOAN_APP_SEQ and dsh.CRNT_REC_FLG = 1
+and ap.PORT_SEQ = mp.PORT_SEQ and mp.CRNT_REC_FLG = 1
+and mp.PORT_SEQ = mrl.PORT_SEQ and mrl.CRNT_REC_FLG = 1
+and mrl.EMP_SEQ = me.EMP_SEQ
+and ap.CRNT_REC_FLG = 1 
+and not exists (select 1 from MW_ANML_RGSTR anml where anml.LOAN_APP_SEQ = ap.LOAN_APP_SEQ and anml.CRNT_REC_FLG = 1)
+and trunc(dsh.DSBMT_DT) <= to_date(:todt, 'dd-MM-yyyy')
+and mp.BRNCH_SEQ = :brnchSeq
+and ap.LOAN_APP_STS = 703
+and ap.PRD_SEQ in (25,26,30,31,32)
+order by round(sysdate - dsh.DSBMT_DT) desc

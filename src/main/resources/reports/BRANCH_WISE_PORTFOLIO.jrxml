@@ -1,0 +1,1246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="BRANCH_WISE_PORTFOLIO" pageWidth="927" pageHeight="595" orientation="Landscape"
+              whenNoDataType="AllSectionsNoDetail" columnWidth="907" leftMargin="10" rightMargin="10" topMargin="20"
+              bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="309348f0-a5ae-4e5e-b8b5-dc4e87ef1391">
+    <property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+    <property name="com.jaspersoft.studio.report.description" value=""/>
+    <property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+    <property name="com.jaspersoft.studio.unit." value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+    <style name="Crosstab_CH" mode="Opaque" backcolor="#F0F8FF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+            <topPen lineWidth="0.5" lineColor="#000000"/>
+            <leftPen lineWidth="0.5" lineColor="#000000"/>
+            <bottomPen lineWidth="0.5" lineColor="#000000"/>
+            <rightPen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="Crosstab_CG" mode="Opaque" backcolor="#BFE1FF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+            <topPen lineWidth="0.5" lineColor="#000000"/>
+            <leftPen lineWidth="0.5" lineColor="#000000"/>
+            <bottomPen lineWidth="0.5" lineColor="#000000"/>
+            <rightPen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="Crosstab_CT" mode="Opaque" backcolor="#005FB3">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+            <topPen lineWidth="0.5" lineColor="#000000"/>
+            <leftPen lineWidth="0.5" lineColor="#000000"/>
+            <bottomPen lineWidth="0.5" lineColor="#000000"/>
+            <rightPen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="Crosstab_CD" mode="Opaque" backcolor="#FFFFFF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+            <topPen lineWidth="0.5" lineColor="#000000"/>
+            <leftPen lineWidth="0.5" lineColor="#000000"/>
+            <bottomPen lineWidth="0.5" lineColor="#000000"/>
+            <rightPen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="Crosstab 1_CG" mode="Opaque" backcolor="#BFE1FF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+            <topPen lineWidth="0.5" lineColor="#000000"/>
+            <leftPen lineWidth="0.5" lineColor="#000000"/>
+            <bottomPen lineWidth="0.5" lineColor="#000000"/>
+            <rightPen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <subDataset name="datasetsmm" uuid="cc896550-b0d8-4e8a-b726-a31bfa915432">
+        <property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+        <property name="com.jaspersoft.studio.data.defaultdataadapter" value="NAVEED_DB"/>
+        <queryString language="SQL">
+            <![CDATA[SELECT mb.BRNCH_NM, vl.REF_CD_DSCR bank, acc.IBAN, acc.ACCT_NUM, acc.BANK_BRNCH
+FROM MW_BRNCH mb
+join MW_BRNCH_ACCT_SET acc on acc.BRNCH_SEQ = mb.BRNCH_SEQ and acc.CRNT_REC_FLG = 1
+join MW_REF_CD_VAL vl on vl.REF_CD = acc.BANK_NM and vl.CRNT_REC_FLG = 1 and vl.REF_CD_GRP_KEY = 178
+where mb.CRNT_REC_FLG = 1
+order by 1]]>
+        </queryString>
+        <field name="BRANCH_NM" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="BRNCH_NM"/>
+        </field>
+        <field name="DSB_CLNTS" class="java.lang.Long">
+            <property name="com.jaspersoft.studio.field.label" value="BANK"/>
+        </field>
+        <field name="DSB_AMT" class="java.lang.Long">
+            <property name="com.jaspersoft.studio.field.label" value="IBAN"/>
+        </field>
+        <field name="OST_CLIENTS" class="java.lang.Long">
+            <property name="com.jaspersoft.studio.field.label" value="BANK"/>
+        </field>
+        <field name="OST_AMT" class="java.lang.Long">
+            <property name="com.jaspersoft.studio.field.label" value="IBAN"/>
+        </field>
+        <field name="DISTRICT_NM" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="BRNCH_NM"/>
+        </field>
+        <field name="TEHSIL_NM" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="BRNCH_NM"/>
+        </field>
+        <field name="TYPE" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="BRNCH_NM"/>
+        </field>
+        <field name="PROVINCE" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="BRNCH_NM"/>
+        </field>
+        <field name="OST_LOANS" class="java.lang.Long">
+            <property name="com.jaspersoft.studio.field.label" value="BANK"/>
+        </field>
+        <field name="OD_CLIENTS" class="java.lang.Long">
+            <property name="com.jaspersoft.studio.field.label" value="BANK"/>
+        </field>
+        <field name="OD_AMT" class="java.lang.Long">
+            <property name="com.jaspersoft.studio.field.label" value="IBAN"/>
+        </field>
+        <variable name="DSB_CLNTS1" class="java.lang.Long" calculation="Sum">
+            <variableExpression><![CDATA[$F{DSB_CLNTS}]]></variableExpression>
+        </variable>
+        <variable name="DSB_AMT1" class="java.lang.Long" calculation="Sum">
+            <variableExpression><![CDATA[$F{DSB_AMT}]]></variableExpression>
+        </variable>
+        <variable name="OST_CLIENTS1" class="java.lang.Long" calculation="Sum">
+            <variableExpression><![CDATA[$F{OST_CLIENTS}]]></variableExpression>
+        </variable>
+        <variable name="OST_AMT1" class="java.lang.Long" calculation="Sum">
+            <variableExpression><![CDATA[$F{OST_AMT}]]></variableExpression>
+        </variable>
+        <variable name="OST_LOANS1" class="java.lang.Long" calculation="Sum">
+            <variableExpression><![CDATA[$F{OST_LOANS}]]></variableExpression>
+        </variable>
+        <variable name="OD_CLIENTS1" class="java.lang.Long" calculation="Sum">
+            <variableExpression><![CDATA[$F{OD_CLIENTS}]]></variableExpression>
+        </variable>
+        <variable name="OD_AMT1" class="java.lang.Long" calculation="Sum">
+            <variableExpression><![CDATA[$F{OD_AMT}]]></variableExpression>
+        </variable>
+    </subDataset>
+    <parameter name="from_dt" class="java.lang.String"/>
+    <parameter name="to_dt" class="java.lang.String"/>
+    <parameter name="LOGO_IMG" class="java.lang.String"/>
+    <parameter name="curr_user" class="java.lang.String"/>
+    <parameter name="dataset" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+    <parameter name="datasetsmm" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+    <queryString>
+        <![CDATA[SELECT mb.BRNCH_NM, vl.REF_CD_DSCR bank, acc.IBAN, acc.ACCT_NUM, acc.BANK_BRNCH
+FROM MW_BRNCH mb
+join MW_BRNCH_ACCT_SET acc on acc.BRNCH_SEQ = mb.BRNCH_SEQ and acc.CRNT_REC_FLG = 1
+join MW_REF_CD_VAL vl on vl.REF_CD = acc.BANK_NM and vl.CRNT_REC_FLG = 1 and vl.REF_CD_GRP_KEY = 178
+where mb.CRNT_REC_FLG = 1
+order by 1]]>
+    </queryString>
+    <field name="BRNCH_NM" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="BRNCH_NM"/>
+    </field>
+    <field name="BANK" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="BANK"/>
+    </field>
+    <field name="IBAN" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="IBAN"/>
+    </field>
+    <field name="ACCT_NUM" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="ACCT_NUM"/>
+    </field>
+    <field name="BANK_BRNCH" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="BANK_BRNCH"/>
+    </field>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="79" splitType="Stretch">
+            <staticText>
+                <reportElement x="329" y="29" width="264" height="20" uuid="e8ecd91e-4fc1-4986-8e88-e0b48d67d9ea"/>
+                <box>
+                    <pen lineWidth="2.0" lineStyle="Solid" lineColor="#D9D4D4"/>
+                    <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                    <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                    <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                    <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Branch Wise Portfolio]]></text>
+            </staticText>
+            <staticText>
+                <reportElement stretchType="ElementGroupHeight" x="50" y="0" width="127" height="20"
+                               uuid="df39c434-0a1f-46c3-bd8f-a7960fd8b3fa"/>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Kashf Foundation]]></text>
+            </staticText>
+            <image>
+                <reportElement x="0" y="0" width="50" height="50" uuid="6387d3a0-d0c6-4962-b37a-4bc539061b8c"/>
+                <imageExpression><![CDATA[$P{LOGO_IMG}]]></imageExpression>
+            </image>
+            <line>
+                <reportElement positionType="Float" x="0" y="76" width="907" height="1"
+                               uuid="14635894-4aa9-433a-b662-7a675e9a31aa"/>
+            </line>
+            <staticText>
+                <reportElement x="767" y="0" width="38" height="12" uuid="63ce206b-513a-4a60-9fc6-010f72c52e5b"/>
+                <textElement textAlignment="Left">
+                    <font fontName="SansSerif" size="8"/>
+                </textElement>
+                <text><![CDATA[User: ]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="825" y="0" width="71" height="12" uuid="8634a3a6-613c-4635-842a-0a8d3af47d8f">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <textElement>
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{curr_user}]]></textFieldExpression>
+            </textField>
+            <textField pattern="MMMMM dd, yyyy">
+                <reportElement x="825" y="12" width="71" height="12" uuid="5c41866e-e525-4a1e-a5d5-4754a689bb6f"/>
+                <textElement>
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression>
+                    <![CDATA[new SimpleDateFormat("dd-MM-yy h:mm a").format(new Date())]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="767" y="12" width="58" height="12" uuid="981ed8eb-1dbb-4bd0-a32f-52df41a82cb9"/>
+                <textElement textAlignment="Left">
+                    <font fontName="SansSerif" size="8"/>
+                </textElement>
+                <text><![CDATA[Printing Date: ]]></text>
+            </staticText>
+            <staticText>
+                <reportElement positionType="Float" x="791" y="56" width="42" height="12"
+                               uuid="a7261bac-48e9-452d-a227-113780243721">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                    <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                    <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                    <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="true"/>
+                </textElement>
+                <text><![CDATA[To Date]]></text>
+            </staticText>
+            <textField pattern="MMMMM dd, yyyy">
+                <reportElement x="833" y="56" width="71" height="12" uuid="e4dcd9b5-e952-4001-abd6-cf6885872c81"/>
+                <textElement verticalAlignment="Middle">
+                    <font size="8" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{to_dt}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+    <pageFooter>
+        <band height="12" splitType="Stretch">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+            <textField>
+                <reportElement x="810" y="0" width="52" height="12" uuid="140b6d24-689f-43bb-a702-bcfaa599e3f9"/>
+                <textElement textAlignment="Right">
+                    <font fontName="SansSerif" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="862" y="0" width="45" height="12" uuid="8b045bcc-cc4e-44ff-9130-f64eccfa284a"/>
+                <textElement textAlignment="Left">
+                    <font fontName="SansSerif" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[" of " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+    <summary>
+        <band height="65">
+            <componentElement>
+                <reportElement positionType="Float" x="0" y="5" width="907" height="60"
+                               uuid="536662cd-fbde-44ab-8cc8-9fde584fe888">
+                    <property name="com.jaspersoft.studio.layout"
+                              value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                </reportElement>
+                <jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components"
+                          xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd"
+                          whenNoDataType="AllSectionsNoDetail">
+                    <datasetRun subDataset="datasetsmm" uuid="441766bc-3a77-492d-a652-8f990814c037">
+                        <dataSourceExpression><![CDATA[$P{datasetsmm}]]></dataSourceExpression>
+                    </datasetRun>
+                    <jr:column width="31" uuid="dcfe9bd2-f702-4aa1-9671-eb0c4d71d7f0">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+                        <jr:tableFooter height="15" rowSpan="1">
+                            <staticText>
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="31"
+                                               height="15" backcolor="#E6E3E3"
+                                               uuid="28d5df1d-73fe-421a-a38d-772a0569d60e">
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[]]></text>
+                            </staticText>
+                        </jr:tableFooter>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="31" height="30" backcolor="#E6E3E3"
+                                               uuid="d168af13-a7cc-465e-bb35-50026c529b11">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Sr. No]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="15">
+                            <textField isStretchWithOverflow="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="31" height="15"
+                                               uuid="1c34749e-059d-4821-b252-e34ddc84db6b"/>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="95" uuid="3a6c562b-0cf8-4599-8346-4acfc37b5960">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+                        <jr:tableFooter height="15" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
+                            <staticText>
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="95"
+                                               height="15" backcolor="#E6E3E3"
+                                               uuid="bf14a6c7-386e-4d0a-950c-993bf812468a">
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Total]]></text>
+                            </staticText>
+                        </jr:tableFooter>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="95" height="30" backcolor="#E6E3E3"
+                                               uuid="70f6d030-09bf-4607-b06a-45326bc36218">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Branch Name]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="15">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="95" height="15"
+                                               uuid="f401084a-c458-415f-983a-ae97c330fdcf">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{BRANCH_NM}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="75" uuid="f91099fd-55b5-4452-afc2-355b37b48e8a">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+                        <jr:tableFooter height="15" rowSpan="1">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="75"
+                                               height="15" backcolor="#E6E3E3"
+                                               uuid="54e25076-11b0-4dea-b8f3-3379a582f710">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="75" height="30" backcolor="#E6E3E3"
+                                               uuid="4a0c9f99-eabd-47b8-8001-a61acce0acd2">
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[District Name]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="15">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="75" height="15"
+                                               uuid="9cf564b2-e5e3-400a-aedf-3edcd36df381">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{DISTRICT_NM}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="75" uuid="fd44a65d-7564-4c50-945b-b905bbd62402">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+                        <jr:tableFooter height="15" rowSpan="1">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="75"
+                                               height="15" backcolor="#E6E3E3"
+                                               uuid="f12d1fd3-0f7b-49fc-9eb6-afb8bd0c8793">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="75" height="30" backcolor="#E6E3E3"
+                                               uuid="3336370a-b56f-452c-9977-fd35f98e0877"/>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Tehsil Name]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="15">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="75" height="15"
+                                               uuid="db8ffe61-36cc-4cd6-accb-52bcbf0c82fa">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{TEHSIL_NM}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="60" uuid="0d117a45-6c25-4da8-93d6-c786f386042d">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+                        <jr:tableFooter height="15" rowSpan="1">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="60"
+                                               height="15" backcolor="#E6E3E3"
+                                               uuid="3875d12b-43b2-4de0-99df-275c824f2e1b">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="60" height="30" backcolor="#E6E3E3"
+                                               uuid="b9e8fcbf-0d7e-49e4-a1a3-b3e982a7aebd"/>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Type]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="15">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="60" height="15"
+                                               uuid="69d4414b-0203-44b8-a551-eb9c8eec74d4">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{TYPE}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="70" uuid="80d9a743-7bc4-4a68-955f-daf3015c9708">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+                        <jr:tableFooter height="15" rowSpan="1">
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="70"
+                                               height="15" backcolor="#E6E3E3"
+                                               uuid="97f63093-d009-4fc2-805a-0405f6a09365">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="70" height="30" backcolor="#E6E3E3"
+                                               uuid="ecd21180-551e-487a-9378-849f963a4b29"/>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Province]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="15">
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="70" height="15"
+                                               uuid="a29f51fe-5752-4216-81bd-3fe777e69c7a">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{PROVINCE}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="207" uuid="3d0f8e8e-fc2a-4a17-a0dc-a4c7dbc7695c">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
+                        <property name="com.jaspersoft.studio.layout"
+                                  value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                        <jr:tableFooter height="15" rowSpan="1">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="60"
+                                               height="15" backcolor="#E6E3E3"
+                                               uuid="27f86c2d-51d0-4e7d-b70e-8b610fd16312">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{OST_LOANS1}]]></textFieldExpression>
+                            </textField>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="60" y="0" width="62"
+                                               height="15" backcolor="#E6E3E3"
+                                               uuid="7bb864cf-e35e-4faa-852a-22b21bbeb0b1">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{OST_CLIENTS1}]]></textFieldExpression>
+                            </textField>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="122" y="0" width="85"
+                                               height="15" backcolor="#E6E3E3"
+                                               uuid="5fc06bbc-df90-4d7d-ad7a-b54d43eed805">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{OST_AMT1}]]></textFieldExpression>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="207" height="15" backcolor="#E6E3E3"
+                                               uuid="c828143f-f193-4e41-9b67-542667881aeb"/>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Total OLP]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="15" width="60" height="15"
+                                               uuid="a268eb8e-74ae-439c-b115-c815dd9ab594">
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Active Loans]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement mode="Opaque" x="60" y="15" width="62" height="15"
+                                               uuid="9d2be6fe-6ba5-4ed6-854d-e333914d848c">
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Active Clients]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement mode="Opaque" x="122" y="15" width="85" height="15"
+                                               uuid="be50e974-0282-43dc-92d2-ec7f28ecc56e"/>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[OLP - Amount]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="15">
+                            <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="60" height="15"
+                                               uuid="df0cd715-919a-46be-a4b8-9db5efc41a6f">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{OST_LOANS}]]></textFieldExpression>
+                            </textField>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="60" y="0" width="62" height="15"
+                                               uuid="09a3ea65-728d-4f3e-8ab3-fdd348334857">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{OST_CLIENTS}]]></textFieldExpression>
+                            </textField>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="122" y="0" width="85" height="15"
+                                               uuid="6c3ee74e-5f3e-4972-ba66-25a8a11746d3">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{OST_AMT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="160" uuid="8f2e58c3-3238-4655-a66c-f003521f721f">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
+                        <property name="com.jaspersoft.studio.layout"
+                                  value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                        <jr:tableFooter height="15" rowSpan="1">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="75"
+                                               height="15" backcolor="#E6E3E3"
+                                               uuid="776c1a3b-8016-49e4-a924-4bedb11e17fc">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{DSB_CLNTS1}]]></textFieldExpression>
+                            </textField>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="75" y="0" width="85"
+                                               height="15" backcolor="#E6E3E3"
+                                               uuid="affbe314-da9b-4197-ab06-dab19f2f9d35">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{DSB_AMT1}]]></textFieldExpression>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="160" height="15" backcolor="#E6E3E3"
+                                               uuid="5aa628b0-06ee-4910-b9ed-396ca94800c2">
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Total Disbursement]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="15" width="75" height="15"
+                                               uuid="788d1b9e-96d7-4566-9962-2d284f7c576e"/>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[No. Clients Disb.]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement mode="Opaque" x="75" y="15" width="85" height="15"
+                                               uuid="0e64a98d-491a-471e-8d11-53007396a06d"/>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Disb. Amount]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="15">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="75" height="15"
+                                               uuid="75451a2b-6156-42f9-8d01-a4520ee7a607">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{DSB_CLNTS}]]></textFieldExpression>
+                            </textField>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="75" y="0" width="85" height="15"
+                                               uuid="a2041f39-ba17-425b-8c9d-a450a36481bf">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{DSB_AMT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="134" uuid="ddd0bbc2-4783-453c-8ca4-ca5c2a3c9003">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
+                        <property name="com.jaspersoft.studio.layout"
+                                  value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                        <jr:tableFooter height="15" rowSpan="1">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="55"
+                                               height="15" backcolor="#E6E3E3"
+                                               uuid="39a52592-9a0f-4c0c-8dd8-aa3ba2cdbde1">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{OD_CLIENTS1}]]></textFieldExpression>
+                            </textField>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="55" y="0" width="79"
+                                               height="15" backcolor="#E6E3E3"
+                                               uuid="b1566e28-5eb7-41ed-b23f-fa78640aa928">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{OD_AMT1}]]></textFieldExpression>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="134" height="15" backcolor="#E6E3E3"
+                                               uuid="b01940f9-2f4c-4d66-978f-0353f6399ec3">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Total Overdue]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="15" width="55" height="15"
+                                               uuid="21648ccc-4d88-402c-8336-4e2d19e85b72">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[No. Clients]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement mode="Opaque" x="55" y="15" width="79" height="15"
+                                               uuid="d8b0afa0-adae-4740-9d4c-efbb86c12649">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[OD Amount]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="15">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="55" height="15"
+                                               uuid="775cae72-ec1f-425a-8487-d698d2301abd">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{OD_CLIENTS}]]></textFieldExpression>
+                            </textField>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="55" y="0" width="79" height="15"
+                                               uuid="03453b0e-0d6b-4906-bdf9-48ed0076aa55">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{OD_AMT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                </jr:table>
+            </componentElement>
+        </band>
+    </summary>
+</jasperReport>

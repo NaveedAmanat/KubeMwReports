@@ -1,0 +1,2302 @@
+/* Formatted on 10/26/2022 12:36:49 PM (QP5 v5.326) */
+---SAWARI + HIL ADDED
+
+  SELECT C.SR_NO,
+         c.BUCKT,
+         SUM (c.OD_CUST_KKK)
+             OD_CUST_KKK,
+         SUM (c.OD_PAR_KKK) --+ SUM (c.OD_PAR_KSK)
+             OD_PAR_KKK,
+         SUM (outstanding_KKK)
+             outstanding_KKK,
+         CASE
+             WHEN SUM (outstanding_KKK) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KKK) / SUM (outstanding_KKK)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_kkk,
+         SUM (c.OD_CUST_KEL)
+             OD_CUST_KEL,
+         SUM (c.OD_PAR_KEL)
+             OD_PAR_KEL,
+         SUM (outstanding_KEL)
+             outstanding_KEL,
+         CASE
+             WHEN SUM (outstanding_KEL) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KEL) / SUM (outstanding_KEL)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KEL,
+         SUM (c.OD_CUST_KSK)
+             OD_CUST_KSK,
+         SUM (c.OD_PAR_KSK)
+             OD_PAR_KSK,
+         SUM (outstanding_KSK)
+             outstanding_KSK,
+         --case when sum(outstanding_KEL)>0 then
+         CASE
+             WHEN SUM (outstanding_KSK) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KSK) / SUM (outstanding_KSK)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KSK,
+         SUM (OD_CUST_KM)
+             OD_CUST_KM,
+         SUM (OD_PAR_KM)
+             OD_PAR_KM,
+         SUM (outstanding_KM)
+             outstanding_KM,
+         CASE
+             WHEN SUM (outstanding_KM) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KM) / SUM (outstanding_KM)) * 100), 2)
+             --round(((1/sum(outstanding_KM))*100),2)
+             ELSE
+                 0
+         END
+             AS percent_KM,
+         SUM (OD_CUST_KSS)
+             OD_CUST_KSS,
+         SUM (OD_PAR_KSS)
+             OD_PAR_KSS,
+         SUM (outstanding_KSS)
+             outstanding_KSS,
+         CASE
+             WHEN SUM (outstanding_KSS) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KSS) / SUM (outstanding_KSS)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KSS,
+         SUM (OD_CUST_KAKSIL)
+             OD_CUST_KAKSIL,
+         SUM (OD_PAR_KAKSIL)
+             OD_PAR_KAKSIL,
+         SUM (outstanding_kaksil)
+             outstanding_kaksil,
+         CASE
+             WHEN SUM (outstanding_kaksil) > 0
+             THEN
+                 ROUND (
+                     ((SUM (OD_PAR_KAKSIL) / SUM (outstanding_kaksil)) * 100),
+                     2)
+             ELSE
+                 0
+         END
+             AS percent_kaksil,
+         SUM (c.OD_CUST_KBK)
+             OD_CUST_KBK,
+         SUM (c.OD_PAR_KBK)
+             OD_PAR_KBK,
+         SUM (outstanding_KBK)
+             outstanding_KBK,
+         CASE
+             WHEN SUM (outstanding_KBK) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KBK) / SUM (outstanding_KBK)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KBK,
+         (  SUM (c.OD_CUST_KKK)
+          + SUM (OD_CUST_KAKSIL)
+          + SUM (OD_CUST_KM)
+          + SUM (OD_CUST_KSS)
+          + SUM (c.OD_CUST_KEL)
+          + SUM (c.OD_CUST_KBK)
+          + SUM (c.OD_CUST_hil)
+          + SUM (c.OD_CUST_KFK)
+          + SUM (c.OD_CUST_saw))
+             TOTAL_OD_CUST,
+         (  SUM (c.OD_PAR_KKK)
+          + SUM (OD_PAR_KAKSIL)
+          + SUM (OD_PAR_KM)
+          + SUM (OD_PAR_KSS)
+          + SUM (c.OD_PAR_KEL)
+          + SUM (c.OD_PAR_KSK)
+          + SUM (c.OD_PAR_KBK)
+          + SUM (c.OD_par_hil)
+          + SUM (c.OD_par_KFK)
+          + SUM (c.OD_par_saw))
+             TOTAL_OD_PAR,
+         (  SUM (outstanding_KKK)
+          + SUM (outstanding_kaksil)
+          + SUM (outstanding_km)
+          + SUM (outstanding_kss)
+          + SUM (outstanding_KEL)
+          + SUM (outstanding_KSK)
+          + SUM (outstanding_KBK)
+          + SUM (outstanding_hil)
+          + SUM (outstanding_KFK)
+          + SUM (outstanding_saw))
+             TOTAL_OUTSTANDING,
+         ROUND (
+             (  (  (  SUM (c.OD_PAR_KKK)
+                    + SUM (OD_PAR_KAKSIL)
+                    + SUM (OD_PAR_KM)
+                    + SUM (OD_PAR_KSS)
+                    + SUM (c.OD_PAR_KEL)
+                    + SUM (c.OD_PAR_KSK)
+                    + SUM (c.OD_PAR_KBK)
+                    + SUM (c.OD_par_hil)
+                    + SUM (c.OD_par_KFK)
+                    + SUM (c.OD_par_saw))
+                 / (  SUM (outstanding_KKK)
+                    + SUM (outstanding_kaksil)
+                    + SUM (outstanding_km)
+                    + SUM (outstanding_kss)
+                    + SUM (outstanding_KEL)
+                    + SUM (outstanding_KSK)
+                    + SUM (outstanding_KBK)
+                    + SUM (outstanding_KFK)
+                    + SUM (outstanding_hil)
+                    + SUM (outstanding_saw)))
+              * 100),
+             2)
+             total_percent,
+         SUM (c.OD_CUST_HIL)
+             OD_CUST_HIL,
+         SUM (c.OD_PAR_HIL)
+             OD_PAR_HIL,
+         SUM (outstanding_HIL)
+             outstanding_HIL,
+         CASE
+             WHEN SUM (outstanding_HIL) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_HIL) / SUM (outstanding_HIL)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_HIL,
+         SUM (c.OD_CUST_SAW)
+             OD_CUST_SAW,
+         SUM (c.OD_PAR_SAW)
+             OD_PAR_SAW,
+         SUM (outstanding_SAW)
+             outstanding_SAW,
+         CASE
+             WHEN SUM (outstanding_SAW) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_SAW) / SUM (outstanding_SAW)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_SAW,
+         SUM (c.OD_CUST_KFK)
+             OD_CUST_KFK,
+         SUM (c.OD_PAR_KFK)
+             OD_PAR_KFK,
+         SUM (outstanding_KFK)
+             outstanding_KFK,
+         CASE
+             WHEN SUM (outstanding_KFK) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KFK) / SUM (outstanding_KFK)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KFK
+    FROM ((  SELECT 1
+                        AS SR_NO,
+                    '1 to 4 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OD_CUST_1_4), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.PAR_1_4), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OD_CUST_1_4), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.PAR_1_4), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OD_CUST_1_4), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.PAR_1_4), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OD_CUST_1_4), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.PAR_1_4), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OD_CUST_1_4), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.PAR_1_4), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OD_CUST_1_4), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.PAR_1_4), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OD_CUST_1_4), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.PAR_1_4), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OD_CUST_1_4), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.PAR_1_4), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OD_CUST_1_4), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.PAR_1_4), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OD_CUST_1_4), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.PAR_1_4), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OD_CUST_1_4), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.PAR_1_4), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OD_CUST_1_4), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.PAR_1_4), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 2
+                        AS SR_NO,
+                    '5 to 15 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OD_CUST_5_15), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.PAR_5_15), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OD_CUST_5_15), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.PAR_5_15), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OD_CUST_5_15), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.PAR_5_15), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OD_CUST_5_15), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.PAR_5_15), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OD_CUST_5_15), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.PAR_5_15), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OD_CUST_5_15), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.PAR_5_15), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OD_CUST_5_15), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.PAR_5_15), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OD_CUST_5_15), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.PAR_5_15), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OD_CUST_5_15), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.PAR_5_15), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OD_CUST_5_15), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.PAR_5_15), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OD_CUST_5_15), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.PAR_5_15), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OD_CUST_5_15), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.PAR_5_15), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 3
+                        AS SR_NO,
+                    '16 to 29 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OD_CUST_16_29), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.PAR_16_29), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OD_CUST_16_29), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.PAR_16_29), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OD_CUST_16_29), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.PAR_16_29), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OD_CUST_16_29), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.PAR_16_29), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OD_CUST_16_29), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.PAR_16_29), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OD_CUST_16_29), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.PAR_16_29), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OD_CUST_16_29), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.PAR_16_29), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OD_CUST_16_29), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.PAR_16_29), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OD_CUST_16_29), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.PAR_16_29), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OD_CUST_16_29), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.PAR_16_29), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OD_CUST_16_29), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.PAR_16_29), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OD_CUST_16_29), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.PAR_16_29), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 4
+                        AS SR_NO,
+                    '30 to 89 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OD_CUST_30_89), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.PAR_30_89), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OD_CUST_30_89), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.PAR_30_89), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OD_CUST_30_89), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.PAR_30_89), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OD_CUST_30_89), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.PAR_30_89), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OD_CUST_30_89), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.PAR_30_89), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OD_CUST_30_89), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.PAR_30_89), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OD_CUST_30_89), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.PAR_30_89), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OD_CUST_30_89), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.PAR_30_89), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OD_CUST_30_89), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.PAR_30_89), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OD_CUST_30_89), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.PAR_30_89), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OD_CUST_30_89), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.PAR_30_89), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OD_CUST_30_89), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.PAR_30_89), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 5
+                        AS SR_NO,
+                    '90 to 179 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OD_CUST_90_179), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.PAR_90_179), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OD_CUST_90_179), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.PAR_90_179), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OD_CUST_90_179), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.PAR_90_179), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OD_CUST_90_179), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.PAR_90_179), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OD_CUST_90_179), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.PAR_90_179), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OD_CUST_90_179), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.PAR_90_179), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OD_CUST_90_179), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.PAR_90_179), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OD_CUST_90_179), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.PAR_90_179), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OD_CUST_90_179), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.PAR_90_179), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OD_CUST_90_179), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.PAR_90_179), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OD_CUST_90_179), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.PAR_90_179), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OD_CUST_90_179), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.PAR_90_179), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 6
+                        AS SR_NO,
+                    '180 to 364 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OD_CUST_364), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.PAR_364), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OD_CUST_364), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.PAR_364), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OD_CUST_364), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.PAR_364), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OD_CUST_364), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.PAR_364), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OD_CUST_364), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.PAR_364), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OD_CUST_364), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.PAR_364), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OD_CUST_364), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.PAR_364), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OD_CUST_364), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.PAR_364), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OD_CUST_364), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.PAR_364), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OD_CUST_364), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.PAR_364), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OD_CUST_364), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.PAR_364), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OD_CUST_364), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.PAR_364), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 7
+                        AS SR_NO,
+                    '365 Days Plus'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OD_CUST_365), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.PAR_365), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OD_CUST_365), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.PAR_365), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OD_CUST_365), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.PAR_365), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OD_CUST_365), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.PAR_365), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OD_CUST_365), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.PAR_365), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OD_CUST_365), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.PAR_365), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OD_CUST_365), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.PAR_365), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OD_CUST_365), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.PAR_365), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OD_CUST_365), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.PAR_365), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OD_CUST_365), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.PAR_365), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OD_CUST_365), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.PAR_365), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OD_CUST_365), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.PAR_365), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)) c
+   WHERE :p_type = 1
+GROUP BY c.BUCKT, C.SR_NO
+UNION ALL
+  -----------rescheduled--------------
+
+  SELECT C.SR_NO,
+         c.BUCKT,
+         SUM (c.OD_CUST_KKK)
+             OD_CUST_KKK,
+         SUM (c.OD_PAR_KKK) --+ SUM (c.OD_PAR_KSK)
+             OD_PAR_KKK,
+         SUM (outstanding_KKK)
+             outstanding_KKK,
+         CASE
+             WHEN SUM (outstanding_KKK) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KKK) / SUM (outstanding_KKK)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_kkk,
+         SUM (c.OD_CUST_KEL)
+             OD_CUST_KEL,
+         SUM (c.OD_PAR_KEL)
+             OD_PAR_KEL,
+         SUM (outstanding_KEL)
+             outstanding_KEL,
+         CASE
+             WHEN SUM (outstanding_KEL) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KEL) / SUM (outstanding_KEL)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KEL,
+         SUM (c.OD_CUST_KSK)
+             OD_CUST_KSK,
+         SUM (c.OD_PAR_KSK)
+             OD_PAR_KSK,
+         SUM (outstanding_KSK)
+             outstanding_KSK,
+         --case when sum(outstanding_KEL)>0 then
+         CASE
+             WHEN SUM (outstanding_KSK) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KSK) / SUM (outstanding_KSK)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KSK,
+         SUM (OD_CUST_KM)
+             OD_CUST_KM,
+         SUM (OD_PAR_KM)
+             OD_PAR_KM,
+         SUM (outstanding_KM)
+             outstanding_KM,
+         CASE
+             WHEN SUM (outstanding_KM) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KM) / SUM (outstanding_KM)) * 100), 2)
+             --round(((1/sum(outstanding_KM))*100),2)
+             ELSE
+                 0
+         END
+             AS percent_KM,
+         SUM (OD_CUST_KSS)
+             OD_CUST_KSS,
+         SUM (OD_PAR_KSS)
+             OD_PAR_KSS,
+         SUM (outstanding_KSS)
+             outstanding_KSS,
+         CASE
+             WHEN SUM (outstanding_KSS) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KSS) / SUM (outstanding_KSS)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KSS,
+         SUM (OD_CUST_KAKSIL)
+             OD_CUST_KAKSIL,
+         SUM (OD_PAR_KAKSIL)
+             OD_PAR_KAKSIL,
+         SUM (outstanding_kaksil)
+             outstanding_kaksil,
+         CASE
+             WHEN SUM (outstanding_kaksil) > 0
+             THEN
+                 ROUND (
+                     ((SUM (OD_PAR_KAKSIL) / SUM (outstanding_kaksil)) * 100),
+                     2)
+             ELSE
+                 0
+         END
+             AS percent_kaksil,
+         SUM (c.OD_CUST_KBK)
+             OD_CUST_KBK,
+         SUM (c.OD_PAR_KBK)
+             OD_PAR_KBK,
+         SUM (outstanding_KBK)
+             outstanding_KBK,
+         CASE
+             WHEN SUM (outstanding_KBK) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KBK) / SUM (outstanding_KBK)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KBK,
+         (  SUM (c.OD_CUST_KKK)
+          + SUM (OD_CUST_KAKSIL)
+          + SUM (OD_CUST_KM)
+          + SUM (OD_CUST_KSS)
+          + SUM (c.OD_CUST_KEL)
+          + SUM (c.OD_CUST_KBK)
+          + SUM (c.OD_CUST_hil)
+          + SUM (c.OD_CUST_KFK)
+          + SUM (c.OD_CUST_saw))
+             TOTAL_OD_CUST,
+         (  SUM (c.OD_PAR_KKK)
+          + SUM (OD_PAR_KAKSIL)
+          + SUM (OD_PAR_KM)
+          + SUM (OD_PAR_KSS)
+          + SUM (c.OD_PAR_KEL)
+          + SUM (c.OD_PAR_KSK)
+          + SUM (c.OD_PAR_KBK)
+          + SUM (c.OD_par_hil)
+          + SUM (c.OD_par_KFK)
+          + SUM (c.OD_par_saw))
+             TOTAL_OD_PAR,
+         (  SUM (outstanding_KKK)
+          + SUM (outstanding_kaksil)
+          + SUM (outstanding_km)
+          + SUM (outstanding_kss)
+          + SUM (outstanding_KEL)
+          + SUM (outstanding_KSK)
+          + SUM (outstanding_KBK)
+          + SUM (outstanding_hil)
+          + SUM (outstanding_KFK)
+          + SUM (outstanding_saw))
+             TOTAL_OUTSTANDING,
+         ROUND (
+             (  (  (  SUM (c.OD_PAR_KKK)
+                    + SUM (OD_PAR_KAKSIL)
+                    + SUM (OD_PAR_KM)
+                    + SUM (OD_PAR_KSS)
+                    + SUM (c.OD_PAR_KEL)
+                    + SUM (c.OD_PAR_KSK)
+                    + SUM (c.OD_PAR_KBK)
+                    + SUM (c.OD_par_hil)
+                    + SUM (c.OD_par_KFK)
+                    + SUM (c.OD_par_saw))
+                 / (  SUM (outstanding_KKK)
+                    + SUM (outstanding_kaksil)
+                    + SUM (outstanding_km)
+                    + SUM (outstanding_kss)
+                    + SUM (outstanding_KEL)
+                    + SUM (outstanding_KSK)
+                    + SUM (outstanding_KBK)
+                    + SUM (outstanding_KFK)
+                    + SUM (outstanding_hil)
+                    + SUM (outstanding_saw)))
+              * 100),
+             2)
+             total_percent,
+         SUM (c.OD_CUST_HIL)
+             OD_CUST_HIL,
+         SUM (c.OD_PAR_HIL)
+             OD_PAR_HIL,
+         SUM (outstanding_HIL)
+             outstanding_HIL,
+         CASE
+             WHEN SUM (outstanding_HIL) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_HIL) / SUM (outstanding_HIL)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_HIL,
+         SUM (c.OD_CUST_SAW)
+             OD_CUST_SAW,
+         SUM (c.OD_PAR_SAW)
+             OD_PAR_SAW,
+         SUM (outstanding_SAW)
+             outstanding_SAW,
+         CASE
+             WHEN SUM (outstanding_SAW) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_SAW) / SUM (outstanding_SAW)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_SAW,
+         SUM (c.OD_CUST_KFK)
+             OD_CUST_KFK,
+         SUM (c.OD_PAR_KFK)
+             OD_PAR_KFK,
+         SUM (outstanding_KFK)
+             outstanding_KFK,
+         CASE
+             WHEN SUM (outstanding_KFK) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KFK) / SUM (outstanding_KFK)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KFK
+    FROM ((  SELECT 1
+                        AS SR_NO,
+                    '1 to 4 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OD_CUST_1_4), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_PAR_1_4), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OD_CUST_1_4), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_PAR_1_4), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OD_CUST_1_4), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_PAR_1_4), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OD_CUST_1_4), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_PAR_1_4), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OD_CUST_1_4), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_PAR_1_4), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OD_CUST_1_4), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_PAR_1_4), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OD_CUST_1_4), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_PAR_1_4), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OD_CUST_1_4), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_PAR_1_4), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OD_CUST_1_4), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_PAR_1_4), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OD_CUST_1_4), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_PAR_1_4), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OD_CUST_1_4), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_PAR_1_4), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OD_CUST_1_4), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_PAR_1_4), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 2
+                        AS SR_NO,
+                    '5 to 15 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OD_CUST_5_15), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_PAR_5_15), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OD_CUST_5_15), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_PAR_5_15), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OD_CUST_5_15), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_PAR_5_15), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OD_CUST_5_15), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_PAR_5_15), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OD_CUST_5_15), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_PAR_5_15), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OD_CUST_5_15), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_PAR_5_15), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OD_CUST_5_15), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_PAR_5_15), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OD_CUST_5_15), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_PAR_5_15), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OD_CUST_5_15), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_PAR_5_15), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OD_CUST_5_15), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_PAR_5_15), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OD_CUST_5_15), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_PAR_5_15), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OD_CUST_5_15), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_PAR_5_15), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 3
+                        AS SR_NO,
+                    '16 to 29 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OD_CUST_16_29), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_PAR_16_29), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OD_CUST_16_29), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_PAR_16_29), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OD_CUST_16_29), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_PAR_16_29), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OD_CUST_16_29), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_PAR_16_29), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OD_CUST_16_29), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_PAR_16_29), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OD_CUST_16_29), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_PAR_16_29), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OD_CUST_16_29), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_PAR_16_29), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OD_CUST_16_29), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_PAR_16_29), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OD_CUST_16_29), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_PAR_16_29), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OD_CUST_16_29), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_PAR_16_29), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OD_CUST_16_29), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_PAR_16_29), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OD_CUST_16_29), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_PAR_16_29), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 4
+                        AS SR_NO,
+                    '30 to 89 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OD_CUST_30_89), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_PAR_30_89), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OD_CUST_30_89), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_PAR_30_89), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OD_CUST_30_89), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_PAR_30_89), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OD_CUST_30_89), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_PAR_30_89), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OD_CUST_30_89), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_PAR_30_89), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OD_CUST_30_89), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_PAR_30_89), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OD_CUST_30_89), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_PAR_30_89), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OD_CUST_30_89), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_PAR_30_89), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OD_CUST_30_89), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_PAR_30_89), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OD_CUST_30_89), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_PAR_30_89), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OD_CUST_30_89), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_PAR_30_89), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OD_CUST_30_89), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_PAR_30_89), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 5
+                        AS SR_NO,
+                    '90 to 179 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OD_CUST_90_179), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_PAR_90_179), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OD_CUST_90_179), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_PAR_90_179), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OD_CUST_90_179), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_PAR_90_179), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OD_CUST_90_179), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_PAR_90_179), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OD_CUST_90_179), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_PAR_90_179), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OD_CUST_90_179), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_PAR_90_179), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OD_CUST_90_179), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_PAR_90_179), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OD_CUST_90_179), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_PAR_90_179), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OD_CUST_90_179), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_PAR_90_179), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OD_CUST_90_179), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_PAR_90_179), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OD_CUST_90_179), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_PAR_90_179), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OD_CUST_90_179), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_PAR_90_179), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 6
+                        AS SR_NO,
+                    '180 to 364 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OD_CUST_364), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_PAR_364), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OD_CUST_364), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_PAR_364), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OD_CUST_364), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_PAR_364), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OD_CUST_364), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_PAR_364), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OD_CUST_364), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_PAR_364), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OD_CUST_364), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_PAR_364), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OD_CUST_364), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_PAR_364), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OD_CUST_364), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_PAR_364), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OD_CUST_364), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_PAR_364), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OD_CUST_364), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_PAR_364), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OD_CUST_364), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_PAR_364), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OD_CUST_364), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_PAR_364), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 7
+                        AS SR_NO,
+                    '365 Days Plus'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OD_CUST_365), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_PAR_365), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OD_CUST_365), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_PAR_365), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OD_CUST_365), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_PAR_365), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OD_CUST_365), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_PAR_365), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OD_CUST_365), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_PAR_365), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OD_CUST_365), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_PAR_365), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OD_CUST_365), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_PAR_365), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OD_CUST_365), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_PAR_365), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OD_CUST_365), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_PAR_365), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OD_CUST_365), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_PAR_365), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OD_CUST_365), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_PAR_365), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OD_CUST_365), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_PAR_365), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.res_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)) c
+   WHERE :p_type = 2
+GROUP BY c.BUCKT, C.SR_NO
+UNION ALL
+  ------------------non reschedules----------
+
+  SELECT C.SR_NO,
+         c.BUCKT,
+         SUM (c.OD_CUST_KKK)
+             OD_CUST_KKK,
+         SUM (c.OD_PAR_KKK) --+ SUM (c.OD_PAR_KSK)
+             OD_PAR_KKK,
+         SUM (outstanding_KKK)
+             outstanding_KKK,
+         CASE
+             WHEN SUM (outstanding_KKK) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KKK) / SUM (outstanding_KKK)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_kkk,
+         SUM (c.OD_CUST_KEL)
+             OD_CUST_KEL,
+         SUM (c.OD_PAR_KEL)
+             OD_PAR_KEL,
+         SUM (outstanding_KEL)
+             outstanding_KEL,
+         CASE
+             WHEN SUM (outstanding_KEL) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KEL) / SUM (outstanding_KEL)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KEL,
+         SUM (c.OD_CUST_KSK)
+             OD_CUST_KSK,
+         SUM (c.OD_PAR_KSK)
+             OD_PAR_KSK,
+         SUM (outstanding_KSK)
+             outstanding_KSK,
+         --case when sum(outstanding_KEL)>0 then
+         CASE
+             WHEN SUM (outstanding_KSK) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KSK) / SUM (outstanding_KSK)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KSK,
+         SUM (OD_CUST_KM)
+             OD_CUST_KM,
+         SUM (OD_PAR_KM)
+             OD_PAR_KM,
+         SUM (outstanding_KM)
+             outstanding_KM,
+         CASE
+             WHEN SUM (outstanding_KM) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KM) / SUM (outstanding_KM)) * 100), 2)
+             --round(((1/sum(outstanding_KM))*100),2)
+             ELSE
+                 0
+         END
+             AS percent_KM,
+         SUM (OD_CUST_KSS)
+             OD_CUST_KSS,
+         SUM (OD_PAR_KSS)
+             OD_PAR_KSS,
+         SUM (outstanding_KSS)
+             outstanding_KSS,
+         CASE
+             WHEN SUM (outstanding_KSS) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KSS) / SUM (outstanding_KSS)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KSS,
+         SUM (OD_CUST_KAKSIL)
+             OD_CUST_KAKSIL,
+         SUM (OD_PAR_KAKSIL)
+             OD_PAR_KAKSIL,
+         SUM (outstanding_kaksil)
+             outstanding_kaksil,
+         CASE
+             WHEN SUM (outstanding_kaksil) > 0
+             THEN
+                 ROUND (
+                     ((SUM (OD_PAR_KAKSIL) / SUM (outstanding_kaksil)) * 100),
+                     2)
+             ELSE
+                 0
+         END
+             AS percent_kaksil,
+         SUM (c.OD_CUST_KBK)
+             OD_CUST_KBK,
+         SUM (c.OD_PAR_KBK)
+             OD_PAR_KBK,
+         SUM (outstanding_KBK)
+             outstanding_KBK,
+         CASE
+             WHEN SUM (outstanding_KBK) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KBK) / SUM (outstanding_KBK)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KBK,
+         (  SUM (c.OD_CUST_KKK)
+          + SUM (OD_CUST_KAKSIL)
+          + SUM (OD_CUST_KM)
+          + SUM (OD_CUST_KSS)
+          + SUM (c.OD_CUST_KEL)
+          + SUM (c.OD_CUST_KBK)
+          + SUM (c.OD_CUST_hil)
+          + SUM (c.OD_CUST_KFK)
+          + SUM (c.OD_CUST_saw))
+             TOTAL_OD_CUST,
+         (  SUM (c.OD_PAR_KKK)
+          + SUM (OD_PAR_KAKSIL)
+          + SUM (OD_PAR_KM)
+          + SUM (OD_PAR_KSS)
+          + SUM (c.OD_PAR_KEL)
+          + SUM (c.OD_PAR_KSK)
+          + SUM (c.OD_PAR_KBK)
+          + SUM (c.OD_par_hil)
+          + SUM (c.OD_par_KFK)
+          + SUM (c.OD_par_saw))
+             TOTAL_OD_PAR,
+         (  SUM (outstanding_KKK)
+          + SUM (outstanding_kaksil)
+          + SUM (outstanding_km)
+          + SUM (outstanding_kss)
+          + SUM (outstanding_KEL)
+          + SUM (outstanding_KSK)
+          + SUM (outstanding_KBK)
+          + SUM (outstanding_hil)
+          + SUM (outstanding_KFK)
+          + SUM (outstanding_saw))
+             TOTAL_OUTSTANDING,
+         ROUND (
+             (  (  (  SUM (c.OD_PAR_KKK)
+                    + SUM (OD_PAR_KAKSIL)
+                    + SUM (OD_PAR_KM)
+                    + SUM (OD_PAR_KSS)
+                    + SUM (c.OD_PAR_KEL)
+                    + SUM (c.OD_PAR_KSK)
+                    + SUM (c.OD_PAR_KBK)
+                    + SUM (c.OD_par_hil)
+                    + SUM (c.OD_par_KFK)
+                    + SUM (c.OD_par_saw))
+                 / (  SUM (outstanding_KKK)
+                    + SUM (outstanding_kaksil)
+                    + SUM (outstanding_km)
+                    + SUM (outstanding_kss)
+                    + SUM (outstanding_KEL)
+                    + SUM (outstanding_KSK)
+                    + SUM (outstanding_KBK)
+                    + SUM (outstanding_KFK)
+                    + SUM (outstanding_hil)
+                    + SUM (outstanding_saw)))
+              * 100),
+             2)
+             total_percent,
+         SUM (c.OD_CUST_HIL)
+             OD_CUST_HIL,
+         SUM (c.OD_PAR_HIL)
+             OD_PAR_HIL,
+         SUM (outstanding_HIL)
+             outstanding_HIL,
+         CASE
+             WHEN SUM (outstanding_HIL) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_HIL) / SUM (outstanding_HIL)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_HIL,
+         SUM (c.OD_CUST_SAW)
+             OD_CUST_SAW,
+         SUM (c.OD_PAR_SAW)
+             OD_PAR_SAW,
+         SUM (outstanding_SAW)
+             outstanding_SAW,
+         CASE
+             WHEN SUM (outstanding_SAW) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_SAW) / SUM (outstanding_SAW)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_SAW,
+         SUM (c.OD_CUST_KFK)
+             OD_CUST_KFK,
+         SUM (c.OD_PAR_KFK)
+             OD_PAR_KFK,
+         SUM (outstanding_KFK)
+             outstanding_KFK,
+         CASE
+             WHEN SUM (outstanding_KFK) > 0
+             THEN
+                 ROUND (((SUM (c.OD_PAR_KFK) / SUM (outstanding_KFK)) * 100),
+                        2)
+             ELSE
+                 0
+         END
+             AS percent_KFK
+    FROM ((  SELECT 1
+                        AS SR_NO,
+                    '1 to 4 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OD_CUST_1_4), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_PAR_1_4), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OD_CUST_1_4), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_PAR_1_4), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OD_CUST_1_4), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_PAR_1_4), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OD_CUST_1_4), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_PAR_1_4), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OD_CUST_1_4), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_PAR_1_4), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OD_CUST_1_4), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_PAR_1_4), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OD_CUST_1_4), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_PAR_1_4), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OD_CUST_1_4), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_PAR_1_4), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OD_CUST_1_4), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_PAR_1_4), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OD_CUST_1_4), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_PAR_1_4), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OD_CUST_1_4), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_PAR_1_4), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OD_CUST_1_4), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_PAR_1_4), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 2
+                        AS SR_NO,
+                    '5 to 15 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OD_CUST_5_15), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_PAR_5_15), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OD_CUST_5_15), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_PAR_5_15), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OD_CUST_5_15), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_PAR_5_15), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OD_CUST_5_15), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_PAR_5_15), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OD_CUST_5_15), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_PAR_5_15), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OD_CUST_5_15), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_PAR_5_15), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OD_CUST_5_15), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_PAR_5_15), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OD_CUST_5_15), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_PAR_5_15), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OD_CUST_5_15), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_PAR_5_15), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OD_CUST_5_15), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_PAR_5_15), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OD_CUST_5_15), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_PAR_5_15), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OD_CUST_5_15), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_PAR_5_15), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 3
+                        AS SR_NO,
+                    '16 to 29 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OD_CUST_16_29), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_PAR_16_29), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OD_CUST_16_29), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_PAR_16_29), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OD_CUST_16_29), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_PAR_16_29), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OD_CUST_16_29), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_PAR_16_29), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OD_CUST_16_29), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_PAR_16_29), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OD_CUST_16_29), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_PAR_16_29), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OD_CUST_16_29), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_PAR_16_29), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OD_CUST_16_29), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_PAR_16_29), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OD_CUST_16_29), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_PAR_16_29), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OD_CUST_16_29), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_PAR_16_29), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OD_CUST_16_29), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_PAR_16_29), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OD_CUST_16_29), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_PAR_16_29), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 4
+                        AS SR_NO,
+                    '30 to 89 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OD_CUST_30_89), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_PAR_30_89), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OD_CUST_30_89), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_PAR_30_89), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OD_CUST_30_89), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_PAR_30_89), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OD_CUST_30_89), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_PAR_30_89), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OD_CUST_30_89), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_PAR_30_89), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OD_CUST_30_89), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_PAR_30_89), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OD_CUST_30_89), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_PAR_30_89), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OD_CUST_30_89), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_PAR_30_89), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OD_CUST_30_89), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_PAR_30_89), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OD_CUST_30_89), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_PAR_30_89), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OD_CUST_30_89), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_PAR_30_89), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OD_CUST_30_89), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_PAR_30_89), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 5
+                        AS SR_NO,
+                    '90 to 179 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OD_CUST_90_179), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_PAR_90_179), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OD_CUST_90_179), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_PAR_90_179), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OD_CUST_90_179), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_PAR_90_179), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OD_CUST_90_179), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_PAR_90_179), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OD_CUST_90_179), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_PAR_90_179), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OD_CUST_90_179), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_PAR_90_179), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OD_CUST_90_179), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_PAR_90_179), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OD_CUST_90_179), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_PAR_90_179), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OD_CUST_90_179), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_PAR_90_179), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OD_CUST_90_179), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_PAR_90_179), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OD_CUST_90_179), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_PAR_90_179), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OD_CUST_90_179), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_PAR_90_179), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 6
+                        AS SR_NO,
+                    '180 to 364 days'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OD_CUST_364), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_PAR_364), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OD_CUST_364), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_PAR_364), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OD_CUST_364), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_PAR_364), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OD_CUST_364), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_PAR_364), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OD_CUST_364), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_PAR_364), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OD_CUST_364), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_PAR_364), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OD_CUST_364), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_PAR_364), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OD_CUST_364), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_PAR_364), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OD_CUST_364), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_PAR_364), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OD_CUST_364), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_PAR_364), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OD_CUST_364), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_PAR_364), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OD_CUST_364), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_PAR_364), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)
+          UNION ALL
+          (  SELECT 7
+                        AS SR_NO,
+                    '365 Days Plus'
+                        AS BUCKT,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OD_CUST_365), 0)
+                        OD_CUST_KKK,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_PAR_365), 0)
+                        OD_PAR_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OD_CUST_365), 0)
+                        OD_CUST_KFK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_PAR_365), 0)
+                        OD_PAR_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OD_CUST_365), 0)
+                        OD_CUST_HIL,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_PAR_365), 0)
+                        OD_PAR_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OD_CUST_365), 0)
+                        OD_CUST_SAW,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_PAR_365), 0)
+                        OD_PAR_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OD_CUST_365), 0)
+                        OD_CUST_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_PAR_365), 0)
+                        OD_PAR_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OD_CUST_365), 0)
+                        OD_CUST_KIKK,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_PAR_365), 0)
+                        OD_PAR_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OD_CUST_365), 0)
+                        OD_CUST_KM,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_PAR_365), 0)
+                        OD_PAR_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OD_CUST_365), 0)
+                        OD_CUST_KSS,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_PAR_365), 0)
+                        OD_PAR_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OD_CUST_365), 0)
+                        OD_CUST_ABL,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_PAR_365), 0)
+                        OD_PAR_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OD_CUST_365), 0)
+                        OD_CUST_KEL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_PAR_365), 0)
+                        OD_PAR_KEL,
+                    DECODE (B.PRODUCT_ID, 1, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KKK,
+                    DECODE (B.PRODUCT_ID, 5766, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KFK,
+                    DECODE (B.PRODUCT_ID, 21, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_HIL,
+                    DECODE (B.PRODUCT_ID, 22, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_SAW,
+                    DECODE (B.PRODUCT_ID, 16, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KAKSIL,
+                    DECODE (B.PRODUCT_ID, 5, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KIKK,
+                    DECODE (B.PRODUCT_ID, 6, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KM,
+                    DECODE (B.PRODUCT_ID, 9, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSS,
+                    DECODE (B.PRODUCT_ID, 11, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_ABL,
+                    DECODE (B.PRODUCT_ID, 13, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KEL,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OD_CUST_365), 0)
+                        OD_CUST_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_PAR_365), 0)
+                        OD_PAR_KSK,
+                    DECODE (B.PRODUCT_ID, 19, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KSK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OD_CUST_365), 0)
+                        OD_CUST_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_PAR_365), 0)
+                        OD_PAR_KBK,
+                    DECODE (B.PRODUCT_ID, 5765, SUM (B.nonres_OS_AMOUNT), 0)
+                        outstanding_KBK
+               FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b
+           GROUP BY B.PRODUCT_ID)) c
+   WHERE :p_type = 3
+GROUP BY c.BUCKT, C.SR_NO
+ORDER BY 1, 2

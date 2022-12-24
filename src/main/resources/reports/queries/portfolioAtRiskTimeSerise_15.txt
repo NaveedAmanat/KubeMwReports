@@ -1,0 +1,48 @@
+    select 2 ord, par_ordr, par_month, EMP_NM, 
+    count(loan_cnt) tot_clnt, 
+    sum(ost_amt) ost_amt,
+    count(case when od_dys > 28.5 then loan_cnt end) par_over_30_day_cnt,
+    sum(case when od_dys > 28.5 then od_amt end) par_over_30_day_od_amt,
+    sum(case when od_dys > 28.5 then ost_amt end) par_over_30_amt0,
+    case when sum(case when od_dys > 28.5 then ost_amt else 0 end) > 0
+    then
+        round((sum(case when od_dys > 28.5 then ost_amt else 0 end) /
+        sum(ost_amt)) * 100 ,2)
+    else
+        0.0
+    end par_perc,
+    count(case when od_amt > 0 then loan_cnt end) par_over_1_day_cnt, 
+    sum(case when od_amt > 0 then od_amt end) par_over_1_day_od_amt, 
+    sum(case when od_amt > 0 then ost_amt end) par_over_1_amt,
+    case when sum(case when od_amt > 0 then ost_amt else 0 end) > 0
+    then
+        round((sum(case when od_amt > 0 then ost_amt else 0 end) /
+        sum(ost_amt)) * 100 ,2)
+    else
+        0.0
+    end par_perc1
+    from (
+    select  emp.EMP_NM, grp.PRD_GRP_NM, to_number(to_char(last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -2)),'RRRRMM')) par_ordr,
+    to_char(last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -2)),'Mon-RRRR') par_month,
+    ap.loan_app_seq loan_cnt, 
+    loan_app_ost(ap.loan_app_seq,last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -2)),'psc') ost_amt,
+    GET_OD_INFO(ap.loan_app_seq,last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -2)),'psc') od_amt, 
+    GET_OD_INFO(ap.loan_app_seq,last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -2)),'d') od_dys
+    from mw_loan_app ap    
+    join mw_prd prd on ap.PRD_SEQ = prd.PRD_SEQ and prd.CRNT_REC_FLG = 1 
+    join mw_prd_grp grp on grp.PRD_GRP_SEQ = prd.PRD_GRP_SEQ and grp.CRNT_REC_FLG = 1
+    join mw_port prt on prt.port_seq=ap.port_seq and prt.crnt_rec_flg=1 and prt.brnch_seq = :brnch_seq
+    join mw_port_emp_rel erl on erl.port_seq=prt.port_seq and erl.crnt_rec_flg=1 
+    join mw_emp emp on emp.emp_seq=erl.emp_seq,
+    mw_dsbmt_vchr_hdr dvh
+    where ( (ap.loan_app_sts=703 and trunc(ap.loan_app_sts_dt) <= last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -2)) and ap.crnt_rec_flg=1) 
+    or (ap.loan_app_sts=704 and trunc(ap.loan_app_sts_dt) > last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -2)) and trunc(dvh.dsbmt_dt) <= last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -2))
+    and ap.crnt_rec_flg=1) 
+    or (ap.loan_app_sts=1245 and trunc(ap.loan_app_sts_dt) > last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -2)))) and dvh.loan_app_seq = ap.loan_app_seq 
+    and dvh.crnt_rec_flg = 1
+    and loan_app_ost(ap.loan_app_seq,last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -2)),'psc') > 0
+    and ap.PRD_SEQ not in (2,5)
+    and not exists (select ctl.loan_app_seq from mw_clnt_tag_list ctl where ctl.loan_app_seq = ap.loan_app_seq 
+    and trunc(ctl.eff_start_dt) <= last_day(add_months(to_date(:todt, 'dd-MM-yyyy'), -2)) and ctl.tags_seq = 4 and ctl.crnt_rec_flg=1)  
+    )
+    group by par_ordr, EMP_NM , par_month

@@ -1,0 +1,146 @@
+  SELECT B.PRODUCT_ID,
+         pg.prd_grp_nm,
+         SUM (B.PAR_1_4)
+             PAR_1_4,
+         SUM (PAR_5_15)
+             PAR_5_15,
+         SUM (PAR_16_29)
+             PAR_16_29,
+         SUM (PAR_30_89)
+             PAR_30_89,
+         SUM (PAR_90_179)
+             PAR_90_179,
+         SUM (PAR_364)
+             PAR_364,
+         SUM (PAR_365)
+             PAR_365,
+         SUM (B.OS_AMOUNT)
+             outstanding,
+         SUM (B.OD_CUST_1_4)
+             OD_CUST_1_4,
+         SUM (OD_CUST_5_15)
+             OD_CUST_5_15,
+         SUM (OD_CUST_16_29)
+             OD_CUST_16_29,
+         SUM (OD_CUST_30_89)
+             OD_CUST_30_89,
+         SUM (OD_CUST_90_179)
+             OD_CUST_90_179,
+         SUM (OD_CUST_364)
+             OD_CUST_364,
+         SUM (OD_CUST_365)
+             OD_CUST_365,
+         SUM (
+             CASE
+                 WHEN product_id <> 19
+                 THEN
+                       OD_CUST_1_4
+                     + OD_CUST_5_15
+                     + OD_CUST_16_29
+                     + OD_CUST_30_89
+                     + OD_CUST_90_179
+                     + OD_CUST_364
+                     + OD_CUST_365
+             END)
+             od_total
+    FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b, mw_prd_grp pg
+   WHERE b.product_id = pg.prd_grp_seq AND b.product_id <> 8 AND :p_type = 1
+GROUP BY B.PRODUCT_ID, pg.prd_grp_nm
+UNION ALL
+  SELECT B.PRODUCT_ID,
+         pg.prd_grp_nm,
+         SUM (B.res_PAR_1_4)
+             res_PAR_1_4,
+         SUM (res_PAR_5_15)
+             res_PAR_5_15,
+         SUM (res_PAR_16_29)
+             res_PAR_16_29,
+         SUM (res_PAR_30_89)
+             res_PAR_30_89,
+         SUM (res_PAR_90_179)
+             res_PAR_90_179,
+         SUM (res_PAR_364)
+             res_PAR_364,
+         SUM (res_PAR_365)
+             res_PAR_365,
+         SUM (B.res_OS_AMOUNT)
+             outstanding,
+         SUM (B.res_OD_CUST_1_4)
+             res_OD_CUST_1_4,
+         SUM (res_OD_CUST_5_15)
+             res_OD_CUST_5_15,
+         SUM (res_OD_CUST_16_29)
+             res_OD_CUST_16_29,
+         SUM (res_OD_CUST_30_89)
+             res_OD_CUST_30_89,
+         SUM (res_OD_CUST_90_179)
+             res_OD_CUST_90_179,
+         SUM (res_OD_CUST_364)
+             res_OD_CUST_364,
+         SUM (res_OD_CUST_365)
+             res_OD_CUST_365,
+         SUM (
+             CASE
+                 WHEN product_id <> 19
+                 THEN
+                       res_OD_CUST_1_4
+                     + res_OD_CUST_5_15
+                     + res_OD_CUST_16_29
+                     + res_OD_CUST_30_89
+                     + res_OD_CUST_90_179
+                     + res_OD_CUST_364
+                     + res_OD_CUST_365
+             END)
+             od_total
+    FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b, mw_prd_grp pg
+   WHERE b.product_id = pg.prd_grp_seq AND b.product_id <> 8 AND :p_type = 2
+GROUP BY B.PRODUCT_ID, pg.prd_grp_nm
+UNION ALL
+  SELECT B.PRODUCT_ID,
+         pg.prd_grp_nm,
+         SUM (B.nonres_PAR_1_4)
+             nonres_PAR_1_4,
+         SUM (nonres_PAR_5_15)
+             nonres_PAR_5_15,
+         SUM (nonres_PAR_16_29)
+             nonres_PAR_16_29,
+         SUM (nonres_PAR_30_89)
+             nonres_PAR_30_89,
+         SUM (nonres_PAR_90_179)
+             nonres_PAR_90_179,
+         SUM (nonres_PAR_364)
+             nonres_PAR_364,
+         SUM (nonres_PAR_365)
+             nonres_PAR_365,
+         SUM (B.nonres_OS_AMOUNT)
+             outstanding,
+         SUM (B.nonres_OD_CUST_1_4)
+             nonres_OD_CUST_1_4,
+         SUM (nonres_OD_CUST_5_15)
+             nonres_OD_CUST_5_15,
+         SUM (nonres_OD_CUST_16_29)
+             nonres_OD_CUST_16_29,
+         SUM (nonres_OD_CUST_30_89)
+             nonres_OD_CUST_30_89,
+         SUM (nonres_OD_CUST_90_179)
+             nonres_OD_CUST_90_179,
+         SUM (nonres_OD_CUST_364)
+             nonres_OD_CUST_364,
+         SUM (nonres_OD_CUST_365)
+             nonres_OD_CUST_365,
+         SUM (
+             CASE
+                 WHEN product_id <> 19
+                 THEN
+                       nonres_OD_CUST_1_4
+                     + nonres_OD_CUST_5_15
+                     + nonres_OD_CUST_16_29
+                     + nonres_OD_CUST_30_89
+                     + nonres_OD_CUST_90_179
+                     + nonres_OD_CUST_364
+                     + nonres_OD_CUST_365
+             END)
+             od_total
+    FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ b, mw_prd_grp pg
+   WHERE b.product_id = pg.prd_grp_seq AND b.product_id <> 8 AND :p_type = 3
+GROUP BY B.PRODUCT_ID, pg.prd_grp_nm

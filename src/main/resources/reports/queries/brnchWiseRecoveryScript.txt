@@ -1,0 +1,9 @@
+select mb.BRNCH_NM ,  initcap(case when rtyp.TYP_STR like 'BANK%' then 'Bank' else rtyp.TYP_STR end) TYP_STR,
+count(rch.pymt_ref) clnts, sum(nvl(rch.PYMT_AMT,0)) rec_amt
+from mw_rcvry_trx rch 
+left outer join mw_typs rtyp on rtyp.typ_seq=rch.RCVRY_TYP_SEQ and rtyp.crnt_rec_flg=1
+join mw_jv_hdr mjh on mjh.ENTY_SEQ = rch.RCVRY_TRX_SEQ
+join mw_brnch mb on mjh.BRNCH_SEQ = mb.BRNCH_SEQ and mb.CRNT_REC_FLG = 1
+and TRUNC(rch.PYMT_DT) BETWEEN TO_DATE(:frmdt, 'dd-MON-yyyy')  AND to_date(:todt, 'dd-MON-yyyy')
+group by mb.BRNCH_NM, initcap(case when rtyp.TYP_STR like 'BANK%' then 'Bank' else rtyp.TYP_STR end)
+order by 1, 2

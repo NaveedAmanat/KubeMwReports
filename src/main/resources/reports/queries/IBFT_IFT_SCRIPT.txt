@@ -1,0 +1,229 @@
+/* Formatted on 29/09/2022 4:03:53 pm (QP5 v5.326) */
+  SELECT ACCT_NM,
+         IBAN,
+         CUST_REF_NUM,
+         BANK_NM,
+         CONTACT_NUM,
+         IFBT_CD,
+         EMAIL,
+         NVL (CHEQUE_DISB_AMT, 0) + NVL (KSZB_AMT, 0) + SUM (NVL (AMT, 0))
+             AS AMOUNT
+    FROM (SELECT AC.ACCT_NM
+                     AS ACCT_NM,
+                 AC.IBAN
+                     AS IBAN,
+                 'K-FIN-' || TO_CHAR (SYSDATE, 'YYYYMMDDHH24MISS')
+                     AS CUST_REF_NUM,
+                 AC.BANK_NM
+                     AS BANK_NM,
+                 AC.IBFT_BANK_CODE
+                     AS IFBT_CD,
+                 NULL
+                     AS CONTACT_NUM,
+                 BR.EMAIL
+                     AS EMAIL,
+                 (SELECT SUM (DTL.AMT)
+                    FROM MW_LOAN_APP APP
+                         JOIN MW_DSBMT_VCHR_HDR HDR
+                             ON     HDR.LOAN_APP_SEQ = APP.LOAN_APP_SEQ
+                                AND HDR.CRNT_REC_FLG = 1
+                         JOIN MW_DSBMT_VCHR_DTL DTL
+                             ON     DTL.DSBMT_HDR_SEQ = HDR.DSBMT_HDR_SEQ
+                                AND DTL.CRNT_REC_FLG = 1
+                         JOIN MW_TYPS TYP
+                             ON     TYP.TYP_SEQ = DTL.PYMT_TYPS_SEQ
+                                AND TYP.TYP_SEQ IN
+                                        (SELECT MT.TYP_SEQ
+                                           FROM MW_TYPS MT
+                                          WHERE     MT.BRNCH_SEQ = BR.BRNCH_SEQ
+                                                AND TYP_ID = '0008'
+                                                AND MT.TYP_CTGRY_KEY = 3)
+                   WHERE     APP.CRNT_REC_FLG = 1
+                         AND APP.BRNCH_SEQ = BR.BRNCH_SEQ
+                         AND APP.PRD_SEQ NOT IN (10, 33, 34)
+                         AND TRUNC (HDR.DSBMT_DT) BETWEEN TO_DATE (
+                                                              :P_FROM_DATE,
+                                                              'dd-MM-yyyy')
+                                                      AND TO_DATE (
+                                                              :P_TO_DATE,
+                                                              'dd-MM-yyyy')
+                  HAVING SUM (DTL.AMT) > 0
+                  UNION ALL
+                  SELECT SUM (DTL.AMT)
+                    FROM MW_LOAN_APP APP
+                         JOIN MW_EXP EX
+                             ON     EX.EXP_REF = APP.LOAN_APP_SEQ
+                                AND EX.EXPNS_TYP_SEQ = 12595
+                                AND EX.CRNT_REC_FLG = 1
+                         JOIN MW_DSBMT_VCHR_HDR HDR
+                             ON     HDR.LOAN_APP_SEQ = APP.LOAN_APP_SEQ
+                                AND HDR.CRNT_REC_FLG = 1
+                         JOIN MW_DSBMT_VCHR_DTL DTL
+                             ON     DTL.DSBMT_HDR_SEQ = HDR.DSBMT_HDR_SEQ
+                                AND DTL.CRNT_REC_FLG = 1
+                         JOIN MW_TYPS TYP
+                             ON     TYP.TYP_SEQ = DTL.PYMT_TYPS_SEQ
+                                AND TYP.TYP_SEQ IN
+                                        (SELECT MT.TYP_SEQ
+                                           FROM MW_TYPS MT
+                                          WHERE     MT.BRNCH_SEQ = BR.BRNCH_SEQ
+                                                AND TYP_ID = '0008'
+                                                AND MT.TYP_CTGRY_KEY = 3)
+                   WHERE     APP.CRNT_REC_FLG = 1
+                         AND APP.BRNCH_SEQ = BR.BRNCH_SEQ
+                         AND APP.PRD_SEQ = 10
+                         AND TRUNC (EX.EFF_START_DT) BETWEEN TO_DATE (
+                                                                 :P_FROM_DATE,
+                                                                 'dd-MM-yyyy')
+                                                         AND TO_DATE (
+                                                                 :P_TO_DATE,
+                                                                 'dd-MM-yyyy')
+                  HAVING SUM (DTL.AMT) > 0
+                  UNION ALL
+                  SELECT SUM (
+                             (SELECT MJD.AMT
+                                FROM MW_JV_HDR MJH, MW_JV_DTL MJD
+                               WHERE     MJH.JV_HDR_SEQ = MJD.JV_HDR_SEQ
+                                     AND MJH.ENTY_SEQ = DTL.DSBMT_HDR_SEQ
+                                     AND UPPER (MJH.ENTY_TYP) = 'DISBURSEMENT'
+                                     AND MJD.CRDT_DBT_FLG = 0
+                                     AND MJD.GL_ACCT_NUM = TYP.GL_ACCT_NUM))
+                             DISB_AMOUNT
+                    FROM MW_LOAN_APP APP
+                         JOIN MW_DSBMT_VCHR_HDR HDR
+                             ON     HDR.LOAN_APP_SEQ = APP.LOAN_APP_SEQ
+                                AND HDR.CRNT_REC_FLG = 1
+                         JOIN MW_DSBMT_VCHR_DTL DTL
+                             ON     DTL.DSBMT_HDR_SEQ = HDR.DSBMT_HDR_SEQ
+                                AND DTL.CRNT_REC_FLG = 1
+                         JOIN MW_TYPS TYP
+                             ON     TYP.TYP_SEQ = DTL.PYMT_TYPS_SEQ
+                                AND TYP.TYP_SEQ IN
+                                        (SELECT MT.TYP_SEQ
+                                           FROM MW_TYPS MT
+                                          WHERE     MT.BRNCH_SEQ = BR.BRNCH_SEQ
+                                                AND TYP_ID = '0008'
+                                                AND MT.TYP_CTGRY_KEY = 3)
+                   WHERE     APP.CRNT_REC_FLG = 1
+                         AND APP.BRNCH_SEQ = BR.BRNCH_SEQ
+                         AND APP.PRD_SEQ IN (33, 34)
+                         AND TRUNC (HDR.DSBMT_DT) BETWEEN TO_DATE (
+                                                              :P_FROM_DATE,
+                                                              'dd-MM-yyyy')
+                                                      AND TO_DATE (
+                                                              :P_TO_DATE,
+                                                              'dd-MM-yyyy')
+                  HAVING SUM (
+                             (SELECT MJD.AMT
+                                FROM MW_JV_HDR MJH, MW_JV_DTL MJD
+                               WHERE     MJH.JV_HDR_SEQ = MJD.JV_HDR_SEQ
+                                     AND MJH.ENTY_SEQ = DTL.DSBMT_HDR_SEQ
+                                     AND UPPER (MJH.ENTY_TYP) = 'DISBURSEMENT'
+                                     AND MJD.CRDT_DBT_FLG = 0
+                                     AND MJD.GL_ACCT_NUM = TYP.GL_ACCT_NUM)) >
+                         0)
+                     CHEQUE_DISB_AMT,
+                 (SELECT NVL (
+                             SUM (
+                                 NVL (
+                                     (CASE
+                                          WHEN MJD.CRDT_DBT_FLG = 0
+                                          THEN
+                                              NVL (MJD.AMT, 0)
+                                      END),
+                                     0)),
+                             0)
+                    FROM MW_JV_HDR MJH, MW_JV_DTL MJD
+                   WHERE     MJH.JV_HDR_SEQ = MJD.JV_HDR_SEQ
+                         AND MJH.BRNCH_SEQ = BR.BRNCH_SEQ
+                         AND INITCAP (MJH.ENTY_TYP) = 'Expense'
+                         AND MJD.GL_ACCT_NUM = '000.000.201113.00000'
+                         AND TRUNC (MJH.JV_DT) BETWEEN TO_DATE ( :P_FROM_DATE,
+                                                                'dd-MM-yyyy')
+                                                   AND TO_DATE ( :P_TO_DATE,
+                                                                'dd-MM-yyyy'))
+                     KSZB_AMT,
+                 RQST.AMT
+            FROM MW_REG REG
+                 JOIN MW_AREA AR
+                     ON AR.REG_SEQ = REG.REG_SEQ AND AR.CRNT_REC_FLG = 1
+                 JOIN MW_BRNCH BR ON BR.AREA_SEQ = AR.AREA_SEQ
+                 JOIN MW_TYPS TYP
+                     ON     TYP.BRNCH_SEQ = br.BRNCH_SEQ
+                        AND TYP.CRNT_REC_FLG = 1
+                        AND TYP.TYP_CTGRY_KEY = 3
+                        AND TYP.TYP_ID = '0008'
+                 JOIN MW_BRNCH_ACCT_SET AC
+                     ON AC.BRNCH_SEQ = BR.BRNCH_SEQ AND AC.CRNT_REC_FLG = 1  AND AC.BANK_NM %%
+                 LEFT JOIN MW_FUND_REQUEST RQST
+                     ON     RQST.ENTY_SEQ = BR.BRNCH_SEQ
+                        AND RQST.ENTY_TYP = 'BR'
+                        AND RQST.CRNT_REC_FLG = 1
+                        AND TRUNC (RQST.CRTD_DT) BETWEEN TO_DATE (
+                                                             :P_FROM_DATE,
+                                                             'dd-MM-yyyy')
+                                                     AND TO_DATE ( :P_TO_DATE,
+                                                                  'dd-MM-yyyy')
+           WHERE REG.CRNT_REC_FLG = 1 AND REG.REG_SEQ <> -1)
+   WHERE KSZB_AMT > 0 OR CHEQUE_DISB_AMT > 0 OR AMT > 0
+GROUP BY ACCT_NM,
+         IBAN,
+         CUST_REF_NUM,
+         BANK_NM,
+         IFBT_CD,
+         CONTACT_NUM,
+         EMAIL,
+         CHEQUE_DISB_AMT,
+         KSZB_AMT
+UNION ALL
+  SELECT ACCT_NM,
+         IBAN,
+         CUST_REF_NUM,
+         BANK_NM,
+         CONTACT_NUM,
+         IFBT_CD,
+         EMAIL,
+         SUM (NVL (AMT, 0))
+             AS AMOUNT
+    FROM (SELECT AC.ACCT_NM
+                     AS ACCT_NM,
+                 AC.IBAN
+                     AS IBAN,
+                 'K-FIN-' || TO_CHAR (SYSDATE, 'YYYYMMDDHH24MISS')
+                     AS CUST_REF_NUM,
+                 AC.BANK_NM
+                     AS BANK_NM,
+                 AC.IBFT_BANK_CODE
+                     AS IFBT_CD,
+                 NULL
+                     AS CONTACT_NUM,
+                 NULL
+                     AS EMAIL,
+                 0
+                     CHEQUE_DISB_AMT,
+                 0
+                     KSZB_AMT,
+                 RQST.AMT
+            FROM MW_REG REG
+                 JOIN MW_REG_ACCT_SET AC
+                     ON AC.REG_SEQ = REG.REG_SEQ AND AC.CRNT_REC_FLG = 1  AND AC.BANK_NM %%
+                 LEFT JOIN MW_FUND_REQUEST RQST
+                     ON     RQST.ENTY_SEQ = REG.REG_SEQ
+                        AND RQST.ENTY_TYP = 'REG'
+                        AND RQST.CRNT_REC_FLG = 1
+                        AND TRUNC (RQST.CRTD_DT) BETWEEN TO_DATE (
+                                                             :P_FROM_DATE,
+                                                             'dd-MM-yyyy')
+                                                     AND TO_DATE ( :P_TO_DATE,
+                                                                  'dd-MM-yyyy')
+           WHERE REG.CRNT_REC_FLG = 1 AND REG.REG_SEQ <> -1)
+   WHERE   AMT > 0
+GROUP BY ACCT_NM,
+         IBAN,
+         CUST_REF_NUM,
+         BANK_NM,
+         IFBT_CD,
+         CONTACT_NUM,
+         EMAIL,
+         CHEQUE_DISB_AMT,
+         KSZB_AMT

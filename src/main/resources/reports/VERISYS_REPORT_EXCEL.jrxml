@@ -1,0 +1,1598 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="VERISYS_REPORT_EXCEL" pageWidth="1810" pageHeight="595" orientation="Landscape"
+              whenNoDataType="AllSectionsNoDetail" columnWidth="1770" leftMargin="20" rightMargin="20" topMargin="20"
+              bottomMargin="20" isIgnorePagination="true" uuid="3ec9f5f4-77b7-493f-8d79-b610a8fcad3b">
+    <property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+    <property name="com.jaspersoft.studio.data.defaultdataadapter" value="MWX_DB"/>
+    <property name="com.jaspersoft.studio.unit." value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+    <style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+            <topPen lineWidth="0.5" lineColor="#000000"/>
+            <leftPen lineWidth="0.5" lineColor="#000000"/>
+            <bottomPen lineWidth="0.5" lineColor="#000000"/>
+            <rightPen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="Table_CH" mode="Opaque" backcolor="#BFE1FF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+            <topPen lineWidth="0.5" lineColor="#000000"/>
+            <leftPen lineWidth="0.5" lineColor="#000000"/>
+            <bottomPen lineWidth="0.5" lineColor="#000000"/>
+            <rightPen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+            <topPen lineWidth="0.5" lineColor="#000000"/>
+            <leftPen lineWidth="0.5" lineColor="#000000"/>
+            <bottomPen lineWidth="0.5" lineColor="#000000"/>
+            <rightPen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <subDataset name="dataset" uuid="ab4caa6f-2733-4327-8117-9dd0e6332996">
+        <property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+        <property name="com.jaspersoft.studio.data.defaultdataadapter" value="MWX_DB"/>
+        <queryString language="SQL">
+            <![CDATA[SELECT CLNT.CLNT_ID,
+         CLNT.FRST_NM || ' ' || CLNT.LAST_NM          CLNT_NM,
+         MV.VER_SEQ,
+         MV.LOAN_APP_SEQ,
+         MV.CNIC,
+         TO_CHAR (MV.TRANS_DT, 'dd-MM-yyyy')          TRANS_DT,
+         TO_CHAR (MV.CNIC_ISSUE_DT, 'dd-MM-yyyy')     CNIC_ISSUE_DT,
+         MV.CNIC_CATEGORY,
+         MV.STATUS,
+         MV.VREMARKS VERISYS_RESP,
+          (SELECT REL.FRST_NM || ' ' || REL.LAST_NM FROM MW_CLNT_REL REL WHERE MV.CNIC =  REL.CNIC_NUM AND REL.CRNT_REC_FLG =1
+                AND REL.LOAN_APP_SEQ = MV.LOAN_APP_SEQ    ) NOM_NM
+    FROM MW_LOAN_APP AP
+         JOIN MW_PORT PRT
+             ON PRT.PORT_SEQ = AP.PORT_SEQ AND PRT.CRNT_REC_FLG = 1
+         JOIN MW_CLNT CLNT
+             ON CLNT.CLNT_SEQ = AP.CLNT_SEQ AND CLNT.CRNT_REC_FLG = 1
+         JOIN MW_CNIC_VERISYS MV
+             ON  MV.LOAN_APP_SEQ = AP.LOAN_APP_SEQ
+             AND (EXISTS (
+                    SELECT LOAN_APP_SEQ FROM MW_CNIC_VERISYS VS
+                    WHERE VS.LOAN_APP_SEQ = MV.LOAN_APP_SEQ
+                    AND STATUS = 'ERROR'
+                    AND TO_NUMBER (0) = 1                    
+                 ) 
+                 OR EXISTS(SELECT LOAN_APP_SEQ FROM MW_CNIC_VERISYS VS
+                    WHERE VS.LOAN_APP_SEQ = MV.LOAN_APP_SEQ
+                    AND STATUS IN ('NEW', 'VERIFIED', 'ERROR')
+                    AND TO_NUMBER ( 0) = 0))               
+                AND TO_DATE (MV.TRANS_DT) BETWEEN TO_DATE ( '01-04-2021',
+                                                           'dd-MM-yyyy')
+                                              AND TO_DATE ( '30-05-2021',
+                                                           'dd-MM-yyyy')
+                AND VER_SEQ =
+                    (SELECT MAX (VER_SEQ)
+                       FROM MW_CNIC_VERISYS V
+                      WHERE     V.LOAN_APP_SEQ = AP.LOAN_APP_SEQ
+                            AND MV.CNIC_CATEGORY = V.CNIC_CATEGORY)
+                AND PRT.BRNCH_SEQ = 98
+ORDER BY CLNT.CLNT_ID, MV.LOAN_APP_SEQ]]>
+        </queryString>
+        <field name="CLNT_ID" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="CLNT_ID"/>
+        </field>
+        <field name="CLNT_NM" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="CLNT_NM"/>
+        </field>
+        <field name="VER_SEQ" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="VER_SEQ"/>
+        </field>
+        <field name="LOAN_APP_SEQ" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="LOAN_APP_SEQ"/>
+        </field>
+        <field name="CNIC" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="CNIC"/>
+        </field>
+        <field name="TRANS_DT" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="TRANS_DT"/>
+        </field>
+        <field name="CNIC_ISSUE_DT" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="CNIC_ISSUE_DT"/>
+        </field>
+        <field name="CNIC_CATEGORY" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="CNIC_CATEGORY"/>
+        </field>
+        <field name="STATUS" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="STATUS"/>
+        </field>
+        <field name="VERISYS_RESP" class="java.lang.String">
+            <property name="com.jaspersoft.studio.field.label" value="VERISYS_RESP"/>
+        </field>
+        <field name="NOM_NM" class="java.lang.String"/>
+        <field name="REG_NM" class="java.lang.String"/>
+        <field name="AREA_NM" class="java.lang.String"/>
+        <field name="BRNCH_NM" class="java.lang.String"/>
+        <field name="KASHF_STATUS" class="java.lang.String"/>
+        <group name="CLNT_ID">
+            <groupExpression><![CDATA[$F{CLNT_ID}]]></groupExpression>
+        </group>
+    </subDataset>
+    <subDataset name="datasetsum" uuid="b67e72a8-874a-42f1-ade9-aa308814fd15">
+        <property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+        <property name="com.jaspersoft.studio.data.defaultdataadapter" value="MWX_DB"/>
+        <queryString language="SQL">
+            <![CDATA[]]>
+        </queryString>
+        <field name="TRANS_DT" class="java.lang.String"/>
+        <field name="PENDING_COUNT" class="java.lang.Long"/>
+        <field name="NADRA_VERIFIED_COUNT" class="java.lang.Long"/>
+        <field name="NADRA_ERROR_COUNT" class="java.lang.Long"/>
+        <field name="KASHF_VERIFIED_COUNT" class="java.lang.Long"/>
+        <field name="KASHF_ERROR_COUNT" class="java.lang.Long"/>
+        <field name="TOTAL_COUNT" class="java.lang.Long"/>
+        <variable name="PENDING_COUNT1" class="java.lang.Long" calculation="Sum">
+            <variableExpression><![CDATA[$F{PENDING_COUNT}]]></variableExpression>
+        </variable>
+        <variable name="NADRA_VERIFIED_COUNT1" class="java.lang.Long" calculation="Sum">
+            <variableExpression><![CDATA[$F{NADRA_VERIFIED_COUNT}]]></variableExpression>
+        </variable>
+        <variable name="NADRA_ERROR_COUNT1" class="java.lang.Long" calculation="Sum">
+            <variableExpression><![CDATA[$F{NADRA_ERROR_COUNT}]]></variableExpression>
+        </variable>
+        <variable name="KASHF_VERIFIED_COUNT1" class="java.lang.Long" calculation="Sum">
+            <variableExpression><![CDATA[$F{KASHF_VERIFIED_COUNT}]]></variableExpression>
+        </variable>
+        <variable name="KASHF_ERROR_COUNT1" class="java.lang.Long" calculation="Sum">
+            <variableExpression><![CDATA[$F{KASHF_ERROR_COUNT}]]></variableExpression>
+        </variable>
+        <variable name="TOTAL_COUNT1" class="java.lang.Long" calculation="Sum">
+            <variableExpression><![CDATA[$F{TOTAL_COUNT}]]></variableExpression>
+        </variable>
+    </subDataset>
+    <parameter name="curr_user" class="java.lang.String"/>
+    <parameter name="reg_nm" class="java.lang.String"/>
+    <parameter name="area_nm" class="java.lang.String"/>
+    <parameter name="brnch_nm" class="java.lang.String"/>
+    <parameter name="brnch_cd" class="java.lang.String"/>
+    <parameter name="from_dt" class="java.lang.String"/>
+    <parameter name="to_dt" class="java.lang.String"/>
+    <parameter name="dataset" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+    <parameter name="LOGO_IMG" class="java.lang.String"/>
+    <parameter name="datasetsum" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+    <queryString language="SQL">
+        <![CDATA[]]>
+    </queryString>
+    <field name="CLNT_ID" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="CLNT_ID"/>
+    </field>
+    <field name="CLNT_NM" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="CLNT_NM"/>
+    </field>
+    <field name="VER_SEQ" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="VER_SEQ"/>
+    </field>
+    <field name="LOAN_APP_SEQ" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="LOAN_APP_SEQ"/>
+    </field>
+    <field name="CNIC" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="CNIC"/>
+    </field>
+    <field name="TRANS_DT" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="TRANS_DT"/>
+    </field>
+    <field name="CNIC_ISSUE_DT" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="CNIC_ISSUE_DT"/>
+    </field>
+    <field name="CNIC_CATEGORY" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="CNIC_CATEGORY"/>
+    </field>
+    <field name="STATUS" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="STATUS"/>
+    </field>
+    <field name="VERISYS_RESP" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="VERISYS_RESP"/>
+    </field>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="90" splitType="Stretch">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+            <staticText>
+                <reportElement stretchType="ElementGroupHeight" x="0" y="0" width="300" height="20"
+                               uuid="5349b3cf-c72b-4f2f-b470-c0bf296ba125">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                    <paragraph leftIndent="2"/>
+                </textElement>
+                <text><![CDATA[Kashf Foundation]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="40" width="300" height="30" uuid="4ec810e0-cb3a-457d-a418-bdf9b5a90f60">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="2.0" lineStyle="Solid" lineColor="#D9D4D4"/>
+                    <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                    <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                    <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                    <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                    <paragraph leftIndent="2"/>
+                </textElement>
+                <text><![CDATA[Verisys Report]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="780" y="40" width="200" height="15" uuid="b5f56e2e-d091-478d-bb19-70ffd6a7294f">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font fontName="SansSerif" size="9" isUnderline="false"/>
+                    <paragraph leftIndent="2"/>
+                </textElement>
+                <textFieldExpression><![CDATA["From: " + $P{from_dt}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="780" y="55" width="200" height="15" uuid="840c2fb2-4604-4ed5-ab25-21ae3ecb8ac5">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font fontName="SansSerif" size="9" isUnderline="false"/>
+                    <paragraph leftIndent="2"/>
+                </textElement>
+                <textFieldExpression><![CDATA["to:   " + $P{to_dt}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+    <summary>
+        <band height="130">
+            <componentElement>
+                <reportElement positionType="Float" x="0" y="89" width="1770" height="40"
+                               uuid="f2cdab38-7c1a-4ffc-bcce-984aa9d80210">
+                    <property name="com.jaspersoft.studio.layout"
+                              value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+                    <property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+                    <property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+                    <property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components"
+                          xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd"
+                          whenNoDataType="AllSectionsNoDetail">
+                    <datasetRun subDataset="dataset" uuid="c73448cb-b14e-49d6-9bc3-6100f362d3ef">
+                        <dataSourceExpression><![CDATA[$P{dataset}]]></dataSourceExpression>
+                    </datasetRun>
+                    <jr:column width="150" uuid="2aa10cd6-7c00-4d1d-bdc0-0502464873e7">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+                        <jr:groupFooter groupName="CLNT_ID">
+                            <jr:cell height="15" rowSpan="1">
+                                <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                            </jr:cell>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="23"
+                                               uuid="22052204-93d2-4f10-b655-136b47afc26d">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="11" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Region Name]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ElementGroupHeight" x="0" y="0" width="150" height="16"
+                                               uuid="9d7a84c1-f21a-45c7-bd9a-2f7d625de360">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{REG_NM}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="c699f4c7-1a33-4d56-85c1-83789ff79289">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+                        <jr:groupFooter groupName="CLNT_ID">
+                            <jr:cell height="15" rowSpan="1"/>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="23"
+                                               uuid="b898e722-671b-46a5-b13a-a1edfe9eb998">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="11" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Area Name]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ElementGroupHeight" x="0" y="0" width="150" height="16"
+                                               uuid="d6a392ab-a5c7-4e2b-8959-f7b4e7e53a1e">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{AREA_NM}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="862f7e5e-801b-4bee-bc6e-dc03d8ebaa2e">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+                        <jr:groupFooter groupName="CLNT_ID">
+                            <jr:cell height="15" rowSpan="1"/>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="23"
+                                               uuid="8044c03b-8822-49ee-9a66-e6738b5d023a">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="11" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Branch Name]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ElementGroupHeight" x="0" y="0" width="150" height="16"
+                                               uuid="dc6f9dd7-500b-4300-a629-b53ea2b1cc1a">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{BRNCH_NM}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="110" uuid="4868bc8f-25ed-4d5e-8dbc-962258bd23ba">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+                        <jr:groupFooter groupName="CLNT_ID">
+                            <jr:cell height="15" rowSpan="1">
+                                <box>
+                                    <pen lineWidth="0.0"/>
+                                </box>
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="110" height="15"
+                                                   uuid="892a130d-c7d4-4c73-b38f-a0516843cbe4">
+                                        <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                                  value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    </reportElement>
+                                    <box topPadding="0">
+                                        <pen lineWidth="0.5"/>
+                                        <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                        <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                        <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                        <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                    </box>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="7" isBold="true"/>
+                                    </textElement>
+                                    <text><![CDATA[]]></text>
+                                </staticText>
+                            </jr:cell>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="110" height="23"
+                                               uuid="427383d9-f6c1-4af6-98b9-2c09c70ef48e">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="11" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Verisys Seq]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="16">
+                            <box>
+                                <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ElementGroupHeight" mode="Opaque" x="0" y="0" width="110"
+                                               height="16" uuid="554a5e91-8882-48c7-8084-a39bc2ee3fac">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.spacingBefore" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="0" rightIndent="1" spacingBefore="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{VER_SEQ}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="110" uuid="902a526d-59a2-4282-88de-aa68e6a823e6">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+                        <jr:groupFooter groupName="CLNT_ID">
+                            <jr:cell height="15" rowSpan="1">
+                                <box>
+                                    <pen lineWidth="0.0"/>
+                                </box>
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="110" height="15"
+                                                   uuid="1566ae1e-2d0b-4979-ae27-d6a3f9c0618d">
+                                        <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                                  value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    </reportElement>
+                                    <box>
+                                        <pen lineWidth="0.0"/>
+                                    </box>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="7" isBold="true"/>
+                                    </textElement>
+                                    <text><![CDATA[]]></text>
+                                </staticText>
+                            </jr:cell>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="110" height="23"
+                                               uuid="6938b9f7-a574-444c-aa75-9ccd2c94f255">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="11" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[CNIC Number]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <box>
+                                <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ElementGroupHeight" x="0" y="0" width="110" height="16"
+                                               uuid="1aef91ff-c688-4876-a554-307090c6fc58">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.spacingBefore" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="0" rightIndent="1" spacingBefore="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{CNIC}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="110" uuid="545aaad4-0cdb-48c9-85fc-764005e56910">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+                        <jr:groupFooter groupName="CLNT_ID">
+                            <jr:cell height="15" rowSpan="1">
+                                <box>
+                                    <pen lineWidth="0.0"/>
+                                </box>
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="110" height="15"
+                                                   uuid="1983bd3a-935c-42b5-85ec-c383a42657d7">
+                                        <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                                  value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    </reportElement>
+                                    <box>
+                                        <pen lineWidth="0.0"/>
+                                    </box>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="7" isBold="true"/>
+                                    </textElement>
+                                    <text><![CDATA[]]></text>
+                                </staticText>
+                            </jr:cell>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="110" height="23"
+                                               uuid="a300a523-4f3a-4cae-bbba-8d7240520598">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="11" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[CNIC Issue Date]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <box>
+                                <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ElementGroupHeight" x="0" y="0" width="110" height="16"
+                                               uuid="b2e465c9-c365-4c72-9f67-3a1405b0c4b5">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{CNIC_ISSUE_DT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="200" uuid="325d9fc6-048a-42e3-b2f6-39ca82326ce8">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
+                        <jr:groupFooter groupName="CLNT_ID">
+                            <jr:cell height="15" rowSpan="1">
+                                <box>
+                                    <pen lineWidth="0.0"/>
+                                </box>
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="200" height="15"
+                                                   uuid="331a8a84-06a1-499c-9ddd-b2c62ac72216">
+                                        <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                                  value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    </reportElement>
+                                    <box>
+                                        <pen lineWidth="0.0"/>
+                                    </box>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="7" isBold="true"/>
+                                    </textElement>
+                                    <text><![CDATA[]]></text>
+                                </staticText>
+                            </jr:cell>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="200" height="23"
+                                               uuid="b47cf7d9-b094-4fee-a30d-80136b022981">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="11" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Client Name]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <box>
+                                <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ElementGroupHeight" x="0" y="0" width="200" height="16"
+                                               uuid="47494669-47d9-4bca-8273-0d1297001108">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression>
+                                    <![CDATA[$F{CNIC_CATEGORY}.equals( "CLIENT" ) ? $F{CLNT_NM}  : $F{NOM_NM}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="100" uuid="dcbf559f-3075-45b0-bd63-82a8a1949e53">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
+                        <jr:groupFooter groupName="CLNT_ID">
+                            <jr:cell height="15" rowSpan="1">
+                                <box>
+                                    <pen lineWidth="0.0"/>
+                                </box>
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="100" height="15"
+                                                   uuid="0c25c617-8709-4b6a-a0c1-0592bd84fb42">
+                                        <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                                  value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    </reportElement>
+                                    <box>
+                                        <pen lineWidth="0.0"/>
+                                    </box>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="7" isBold="true"/>
+                                    </textElement>
+                                    <text><![CDATA[]]></text>
+                                </staticText>
+                            </jr:cell>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="100" height="23"
+                                               uuid="983dbcdf-5fb7-4043-8521-9a180f63578d">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="11" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[CNIC Category]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <box>
+                                <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ElementGroupHeight" x="0" y="0" width="100" height="16"
+                                               uuid="998a85ab-5a2b-4dff-b338-223d735fd9ed">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{CNIC_CATEGORY}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="120" uuid="5eddba75-3ab5-4ca5-899f-44842d7d812d">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
+                        <jr:groupFooter groupName="CLNT_ID">
+                            <jr:cell height="15" rowSpan="1">
+                                <box>
+                                    <pen lineWidth="0.0"/>
+                                </box>
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="120" height="15"
+                                                   uuid="a1073e1c-de1a-4514-847a-b99e6f53bd4c">
+                                        <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                                  value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    </reportElement>
+                                    <box>
+                                        <pen lineWidth="0.0"/>
+                                    </box>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="7" isBold="true"/>
+                                    </textElement>
+                                    <text><![CDATA[]]></text>
+                                </staticText>
+                            </jr:cell>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="120" height="23"
+                                               uuid="77eed242-9097-440b-8bc6-c35a13927237">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="11" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Trans Date]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <box>
+                                <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ElementGroupHeight" x="0" y="0" width="120" height="16"
+                                               uuid="2a23c169-31b9-470b-a5b8-51117ef4157d">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{TRANS_DT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="110" uuid="153b3988-34d3-4894-82aa-d395de1fa483">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column10"/>
+                        <jr:groupFooter groupName="CLNT_ID">
+                            <jr:cell height="15" rowSpan="1">
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="110" height="15"
+                                                   uuid="e0743d62-9481-4e21-983e-624c20729662">
+                                        <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                                  value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    </reportElement>
+                                    <box>
+                                        <pen lineWidth="0.0"/>
+                                    </box>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="7" isBold="true"/>
+                                    </textElement>
+                                    <text><![CDATA[]]></text>
+                                </staticText>
+                            </jr:cell>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="110" height="23"
+                                               uuid="83a62482-3c0e-4c78-915e-cd919ffdc24c">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="11" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Verisys Status]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ElementGroupHeight" x="0" y="0" width="110" height="16"
+                                               uuid="77837b61-06ef-4c2c-8783-f51ee0548435">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{STATUS}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="110" uuid="ffb57b5f-d1f5-4b4a-a266-2de0ab19aed6">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column11"/>
+                        <jr:groupFooter groupName="CLNT_ID">
+                            <jr:cell height="15" rowSpan="1">
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="110" height="15"
+                                                   uuid="c2600a93-8593-4963-973e-83214e5f3921">
+                                        <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                                  value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    </reportElement>
+                                    <box>
+                                        <pen lineWidth="0.0"/>
+                                    </box>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="7" isBold="true"/>
+                                    </textElement>
+                                    <text><![CDATA[]]></text>
+                                </staticText>
+                            </jr:cell>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="110" height="23"
+                                               uuid="011099a8-5ee1-4964-be7b-0ce9d7c47eab">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="11" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[KASHF Status]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ElementGroupHeight" x="0" y="0" width="110" height="16"
+                                               uuid="22ad331f-3ed9-4fd5-bc37-2bb0fd4e0d0c">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{KASHF_STATUS}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="350" uuid="a8838aa9-4b45-4760-b2ac-51f915e7fb98">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column12"/>
+                        <jr:groupFooter groupName="CLNT_ID">
+                            <jr:cell height="15" rowSpan="1">
+                                <box>
+                                    <pen lineWidth="0.0"/>
+                                </box>
+                                <staticText>
+                                    <reportElement mode="Transparent" x="0" y="0" width="350" height="15"
+                                                   uuid="712dcf7b-4330-4991-9d98-c6ce7ecdddfe">
+                                        <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                                  value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    </reportElement>
+                                    <box>
+                                        <pen lineWidth="0.0"/>
+                                    </box>
+                                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                                        <font size="7" isBold="true"/>
+                                    </textElement>
+                                    <text><![CDATA[]]></text>
+                                </staticText>
+                            </jr:cell>
+                        </jr:groupFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="350" height="23"
+                                               uuid="638c30c4-a5c1-4daa-966f-09d9b0718da1">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="11" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Verisys Remark]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <box>
+                                <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ElementGroupHeight" x="0" y="0" width="350" height="16"
+                                               uuid="d91fd107-0e97-4c77-bc47-1e05a725bbb4">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box topPadding="0" rightPadding="0">
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph lineSpacing="Single" lineSpacingSize="1.0" leftIndent="1"
+                                               rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{VERISYS_RESP}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                </jr:table>
+            </componentElement>
+            <componentElement>
+                <reportElement positionType="Float" x="0" y="25" width="890" height="20"
+                               uuid="32a6e65f-14aa-4c5f-82b4-b5d54217f27a">
+                    <property name="com.jaspersoft.studio.layout"
+                              value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+                    <property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+                    <property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+                    <property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components"
+                          xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd"
+                          whenNoDataType="AllSectionsNoDetail">
+                    <datasetRun subDataset="datasetsum" uuid="ddc37bf6-afd4-4db7-aec9-f90798767f4a">
+                        <dataSourceExpression><![CDATA[$P{datasetsum}]]></dataSourceExpression>
+                    </datasetRun>
+                    <jr:column width="150" uuid="07cb9d7f-2079-4cff-9656-45d17cc43e72">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+                        <jr:tableFooter style="Table_TH" height="16" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="16"
+                                               uuid="2326d61b-26f8-4c99-ac31-88793ee853f9">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Total]]></text>
+                            </staticText>
+                        </jr:tableFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="23"
+                                               uuid="7c310251-2ba6-4c19-a9a3-2484de7117ef">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Trans Date]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="16"
+                                               uuid="1c1ba325-a97b-4152-9a7d-09489403f00b">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{TRANS_DT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="af5e4097-bd6a-47ef-a244-add4f47727f4">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+                        <jr:tableFooter style="Table_TH" height="16" rowSpan="1">
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="150"
+                                               height="16" uuid="73a7032e-271f-461d-8a79-2ad436097f8c">
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                    <paragraph rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{PENDING_COUNT1}]]></textFieldExpression>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="23"
+                                               uuid="f0ebb916-b135-490a-bad3-a26209d629ab">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[New Request]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="16"
+                                               uuid="46d16ed3-1d1d-4711-8f52-0a44a5d52b65">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{PENDING_COUNT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="ec227d40-93d8-4a3c-866a-da56d140de8d">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+                        <jr:tableFooter style="Table_TH" height="16" rowSpan="1">
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="150"
+                                               height="16" uuid="c0017fe9-4178-42c9-920d-4f51b50d1984">
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                    <paragraph rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{NADRA_VERIFIED_COUNT1}]]></textFieldExpression>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="23"
+                                               uuid="e2b1402a-5832-4a3d-a228-57205cd058b0">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Nadra Verified]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="16"
+                                               uuid="c6b7cf0e-c99c-44e2-9688-822f4f0efbb9">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{NADRA_VERIFIED_COUNT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="110" uuid="817f4503-6fdc-4a6d-afca-5233c55a63ee">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+                        <jr:tableFooter style="Table_TH" height="16" rowSpan="1">
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="110"
+                                               height="16" uuid="b20d4ec6-d928-49cd-9ff8-18e77fc92b9d">
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                    <paragraph rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{NADRA_ERROR_COUNT1}]]></textFieldExpression>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="110" height="23"
+                                               uuid="a99423e8-faa0-4101-b0c7-88b63bbc639d">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Nadra Error]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="16">
+                            <box>
+                                <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textField pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="110"
+                                               height="16" uuid="4e92b8bd-4255-48c0-bdce-4f4141ad897e">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.spacingBefore" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="0" rightIndent="1" spacingBefore="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{NADRA_ERROR_COUNT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="110" uuid="4f5139f3-4197-406d-9e0e-ca3067c0f3c7">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+                        <jr:tableFooter style="Table_TH" height="16" rowSpan="1">
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="110"
+                                               height="16" uuid="d06697b2-2f6e-4baf-8899-2b336260e12a">
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                    <paragraph rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{KASHF_VERIFIED_COUNT1}]]></textFieldExpression>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="110" height="23"
+                                               uuid="957e10dc-2b27-4af8-81fc-1cd19bfcf8c4">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[KASHF Verified]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <box>
+                                <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textField pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="110" height="16"
+                                               uuid="d2432cf9-d27c-41a9-8c53-b0c3bfbf500c">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.spacingBefore" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="0" rightIndent="1" spacingBefore="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{KASHF_VERIFIED_COUNT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="110" uuid="aeef8828-b4b2-4f34-b7e9-74d68354d996">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+                        <jr:tableFooter style="Table_TH" height="16" rowSpan="1">
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="110"
+                                               height="16" uuid="2ec2249b-1594-4372-8265-f22d46dccc80">
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                    <paragraph rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{KASHF_ERROR_COUNT1}]]></textFieldExpression>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="110" height="23"
+                                               uuid="21584f54-fb47-4342-a13e-414286db03cc">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[KASHF Restricted]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <box>
+                                <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textField pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="110" height="16"
+                                               uuid="13cf1d45-138e-45c7-a0b4-1baf19f1156e">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{KASHF_ERROR_COUNT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="110" uuid="7a1cc17a-3de4-4989-8f5c-fe5ec61f6612">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
+                        <jr:tableFooter style="Table_TH" height="16" rowSpan="1">
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" mode="Opaque" x="0" y="0" width="110"
+                                               height="16" uuid="6a9491cc-5623-4d5c-b321-29131183a05e">
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                    <paragraph rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{TOTAL_COUNT1}]]></textFieldExpression>
+                            </textField>
+                        </jr:tableFooter>
+                        <jr:columnHeader style="Table_CH" height="23" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="110" height="23"
+                                               uuid="f33a845a-c9b4-4a19-9848-f4006015718c">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Total Request]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell style="Table_TD" height="16">
+                            <box>
+                                <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textField pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="110" height="16"
+                                               uuid="f6514f99-48cd-4942-bbc2-572d26a6047a">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.5"/>
+                                    <topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="9"/>
+                                    <paragraph leftIndent="0" rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{TOTAL_COUNT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                </jr:table>
+            </componentElement>
+            <staticText>
+                <reportElement positionType="Float" mode="Opaque" x="0" y="5" width="890" height="20"
+                               uuid="c6f9d2e1-fcb9-446f-bbf9-2777bca58a5e">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Summary]]></text>
+            </staticText>
+            <staticText>
+                <reportElement positionType="Float" mode="Opaque" x="0" y="46" width="890" height="42"
+                               uuid="a9d92232-e453-41da-aa3e-a9a225183218">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                              value="76f75c6c-403c-4ab6-b084-6e76a5c58608"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.5"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[]]></text>
+            </staticText>
+        </band>
+    </summary>
+</jasperReport>

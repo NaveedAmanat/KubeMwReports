@@ -1,0 +1,234 @@
+/* Formatted on 8/15/2022 3:23:14 PM (QP5 v5.326) */
+  SELECT REGION,
+         "PAR_DATE_REGION1",
+         "PAR_DATE_REGION2",
+         "PAR_DATE_REGION3",
+         SUM (NVL (TARGET_CLTS_REGION1, 0))          TARGET_CLTS_REGION1,
+         SUM (NVL (TARGET_CLTS_REGION2, 0))          TARGET_CLTS_REGION2,
+         SUM (NVL (TARGET_CLTS_REGION3, 0))          TARGET_CLTS_REGION3,
+         SUM (NVL (ACHIEVEMENT_CLTS_REGION1, 0))     ACHIEVEMENT_CLTS_REGION1,
+         SUM (NVL (ACHIEVEMENT_CLTS_REGION2, 0))     ACHIEVEMENT_CLTS_REGION2,
+         SUM (NVL (ACHIEVEMENT_CLTS_REGION3, 0))     ACHIEVEMENT_CLTS_REGION3
+    FROM (  SELECT REGION,
+                   PRODUCT_CODE_REGION,
+                   LISTAGG (PAR_DATE_REGION1)
+                       WITHIN GROUP (ORDER BY PAR_DATE_REGION1)
+                       "PAR_DATE_REGION1",
+                   LISTAGG (PAR_DATE_REGION2)
+                       WITHIN GROUP (ORDER BY PAR_DATE_REGION2)
+                       "PAR_DATE_REGION2",
+                   LISTAGG (PAR_DATE_REGION3)
+                       WITHIN GROUP (ORDER BY PAR_DATE_REGION3)
+                       "PAR_DATE_REGION3",
+                   SUM (NVL (TARGET_CLTS_REGION1, 0))
+                       TARGET_CLTS_REGION1,
+                   SUM (NVL (TARGET_CLTS_REGION2, 0))
+                       TARGET_CLTS_REGION2,
+                   SUM (NVL (TARGET_CLTS_REGION3, 0))
+                       TARGET_CLTS_REGION3,
+                   SUM (NVL (ACHIEVEMENT_CLTS_REGION1, 0))
+                       ACHIEVEMENT_CLTS_REGION1,
+                   SUM (NVL (ACHIEVEMENT_CLTS_REGION2, 0))
+                       ACHIEVEMENT_CLTS_REGION2,
+                   SUM (NVL (ACHIEVEMENT_CLTS_REGION3, 0))
+                       ACHIEVEMENT_CLTS_REGION3
+              FROM (SELECT REGION,
+                           PRODUCT_CODE_REGION,
+                           CASE
+                               WHEN TO_CHAR (
+                                          TRUNC (
+                                              (  TRUNC (
+                                                     TO_DATE ( :asOfDate,
+                                                              'dd-MM-yyyy'),
+                                                     'month')
+                                               - 1),
+                                              'month')
+                                        - 1,
+                                        'RRRRMM') =
+                                    FLAG_REGION1
+                               THEN
+                                   TARGET_CLTS_REGION
+                           END
+                               AS TARGET_CLTS_REGION1,
+                           CASE
+                               WHEN TO_CHAR (
+                                          TRUNC (
+                                              TO_DATE ( :asOfDate, 'dd-MM-yyyy'),
+                                              'month')
+                                        - 1,
+                                        'RRRRMM') =
+                                    FLAG_REGION1
+                               THEN
+                                   TARGET_CLTS_REGION
+                           END
+                               AS TARGET_CLTS_REGION2,
+                           CASE
+                               WHEN TO_CHAR (TO_DATE ( :asOfDate, 'dd-MM-yyyy'),
+                                             'RRRRMM') =
+                                    FLAG_REGION1
+                               THEN
+                                   TARGET_CLTS_REGION
+                           END
+                               AS TARGET_CLTS_REGION3,
+                           CASE
+                               WHEN TO_CHAR (
+                                          TRUNC (
+                                              (  TRUNC (
+                                                     TO_DATE ( :asOfDate,
+                                                              'dd-MM-yyyy'),
+                                                     'month')
+                                               - 1),
+                                              'month')
+                                        - 1,
+                                        'RRRRMM') =
+                                    FLAG_REGION1
+                               THEN
+                                   ACHIEVEMENT_CLTS_REGION
+                           END
+                               AS ACHIEVEMENT_CLTS_REGION1,
+                           CASE
+                               WHEN TO_CHAR (
+                                          TRUNC (
+                                              TO_DATE ( :asOfDate, 'dd-MM-yyyy'),
+                                              'month')
+                                        - 1,
+                                        'RRRRMM') =
+                                    FLAG_REGION1
+                               THEN
+                                   ACHIEVEMENT_CLTS_REGION
+                           END
+                               AS ACHIEVEMENT_CLTS_REGION2,
+                           CASE
+                               WHEN TO_CHAR (TO_DATE ( :asOfDate, 'dd-MM-yyyy'),
+                                             'RRRRMM') =
+                                    FLAG_REGION1
+                               THEN
+                                   ACHIEVEMENT_CLTS_REGION
+                           END
+                               AS ACHIEVEMENT_CLTS_REGION3,
+                           CASE
+                               WHEN TO_CHAR (
+                                          TRUNC (
+                                              (  TRUNC (
+                                                     TO_DATE ( :asOfDate,
+                                                              'dd-MM-yyyy'),
+                                                     'month')
+                                               - 1),
+                                              'month')
+                                        - 1,
+                                        'RRRRMM') =
+                                    FLAG_REGION1
+                               THEN
+                                   PAR_DATE_REGION
+                           END
+                               AS PAR_DATE_REGION1,
+                           CASE
+                               WHEN TO_CHAR (
+                                          TRUNC (
+                                              TO_DATE ( :asOfDate, 'dd-MM-yyyy'),
+                                              'month')
+                                        - 1,
+                                        'RRRRMM') =
+                                    FLAG_REGION1
+                               THEN
+                                   PAR_DATE_REGION
+                           END
+                               AS PAR_DATE_REGION2,
+                           CASE
+                               WHEN TO_CHAR (TO_DATE ( :asOfDate, 'dd-MM-yyyy'),
+                                             'RRRRMM') =
+                                    FLAG_REGION1
+                               THEN
+                                   PAR_DATE_REGION
+                           END
+                               AS PAR_DATE_REGION3
+                      FROM (  SELECT DISTINCT
+                                     INITCAP (PD.PRD_GRP_NM)
+                                         PRODUCT,
+                                     INITCAP (R.REG_NM)
+                                         REGION,
+                                     SUM (NVL (TA.TARGET_AMT, 0))
+                                         TARGET_CLTS_REGION,
+                                     SUM (NVL (TA.ACH_AMT, 0))
+                                         ACHIEVEMENT_CLTS_REGION,
+                                     (CASE
+                                          WHEN (    SUM (NVL (TA.TARGET_AMT, 0)) >
+                                                    0
+                                                AND SUM (NVL (TA.ACH_AMT, 0)) > 0)
+                                          THEN
+                                              ROUND (
+                                                    SUM (NVL (TA.ACH_AMT, 0))
+                                                  / SUM (NVL (TA.TARGET_AMT, 0))
+                                                  * 100,
+                                                  2)
+                                          ELSE
+                                              0
+                                      END)
+                                         P_TAG_CLTS_REGION,
+                                     TO_CHAR (TA.PAR_DATE, 'Mon-YYYY')
+                                         PAR_DATE_REGION,
+                                     TO_NUMBER (TO_CHAR (TA.PAR_DATE, 'MM'))
+                                         FLAG_REGION,
+                                     TO_NUMBER (TO_CHAR (TA.PAR_DATE, 'RRRRMM'))
+                                         FLAG_REGION1,
+                                     (CASE
+                                          WHEN PD.PRD_GRP_SEQ = 1 THEN 1
+                                          WHEN PD.PRD_GRP_SEQ = 13 THEN 2
+                                          WHEN PD.PRD_GRP_SEQ = 6 THEN 3
+                                          WHEN PD.PRD_GRP_SEQ = 9 THEN 4
+                                          WHEN PD.PRD_GRP_SEQ = 4 THEN 5
+                                          WHEN PD.PRD_GRP_SEQ = 10 THEN 6
+                                          WHEN PD.PRD_GRP_SEQ = 5 THEN 7
+                                          WHEN PD.PRD_GRP_SEQ = 11 THEN 8
+                                          WHEN PD.PRD_GRP_SEQ = 8 THEN 9
+                                          ELSE PD.PRD_GRP_SEQ
+                                      END)
+                                         PRODUCT_CODE_REGION
+                                FROM KASHF_REPORTING.TARGET_ACHIEVEMENTS TA,
+                                     MW_BRNCH                       B,
+                                     MW_AREA                        A,
+                                     MW_REG                         R,
+                                     MW_PRD_GRP                     PD
+                               WHERE     TA.BRANCH_CD = B.BRNCH_CD
+                                     AND B.CRNT_REC_FLG = 1
+                                     AND B.AREA_SEQ = A.AREA_SEQ
+                                     AND A.CRNT_REC_FLG = 1
+                                     AND A.REG_SEQ = R.REG_SEQ
+                                     AND R.CRNT_REC_FLG = 1
+                                     AND TA.PRODUCT_CODE = PD.PRD_GRP_SEQ
+                                     AND PD.CRNT_REC_FLG = 1
+                                     AND TA.PRODUCT_CODE NOT IN (8,
+                                                                 4,
+                                                                 5,
+                                                                 11,
+                                                                 10)
+                                     --and b.brnch_seq = 1
+                                     AND TO_CHAR (TA.PAR_DATE, 'MM') BETWEEN (  TO_NUMBER (
+                                                                                    TO_CHAR (
+                                                                                        TO_DATE (
+                                                                                            :asOfDate,
+                                                                                            'dd-MM-yyyy'),
+                                                                                        'MM'))
+                                                                              - 2)
+                                                                         AND TRIM (
+                                                                                 TO_NUMBER (
+                                                                                     TO_CHAR (
+                                                                                         TO_DATE (
+                                                                                             :asOfDate,
+                                                                                             'dd-MM-yyyy'),
+                                                                                         'MM')))
+                            GROUP BY PD.PRD_GRP_NM,
+                                     TO_CHAR (TA.PAR_DATE, 'Mon-YYYY'),
+                                     INITCAP (R.REG_NM),
+                                     PD.PRD_GRP_SEQ,
+                                     TO_NUMBER (TO_CHAR (TA.PAR_DATE, 'MM')),
+                                     TO_NUMBER (TO_CHAR (TA.PAR_DATE, 'RRRRMM'))
+                            ORDER BY PRODUCT_CODE_REGION,
+                                     TO_CHAR (TA.PAR_DATE, 'Mon-YYYY'),
+                                     INITCAP (R.REG_NM)))
+          GROUP BY REGION, PRODUCT_CODE_REGION)
+GROUP BY REGION,
+         "PAR_DATE_REGION1",
+         "PAR_DATE_REGION2",
+         "PAR_DATE_REGION3"
+ORDER BY REGION

@@ -1,0 +1,26 @@
+SELECT TRNS.ADC_REQUEST, TRNS.CRTD_DT, BRNCH.BRNCH_NM, TRNS.CRTD_BY
+  FROM ADC.ADC_TRANSACTIONS  TRNS
+       JOIN ADC.ADC_REF_CD_VAL VNDR
+           ON     VNDR.CRNT_REC_FLG = TRNS.CRNT_REC_FLG
+              AND VNDR.REF_CD_VAL_SEQ = TRNS.REF_CD_VNDR_SEQ
+              AND VNDR.REF_CD_GRP_CODE = '0001'
+              AND VNDR.REF_CD_VAL_CODE = :adcSeq
+       JOIN ADC.ADC_REF_CD_VAL PYMT_TYP
+           ON     PYMT_TYP.CRNT_REC_FLG = TRNS.CRNT_REC_FLG
+              AND PYMT_TYP.REF_CD_VAL_SEQ = TRNS.REF_CD_PYMT_TYP_SEQ
+              AND PYMT_TYP.REF_CD_GRP_CODE = '0004'
+              AND PYMT_TYP.REF_CD_VAL_CODE = '0001'              
+       JOIN ADC.ADC_REF_CD_VAL val3
+           ON     val3.CRNT_REC_FLG = TRNS.CRNT_REC_FLG
+              AND val3.REF_CD_VAL_SEQ = TRNS.REF_CD_RESP_STS_SEQ
+              AND val3.REF_CD_GRP_CODE = '0007'
+              AND val3.REF_CD_VAL_CODE = '0000'              
+        -- BRANCH INFO
+        JOIN MW_BRNCH BRNCH ON BRNCH.BRNCH_SEQ = TRNS.BRNCH_SEQ
+            AND BRNCH.CRNT_REC_FLG = TRNS.CRNT_REC_FLG
+ WHERE TRUNC (TRNS.CRTD_DT) BETWEEN TO_DATE ( :frmdt, 'dd-MON-yyyy')
+                                AND TO_DATE ( :todt, 'dd-MON-yyyy')
+                                AND TRNS.CRNT_REC_FLG = 1
+        AND BRNCH.BRNCH_SEQ = (CASE WHEN :brnchSeq = -1 THEN BRNCH.BRNCH_SEQ ELSE :brnchSeq END)
+        --AND TRNS.REF_CD_VNDR_SEQ = :adcSeq
+ ORDER BY TRNS.CRTD_DT

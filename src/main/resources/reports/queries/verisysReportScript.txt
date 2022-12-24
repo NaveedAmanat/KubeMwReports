@@ -1,0 +1,75 @@
+  SELECT mc.clnt_id,
+         mc.frst_nm || ' ' || mc.last_nm
+             clnt_nm,
+         mv.ver_seq,
+         mv.loan_app_seq,
+         mv.cnic,
+         TO_CHAR (mv.trans_dt, 'dd/MM/yyyy HH:MI:SS')
+             trans_dt,
+         TO_CHAR (mv.cnic_issue_dt)
+             cnic_issue_dt,
+         mv.cnic_category,
+         mv.status,
+         mv.vremarks
+             verisys_resp,
+         CASE
+             WHEN mv.cnic_category = 'NOMINEE'
+             THEN
+                 (SELECT rel.frst_nm || ' ' || rel.last_nm
+                    FROM mw_clnt_rel rel
+                   WHERE     mv.cnic = rel.cnic_num
+                         AND rel.rel_typ_flg = 1
+                         AND rel.loan_app_seq = mv.loan_app_seq
+                         AND rel.crnt_rec_flg = 1)
+             ELSE
+                 NULL
+         END
+             nom_nm,
+         reg.reg_nm,
+         area.area_nm,
+         brnch.brnch_nm,
+         (CASE
+              WHEN mv.kashf_status = 'Y' THEN 'VERIFIED'
+              WHEN mv.status = 'VERIFIED' AND mv.kashf_status = 'E' THEN 'RESTRICTED '
+              WHEN mv.status = 'ERROR' THEN 'ERROR'
+          END)
+             kashf_status
+    FROM mw_cnic_verisys mv
+         LEFT OUTER JOIN mw_loan_app la ON mv.loan_app_seq = la.loan_app_seq
+         LEFT OUTER JOIN mw_clnt mc ON mc.clnt_seq = la.clnt_seq
+         LEFT OUTER JOIN mw_port port ON port.port_seq = la.port_seq
+         LEFT OUTER JOIN mw_brnch brnch ON port.brnch_seq = brnch.brnch_seq
+         LEFT OUTER JOIN mw_area area ON brnch.area_seq = area.area_seq
+         LEFT OUTER JOIN mw_reg reg ON reg.reg_seq = area.reg_seq
+   WHERE     reg.crnt_rec_flg = 1
+         AND area.crnt_rec_flg = 1
+         AND brnch.crnt_rec_flg = 1
+         AND port.crnt_rec_flg = 1
+         AND to_date (mv.trans_dt) BETWEEN TO_DATE ( :frmdt, 'dd-MM-yyyy') AND TO_DATE ( :todt, 'dd-MM-yyyy')
+         AND port.brnch_seq = (CASE WHEN :brnchSeq = -1 THEN port.brnch_seq ELSE :brnchSeq END)
+         AND area.area_seq = (CASE WHEN :areaSeq = -1 THEN area.area_seq ELSE :areaSeq END)
+         AND reg.reg_seq = (CASE WHEN :regSeq = -1 THEN reg.reg_seq ELSE :regSeq END)
+         AND (EXISTS (
+                    SELECT VS.VER_SEQ FROM MW_CNIC_VERISYS VS
+                    WHERE VS.LOAN_APP_SEQ = MV.LOAN_APP_SEQ     
+                    AND VS.VER_SEQ = (SELECT MAX (VER_SEQ) FROM MW_CNIC_VERISYS V WHERE V.LOAN_APP_SEQ =VS.LOAN_APP_SEQ AND VS.CNIC_CATEGORY =  V.CNIC_CATEGORY)
+                    AND VS.STATUS IN ('ERROR')
+                    AND TO_NUMBER ( :typ) = 1              
+                 )
+                 OR EXISTS (
+                    SELECT VS.VER_SEQ FROM MW_CNIC_VERISYS VS
+                    WHERE VS.LOAN_APP_SEQ = MV.LOAN_APP_SEQ     
+                    AND VS.VER_SEQ = (SELECT MAX (VER_SEQ) FROM MW_CNIC_VERISYS V WHERE V.LOAN_APP_SEQ =VS.LOAN_APP_SEQ AND VS.CNIC_CATEGORY =  V.CNIC_CATEGORY)
+                    AND VS.STATUS IN ('VERIFIED') AND VS.KASHF_STATUS ='E' 
+                    AND TO_NUMBER ( :typ) = 2              
+                 )
+                 OR EXISTS(SELECT VS.VER_SEQ FROM MW_CNIC_VERISYS VS
+                    WHERE VS.LOAN_APP_SEQ = MV.LOAN_APP_SEQ
+                    AND STATUS IN ('NEW', 'VERIFIED', 'ERROR')
+                    AND TO_NUMBER ( :typ) = 0)) 
+ORDER BY reg.reg_nm,
+         area.area_nm,
+         brnch.brnch_nm,
+         mc.clnt_id,
+         mv.loan_app_seq,
+         mv.cnic_category

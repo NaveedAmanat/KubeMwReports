@@ -1,0 +1,3 @@
+select lad.doc_seq, doc_img,d.doc_nm    from mw_loan_app_doc lad 
+                 join mw_doc d on d.doc_seq=lad.doc_seq and d.crnt_rec_flg = 1 and (doc_nm='CLIENTS PICTURE' or doc_nm='NOMINEE PICTURE') 
+                 where loan_app_seq=:loanAppSeq and lad.crnt_rec_flg = 1 order by lad.doc_seq

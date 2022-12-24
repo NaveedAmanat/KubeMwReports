@@ -1,0 +1,38 @@
+SELECT
+  /* FileName: LOAN_CYCLE_WISE_PORTFOLIO
+     * Writted by: Aisha Khan
+     * Review By: Ali Khubaib
+     * Date: 24-Nov-2022
+     * Reason: Finance Report (Portfolio) */
+cycle_no, SUM (OST_CLIENTS) OST_CLIENTS, SUM (OST_AMT) OST_AMT
+    FROM (  SELECT CASE WHEN cycle_no > 5 THEN 6 ELSE cycle_no END
+                       AS cycle_no,
+                   SUM (OST_AMT)
+                       OST_AMT,
+                   SUM (OST_CLIENTS)
+                       OST_CLIENTS
+              FROM (  SELECT cpm.cycle_no,
+                             CASE
+                                 WHEN CPM.PRODUCT_ID <> 19
+                                 THEN
+                                     COUNT (LOAN_CYCLE_ID)
+                             END
+                                 OST_CLIENTS,
+                             COUNT (LOAN_CYCLE_ID)
+                                 OST_LOANS,
+                             (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                                 OST_AMT
+                        FROM KASHF_REPORTING.CON_MON_FMTO_TMP CPM
+                       WHERE     (   CPM.LOAN_COMPLETION_DATE IS NULL
+                                  OR CPM.LOAN_COMPLETION_DATE >
+                                     TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                             AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                  + NVL (OUTSTANDING_SC, 0)) >
+                                 0
+                             AND CPM.PRODUCT_ID NOT IN (8)
+                             AND TRUNC (cpm.trn_date) =
+                                 TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                    GROUP BY cpm.cycle_no, cpm.product_id)
+          GROUP BY cycle_no)
+GROUP BY cycle_no
+order by 1

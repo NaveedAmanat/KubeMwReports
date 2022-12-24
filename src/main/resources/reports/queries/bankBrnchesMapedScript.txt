@@ -1,0 +1,6 @@
+SELECT mb.BRNCH_NM, acc.BANK_NM bank, acc.IBAN, acc.ACCT_NUM, acc.BANK_BRNCH, acc.BANK_CODE, acc.IBFT_BANK_CODE
+FROM MW_BRNCH mb
+join MW_BRNCH_ACCT_SET acc on acc.BRNCH_SEQ = mb.BRNCH_SEQ and acc.CRNT_REC_FLG = 1
+--join MW_REF_CD_VAL vl on vl.REF_CD = acc.BANK_NM and vl.CRNT_REC_FLG = 1 and vl.REF_CD_GRP_KEY = 178
+where mb.CRNT_REC_FLG = 1 and mb.brnch_seq <> -1
+order by 1

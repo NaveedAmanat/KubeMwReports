@@ -1,0 +1,696 @@
+SELECT /* FileName: CLNT_AND_BRNCH_AUDIT_SAMPLING
+               * Writted by: Aisha Khan
+               * Review By: Ali Khubaib
+               * Date: 24-Nov-2022
+               * Reason: IA Report */
+reg_nm,
+       area_nm,
+       ac.brnch_nm
+           BRANCH,
+       --       ac.loan_app_seq,
+       (SELECT val3.REF_CD_DSCR
+          FROM MW_REF_CD_VAL val3, MW_BRNCH MB
+         WHERE     val3.REF_CD_SEQ = MB.BRNCH_TYP_KEY
+               AND AC.brnch_seq = MB.brnch_seq
+               AND val3.CRNT_REC_FLG = 1
+               AND ROWNUM = 1)
+           BRANCH_TYPE,
+       AC.BDO_NM
+           BDO_NAME,
+       (SELECT PREL.LAST_UPD_DT
+          FROM MW_PORT_EMP_REL PREL
+         WHERE AC.port_seq = PREL.PORT_SEQ AND PREL.CRNT_REC_FLG = 1)
+           PORTFOLIO_HANDLING_DATE,
+       AC.PRD_NM
+           product_nm,
+       ac.CLNT_SEQ
+           CUSTOMER_ID,
+       AC.FRST_NM || ' ' || AC.LAST_NM
+           CUSTOMER_NAME,
+       AC.GNDR_DESC
+           GENDER,
+       (SELECT 'house ' || hse_num || ' street ' || strt || ' ' || oth_dtl
+          FROM mw_addr ad, mw_addr_rel adr
+         WHERE     adr.ADDR_SEQ = ad.ADDR_SEQ
+               AND ad.crnt_rec_flg = 1
+               AND adr.crnt_rec_flg = 1
+               AND adr.ENTY_KEY = mc.clnt_seq
+               AND enty_typ = 'Client')
+           ADDRESS,
+       mc.PH_NUM
+           CLNT_PH_NUM,
+       AC.LOAN_CYCL_NUM
+           CYCLE_NUM,
+       (SELECT val3.REF_CD_DSCR
+          FROM MW_REF_CD_VAL val3
+         WHERE     val3.REF_CD_SEQ = biz.PRSN_RUN_THE_BIZ
+               AND val3.CRNT_REC_FLG = 1
+               AND ROWNUM = 1)
+           LOAN_USER,
+       (SELECT COUNT (1)
+          FROM mw_loan_app ap
+         WHERE     ap.clnt_seq = mc.clnt_seq
+               AND ap.crnt_rec_flg = 1
+               AND ap.loan_app_sts IN (1245, 703, 704))
+           loan_in_kashf,
+       REL.NOM_NM
+           NOMINEE_NAME,
+       REL.CNIC_NUM
+           NOMINEE_CNIC,
+       rel.nominee_relation,
+       NOM_PH_NUM,
+       CASE
+           WHEN pdc.pdc_nm IS NULL AND mc.slf_pdc_flg = 1
+           THEN
+               AC.FRST_NM || ' ' || AC.LAST_NM
+           WHEN pdc.pdc_nm IS NULL AND mc.co_bwr_san_flg = 1
+           THEN
+               REL.NOM_NM
+           ELSE
+               pdc.pdc_nm
+       END
+           pdc_nm,
+       CASE
+           WHEN PDC_PH_NUM IS NULL AND mc.slf_pdc_flg = 1 THEN mc.PH_NUM
+           WHEN PDC_PH_NUM IS NULL AND mc.co_bwr_san_flg = 1 THEN NOM_PH_NUM
+           ELSE PDC_PH_NUM
+       END
+           PDC_PH_NUM,
+       CASE
+           WHEN pdc.CNIC_NUM IS NULL AND mc.slf_pdc_flg = 1
+           THEN
+               mc.CNIC_NUM
+           WHEN pdc.CNIC_NUM IS NULL AND mc.co_bwr_san_flg = 1
+           THEN
+               REL.CNIC_NUM
+           ELSE
+               pdc.CNIC_NUM
+       END
+           PDC_CNIC_NUM,
+       CASE
+           WHEN pdc.pdc_relation IS NULL AND mc.slf_pdc_flg = 1
+           THEN
+               'self'
+           WHEN pdc.pdc_relation IS NULL AND mc.co_bwr_san_flg = 1
+           THEN
+               rel.nominee_relation
+           ELSE
+               pdc.pdc_relation
+       END
+           PDC_relation_with_client,
+       nok.nok_nm
+           nok_nm,
+       NOK_PH_NUM,
+       nok.CNIC_NUM
+           nok_CNIC_NUM,
+       nok.nok_relation
+           nok_relation_with_client,
+       (  ac.DSBMT_AMT
+        - (SELECT  max(AP.APRVD_LOAN_AMT)
+  FROM MW_LOAN_APP AP
+ WHERE     AP.LOAN_CYCL_NUM =
+           (SELECT MAX (AP2.LOAN_CYCL_NUM)
+              FROM MW_LOAN_APP AP2
+             WHERE     AP2.CRNT_REC_FLG = 1
+                   AND AP2.CLNT_SEQ = ac.CLNT_SEQ
+                   AND AP2.LOAN_APP_STS = 704
+                   AND AP2.LOAN_CYCL_NUM < ac.LOAN_CYCL_NUM)
+       AND AP.CLNT_SEQ = ac.CLNT_SEQ
+       AND AP.LOAN_CYCL_NUM < ac.LOAN_CYCL_NUM
+       AND AP.CRNT_REC_FLG = 1
+       AND AP.LOAN_APP_STS = 704
+       AND AP.PRD_SEQ =
+           (CASE
+                WHEN    ac.prd_seq = 29
+                     AND EXISTS
+                             (SELECT AP3.PRD_SEQ
+                                FROM MW_LOAN_APP AP3
+                               WHERE     AP3.LOAN_CYCL_NUM =
+                                         (SELECT MAX (AP4.LOAN_CYCL_NUM)
+                                            FROM MW_LOAN_APP AP4
+                                           WHERE     AP4.CRNT_REC_FLG = 1
+                                                 AND AP4.CLNT_SEQ =
+                                                     ac.CLNT_SEQ
+                                                 AND AP4.LOAN_APP_STS = 704
+                                                 AND AP4.LOAN_CYCL_NUM <
+                                                     ac.LOAN_CYCL_NUM)
+                                     AND AP3.PRD_SEQ = 29
+                                     AND AP3.CLNT_SEQ = ac.CLNT_SEQ
+                                     AND AP3.LOAN_APP_STS = 704
+                                     AND AP3.LOAN_CYCL_NUM < ac.LOAN_CYCL_NUM )
+                THEN
+                    29
+                ELSE
+                    ap.prd_seq
+            END)))
+           loan_jump,
+       sector,
+       activity,
+       ac.DSBMT_DT
+           Disb_Date,
+       ac.DSBMT_AMT
+           Disb_Pr,
+       (SELECT SUM (psd.TOT_CHRG_DUE)     OUTS_AMOUNT_SC
+          FROM mw_pymt_sched_hdr psh, mw_pymt_sched_dtl psd
+         WHERE     psh.PYMT_SCHED_HDR_SEQ = psd.PYMT_SCHED_HDR_SEQ
+               AND psh.CRNT_REC_FLG = 1
+               AND psh.loan_app_seq = TO_NUMBER (ac.loan_app_seq)
+               AND psd.crnt_rec_flg = 1)
+           DISB_SC,
+       ac.OST_PPAL_AMT
+           OUTSTANDING_PRINCIPAL,
+       ac.OST_TOT_CHRG_AMT
+           OUTSTANDING_SC,
+       ac.OST_PPAL_AMT + ac.OST_TOT_CHRG_AMT
+           ost_tot,
+       ac.OD_PPAL_AMT_DUE
+           overdue_pr,
+       ac.OD_TOT_CHRG_DUE
+           OVERDUE_AMOUNT_SC,
+       ac.OD_PPAL_AMT_DUE + ac.OD_TOT_CHRG_DUE
+           od_tot,
+       OD_DAYS
+           OVERDUE_DAYS,
+       (SELECT wo.TAG_FROM_DT
+          FROM MW_CLNT_TAG_LIST wo
+         WHERE     wo.loan_app_seq = TO_NUMBER (ac.loan_app_seq)
+               AND wo.crnt_rec_flg = 1
+               AND ROWNUM = 1)
+           WRITE_OFF_DATE,
+       (SELECT COUNT (1)
+          FROM mw_pymt_sched_hdr  psh
+               JOIN mw_pymt_sched_dtl psd
+                   ON     psd.PYMT_SCHED_HDR_SEQ = psh.PYMT_SCHED_HDR_SEQ
+                      AND psd.CRNT_REC_FLG = 1
+                      AND psh.CRNT_REC_FLG = 1
+         WHERE psh.LOAN_APP_SEQ = TO_NUMBER (ac.loan_app_seq))
+           "Total Installments",
+       (SELECT LAST_UPD_DT
+          FROM (  SELECT RLL.LAST_UPD_DT
+                    FROM MW_RS_LOAN_LIST RLL
+                   WHERE     RLL.RC_CHANGE_STATUS = 1
+                         AND RLL.LOAN_APP_SEQ = AC.LOAN_APP_SEQ
+                ORDER BY 1 DESC)
+         WHERE ROWNUM = 1)
+           RESCHEDULE_DATE,
+       (SELECT COUNT (psd.PYMT_SCHED_DTL_SEQ)
+          FROM mw_pymt_sched_hdr psh, mw_pymt_sched_dtl psd
+         WHERE     psh.LOAN_APP_SEQ = TO_NUMBER (ac.loan_app_seq)
+               AND psh.PYMT_SCHED_HDR_SEQ = psd.PYMT_SCHED_HDR_SEQ
+               AND psh.crnt_rec_flg = 1
+               AND psd.PYMT_STS_KEY IN (945, 1145)
+               AND psd.CRNT_REC_FLG = 1
+               AND NOT EXISTS
+                       (SELECT 1
+                          FROM kashf_reporting.EXCLUDE_SCHEDULES psd1
+                         WHERE PYMT_SCHED_HDR_SEQ = PSH.PYMT_SCHED_HDR_SEQ))
+           "Remaining Installments",
+       mc.CNIC_NUM
+           clnt_cnic,
+       AC.NDI
+           NDI,
+       mc.NUM_OF_DPND,
+       AC.CLIENT_HOUSE_STS
+           house_status,
+       AC.EFF_START_DT
+           form_filling_date,
+       (SELECT COUNT (psd.PYMT_SCHED_DTL_SEQ)
+          FROM mw_pymt_sched_dtl psd, mw_pymt_sched_hdr psh
+         WHERE     psh.loan_app_seq = ac.loan_app_seq
+               AND psd.PYMT_SCHED_HDR_SEQ = psh.PYMT_SCHED_HDR_SEQ
+               AND psd.crnt_rec_flg = 1
+               AND psh.crnt_rec_flg = 1
+               AND psd.PYMT_STS_KEY = 947)
+           adv,
+       (SELECT COUNT (psd.PYMT_SCHED_DTL_SEQ)
+          FROM mw_pymt_sched_dtl psd, mw_pymt_sched_hdr psh
+         WHERE     psh.loan_app_seq = ac.loan_app_seq
+               AND psd.PYMT_SCHED_HDR_SEQ = psh.PYMT_SCHED_HDR_SEQ
+               AND psd.crnt_rec_flg = 1
+               AND psh.crnt_rec_flg = 1
+               AND psd.PYMT_STS_KEY = 946)
+           same_day,
+       (SELECT SUM (exp_amt)
+          FROM mw_biz_exp_dtl bed
+         WHERE     bed.BIZ_APRSL_SEQ = biz.BIZ_APRSL_SEQ
+               AND bed.CRNT_REC_FLG = 1
+               AND bed.EXP_CTGRY_KEY = 1)
+           business_exp,
+       (SELECT SUM (exp_amt)
+          FROM mw_biz_exp_dtl bed
+         WHERE     bed.BIZ_APRSL_SEQ = biz.BIZ_APRSL_SEQ
+               AND bed.CRNT_REC_FLG = 1
+               AND bed.EXP_CTGRY_KEY = 2)
+           house_exp,
+       (SELECT SUM (incm_amt)
+          FROM mw_biz_aprsl_incm_hdr bih, mw_biz_aprsl_incm_dtl bid
+         WHERE     bih.BIZ_APRSL_SEQ = biz.BIZ_APRSL_SEQ
+               AND bih.INCM_HDR_SEQ = bid.INCM_HDR_SEQ
+               AND bih.CRNT_REC_FLG = 1
+               AND bid.CRNT_REC_FLG = 1
+               AND bid.INCM_CTGRY_KEY = 1)
+           business_incm,
+       (SELECT SUM (incm_amt)
+          FROM mw_biz_aprsl_incm_hdr bih, mw_biz_aprsl_incm_dtl bid
+         WHERE     bih.BIZ_APRSL_SEQ = biz.BIZ_APRSL_SEQ
+               AND bih.INCM_HDR_SEQ = bid.INCM_HDR_SEQ
+               AND bih.CRNT_REC_FLG = 1
+               AND bid.CRNT_REC_FLG = 1
+               AND bid.INCM_CTGRY_KEY = 2)
+           othr_incm,
+       NULL
+           bm_screening_dt,
+       (SELECT MAX (c.last_upd_dt)
+          FROM AUDIT_MWX.HIST_MW_LOAN_APP C
+         WHERE     C.crnt_rec_flg = 1
+               AND C.loan_app_seq = ac.loan_app_seq
+               AND loan_app_sts = 702)
+           bm_aprvl_dt,
+       (SELECT COUNT (1)
+          FROM mw_mfcib_oth_outsd_loan mool
+         WHERE mool.loan_app_seq = ac.loan_app_seq AND mool.crnt_rec_flg = 1)
+           othr_mfi,
+       (  SELECT NVL (COUNT (MAX (rch.rcvry_trx_seq)), 0)
+            FROM mw_rcvry_trx     rch,
+                 mw_rcvry_dtl     rcd,
+                 mw_pymt_sched_dtl psd,
+                 mw_pymt_sched_hdr psh
+           WHERE     rch.rcvry_trx_seq = rcd.rcvry_trx_seq
+                 AND rch.crnt_rec_flg = 1
+                 AND rcd.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                 AND rcd.crnt_rec_flg = 1
+                 AND psd.pymt_sched_hdr_seq = psh.pymt_sched_hdr_seq
+                 AND psd.crnt_rec_flg = 1
+                 AND psh.crnt_rec_flg = 1
+                 AND rch.rcvry_typ_seq IN (161, 556)
+                 AND psh.loan_app_seq = ac.loan_app_seq
+        GROUP BY rch.rcvry_trx_seq)
+           cur_rcv_cash,
+       (  SELECT NVL (COUNT (MAX (rch.rcvry_trx_seq)), 0)
+            FROM mw_rcvry_trx     rch,
+                 mw_rcvry_dtl     rcd,
+                 mw_pymt_sched_dtl psd,
+                 mw_pymt_sched_hdr psh,
+                 MW_TYPS          T
+           WHERE     rch.rcvry_trx_seq = rcd.rcvry_trx_seq
+                 AND rch.crnt_rec_flg = 1
+                 AND rcd.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                 AND rcd.crnt_rec_flg = 1
+                 AND psd.pymt_sched_hdr_seq = psh.pymt_sched_hdr_seq
+                 AND psd.crnt_rec_flg = 1
+                 AND psh.crnt_rec_flg = 1
+                 AND psh.loan_app_seq = ac.loan_app_seq
+                 AND T.TYP_SEQ = RCH.RCVRY_TYP_SEQ
+                 AND T.CRNT_REC_FLG = 1
+                 AND T.TYP_ID <> '0001'
+        GROUP BY rch.rcvry_trx_seq)
+           cur_rcv_bank,
+       (SELECT COUNT (pymt_sched_dtl_seq)
+          FROM (  SELECT pd.PYMT_SCHED_DTL_SEQ,
+                         PD.DUE_DT,
+                         PD.INST_NUM,
+                         TRUNC (MAX (rt.pymt_dt)) - pd.due_dt     DIFF
+                    FROM mw_pymt_sched_dtl pd
+                         JOIN mw_pymt_sched_hdr ph
+                             ON pd.pymt_sched_hdr_seq = ph.pymt_sched_hdr_seq
+                         LEFT OUTER JOIN mw_rcvry_dtl rd
+                             ON pd.pymt_sched_dtl_seq = rd.pymt_sched_dtl_seq
+                         LEFT OUTER JOIN mw_rcvry_trx rt
+                             ON rd.rcvry_trx_seq = rt.rcvry_trx_seq
+                   WHERE     pd.CRNT_REC_FLG = 1
+                         AND ph.CRNT_REC_FLG = 1
+                         AND rd.CRNT_REC_FLG = 1
+                         AND rt.CRNT_REC_FLG = 1
+                         AND pd.PYMT_STS_KEY IN (948)
+                         AND ph.loan_app_seq = ac.loan_app_seq
+                GROUP BY pd.PYMT_SCHED_DTL_SEQ, PD.INST_NUM, pd.due_dt)
+         WHERE DIFF BETWEEN 1 AND 30)
+           del_1_30,
+       (SELECT COUNT (pymt_sched_dtl_seq)
+          FROM (  SELECT pd.PYMT_SCHED_DTL_SEQ,
+                         PD.DUE_DT,
+                         PD.INST_NUM,
+                         TRUNC (MAX (rt.pymt_dt)) - pd.due_dt     DIFF
+                    FROM mw_pymt_sched_dtl pd
+                         JOIN mw_pymt_sched_hdr ph
+                             ON pd.pymt_sched_hdr_seq = ph.pymt_sched_hdr_seq
+                         LEFT OUTER JOIN mw_rcvry_dtl rd
+                             ON pd.pymt_sched_dtl_seq = rd.pymt_sched_dtl_seq
+                         LEFT OUTER JOIN mw_rcvry_trx rt
+                             ON rd.rcvry_trx_seq = rt.rcvry_trx_seq
+                   WHERE     pd.CRNT_REC_FLG = 1
+                         AND ph.CRNT_REC_FLG = 1
+                         AND rd.CRNT_REC_FLG = 1
+                         AND rt.CRNT_REC_FLG = 1
+                         AND pd.PYMT_STS_KEY IN (948)
+                         AND ph.loan_app_seq = ac.loan_app_seq
+                GROUP BY pd.PYMT_SCHED_DTL_SEQ, PD.INST_NUM, pd.due_dt)
+         WHERE DIFF > 30)
+           del_30,
+       (SELECT grp.prd_grp_nm
+          FROM (  SELECT ap.prd_seq
+                    FROM mw_loan_app ap
+                   WHERE     ap.loan_cycl_num =
+                             (SELECT MAX (ap.loan_cycl_num)
+                                FROM mw_loan_app ap
+                               WHERE     ap.crnt_rec_flg = 1
+                                     AND ap.clnt_seq = mc.clnt_seq
+                                     AND ap.loan_app_sts = 704
+                                     AND ap.prd_seq <> 29
+                                     AND ap.loan_cycl_num < AC.LOAN_CYCL_NUM)
+                         AND ap.clnt_seq = mc.clnt_seq
+                         AND ap.CRNT_REC_FLG = 1
+                         AND ap.prd_seq <> 29
+                         AND ap.loan_cycl_num < AC.LOAN_CYCL_NUM
+                         AND ap.loan_app_sts = 704
+                ORDER BY ap.EFF_START_DT DESC) p,
+               mw_prd      prd,
+               mw_prd_grp  grp
+         WHERE     p.prd_seq = prd.prd_seq
+               AND prd.PRD_GRP_SEQ = grp.PRD_GRP_SEQ
+               AND ROWNUM = 1)
+           prev_loan_prd,
+       (SELECT APRVD_LOAN_AMT
+          FROM (  SELECT ap.APRVD_LOAN_AMT
+                    FROM mw_loan_app ap
+                   WHERE     ap.loan_cycl_num =
+                             (SELECT MAX (ap.loan_cycl_num)
+                                FROM mw_loan_app ap
+                               WHERE     ap.crnt_rec_flg = 1
+                                     AND ap.clnt_seq = mc.clnt_seq
+                                     AND ap.loan_app_sts = 704
+                                     AND ap.loan_cycl_num < AC.LOAN_CYCL_NUM)
+                         AND ap.clnt_seq = mc.clnt_seq
+                         AND ap.CRNT_REC_FLG = 1
+                         AND ap.prd_seq <> 29
+                         AND ap.loan_cycl_num < AC.LOAN_CYCL_NUM
+                         AND ap.loan_app_sts = 704
+                ORDER BY ap.EFF_START_DT DESC)
+         WHERE ROWNUM = 1)
+           prev_loan_dsb_amt,
+       (SELECT loan_app_sts_dt
+          FROM (  SELECT ap.loan_app_sts_dt
+                    FROM mw_loan_app ap
+                   WHERE     ap.loan_cycl_num =
+                             (SELECT MAX (ap.loan_cycl_num)
+                                FROM mw_loan_app ap
+                               WHERE     ap.crnt_rec_flg = 1
+                                     AND ap.clnt_seq = mc.clnt_seq
+                                     AND ap.loan_app_sts = 704
+                                     AND ap.prd_seq <> 29
+                                     AND ap.loan_cycl_num < AC.LOAN_CYCL_NUM)
+                         AND ap.clnt_seq = mc.clnt_seq
+                         AND ap.CRNT_REC_FLG = 1
+                         AND ap.prd_seq <> 29
+                         AND ap.loan_cycl_num < AC.LOAN_CYCL_NUM
+                         AND ap.loan_app_sts = 704
+                ORDER BY ap.EFF_START_DT DESC)
+         WHERE ROWNUM = 1)
+           prev_loan_cmpl_dt,
+       (SELECT COUNT (psd.PYMT_SCHED_DTL_SEQ)
+          FROM mw_pymt_sched_dtl psd, mw_pymt_sched_hdr psh
+         WHERE     psh.loan_app_seq =
+                   (SELECT loan_app_seq
+                      FROM (  SELECT ap.loan_app_seq
+                                FROM mw_loan_app ap
+                               WHERE     ap.loan_cycl_num =
+                                         (SELECT MAX (ap.loan_cycl_num)
+                                            FROM mw_loan_app ap
+                                           WHERE     ap.crnt_rec_flg = 1
+                                                 AND ap.clnt_seq = mc.clnt_seq
+                                                 AND ap.loan_app_sts = 704
+                                                 AND ap.prd_seq <> 29
+                                                 AND ap.loan_cycl_num <
+                                                     AC.LOAN_CYCL_NUM)
+                                     AND ap.clnt_seq = mc.clnt_seq
+                                     AND ap.CRNT_REC_FLG = 1
+                                     AND ap.loan_cycl_num < AC.LOAN_CYCL_NUM
+                                     AND ap.prd_seq <> 29
+                                     AND ap.loan_app_sts = 704
+                            ORDER BY ap.EFF_START_DT DESC)
+                     WHERE ROWNUM = 1)
+               AND psd.PYMT_SCHED_HDR_SEQ = psh.PYMT_SCHED_HDR_SEQ
+               AND psd.crnt_rec_flg = 1
+               AND psh.crnt_rec_flg = 1
+               AND psd.PYMT_STS_KEY = 947)
+           pev_loan_adv,
+       (SELECT COUNT (psd.PYMT_SCHED_DTL_SEQ)
+          FROM mw_pymt_sched_dtl psd, mw_pymt_sched_hdr psh
+         WHERE     psh.loan_app_seq =
+                   (SELECT loan_app_seq
+                      FROM (  SELECT ap.loan_app_seq
+                                FROM mw_loan_app ap
+                               WHERE     ap.loan_cycl_num =
+                                         (SELECT MAX (ap.loan_cycl_num)
+                                            FROM mw_loan_app ap
+                                           WHERE     ap.crnt_rec_flg = 1
+                                                 AND ap.clnt_seq = mc.clnt_seq
+                                                 AND ap.loan_app_sts = 704
+                                                 AND ap.prd_seq <> 29
+                                                 AND ap.loan_cycl_num <
+                                                     AC.LOAN_CYCL_NUM)
+                                     AND ap.clnt_seq = mc.clnt_seq
+                                     AND ap.CRNT_REC_FLG = 1
+                                     AND ap.prd_seq <> 29
+                                     AND ap.loan_cycl_num < AC.LOAN_CYCL_NUM
+                                     AND ap.loan_app_sts = 704
+                            ORDER BY ap.EFF_START_DT DESC)
+                     WHERE ROWNUM = 1)
+               AND psd.PYMT_SCHED_HDR_SEQ = psh.PYMT_SCHED_HDR_SEQ
+               AND psd.crnt_rec_flg = 1
+               AND psh.crnt_rec_flg = 1
+               AND psd.PYMT_STS_KEY = 946)
+           pev_loan_same_day,
+       (SELECT COUNT (psd.PYMT_SCHED_DTL_SEQ)
+          FROM mw_pymt_sched_dtl psd, mw_pymt_sched_hdr psh
+         WHERE     psh.loan_app_seq =
+                   (SELECT loan_app_seq
+                      FROM (  SELECT ap.loan_app_seq
+                                FROM mw_loan_app ap
+                               WHERE     ap.loan_cycl_num =
+                                         (SELECT MAX (ap.loan_cycl_num)
+                                            FROM mw_loan_app ap
+                                           WHERE     ap.crnt_rec_flg = 1
+                                                 AND ap.clnt_seq = mc.clnt_seq
+                                                 AND ap.loan_app_sts = 704
+                                                 AND ap.prd_seq <> 29
+                                                 AND ap.loan_cycl_num <
+                                                     AC.LOAN_CYCL_NUM)
+                                     AND ap.clnt_seq = mc.clnt_seq
+                                     AND ap.CRNT_REC_FLG = 1
+                                     AND ap.loan_cycl_num < AC.LOAN_CYCL_NUM
+                                     AND ap.prd_seq <> 29
+                                     AND ap.loan_app_sts = 704
+                            ORDER BY ap.EFF_START_DT DESC)
+                     WHERE ROWNUM = 1)
+               AND psd.PYMT_SCHED_HDR_SEQ = psh.PYMT_SCHED_HDR_SEQ
+               AND psd.crnt_rec_flg = 1
+               AND psh.crnt_rec_flg = 1
+               AND psd.PYMT_STS_KEY = 948)
+           prev_loan_deli,
+       (SELECT MAX (sec.BIZ_SECT_NM)
+          FROM MW_BIZ_SECT sec, MW_BIZ_APRSL bs, MW_BIZ_ACTY act
+         WHERE     bs.CRNT_REC_FLG = 1
+               AND act.BIZ_ACTY_SEQ = bs.ACTY_KEY
+               AND sec.CRNT_REC_FLG = 1
+               AND bs.LOAN_APP_SEQ =
+                   (SELECT loan_app_seq
+                      FROM (  SELECT ap.loan_app_seq
+                                FROM mw_loan_app ap
+                               WHERE     ap.loan_cycl_num =
+                                         (SELECT MAX (ap.loan_cycl_num)
+                                            FROM mw_loan_app ap
+                                           WHERE     ap.crnt_rec_flg = 1
+                                                 AND ap.clnt_seq = mc.clnt_seq
+                                                 AND ap.loan_app_sts = 704
+                                                 AND ap.prd_seq <> 29
+                                                 AND ap.loan_cycl_num <
+                                                     AC.LOAN_CYCL_NUM)
+                                     AND ap.clnt_seq = mc.clnt_seq
+                                     AND ap.loan_cycl_num < AC.LOAN_CYCL_NUM
+                                     AND ap.CRNT_REC_FLG = 1
+                                     AND ap.prd_seq <> 29
+                                     AND ap.loan_app_sts = 704
+                            ORDER BY ap.EFF_START_DT DESC)
+                     WHERE ROWNUM = 1)
+               AND bs.CRNT_REC_FLG = 1
+               AND ROWNUM = 1
+               AND sec.BIZ_SECT_SEQ = act.BIZ_SECT_SEQ
+               AND act.CRNT_REC_FLG = 1)
+           prev_loan_SECTOR,
+       (SELECT MAX (act.BIZ_ACTY_NM)
+          FROM MW_BIZ_SECT sec, MW_BIZ_APRSL bs, MW_BIZ_ACTY act
+         WHERE     bs.CRNT_REC_FLG = 1
+               AND act.BIZ_ACTY_SEQ = bs.ACTY_KEY
+               AND sec.CRNT_REC_FLG = 1
+               AND bs.LOAN_APP_SEQ =
+                   (SELECT loan_app_seq
+                      FROM (  SELECT ap.loan_app_seq
+                                FROM mw_loan_app ap
+                               WHERE     ap.loan_cycl_num =
+                                         (SELECT MAX (ap.loan_cycl_num)
+                                            FROM mw_loan_app ap
+                                           WHERE     ap.crnt_rec_flg = 1
+                                                 AND ap.clnt_seq = mc.clnt_seq
+                                                 AND ap.loan_app_sts = 704
+                                                 AND ap.prd_seq <> 29
+                                                 AND ap.loan_cycl_num <
+                                                     AC.LOAN_CYCL_NUM)
+                                     AND ap.clnt_seq = mc.clnt_seq
+                                     AND ap.loan_cycl_num < AC.LOAN_CYCL_NUM
+                                     AND ap.CRNT_REC_FLG = 1
+                                     AND ap.prd_seq <> 29
+                                     AND ap.loan_app_sts = 704
+                            ORDER BY ap.EFF_START_DT DESC)
+                     WHERE ROWNUM = 1)
+               AND bs.CRNT_REC_FLG = 1
+               AND ROWNUM = 1
+               AND sec.BIZ_SECT_SEQ = act.BIZ_SECT_SEQ
+               AND act.CRNT_REC_FLG = 1)
+           prev_loan_ACTIVITY,
+       (  SELECT COUNT (MAX (rch.rcvry_trx_seq))
+            FROM mw_rcvry_trx     rch,
+                 mw_rcvry_dtl     rcd,
+                 mw_pymt_sched_dtl psd,
+                 mw_pymt_sched_hdr psh
+           WHERE     rch.rcvry_trx_seq = rcd.rcvry_trx_seq
+                 AND rch.crnt_rec_flg = 1
+                 AND rcd.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                 AND rcd.crnt_rec_flg = 1
+                 AND psd.pymt_sched_hdr_seq = psh.pymt_sched_hdr_seq
+                 AND psd.crnt_rec_flg = 1
+                 AND psh.crnt_rec_flg = 1
+                 AND rch.rcvry_typ_seq IN (161, 556)
+                 AND psh.loan_app_seq =
+                     (SELECT loan_app_seq
+                        FROM (  SELECT ap.loan_app_seq
+                                  FROM mw_loan_app ap
+                                 WHERE     ap.loan_cycl_num =
+                                           (SELECT MAX (ap.loan_cycl_num)
+                                              FROM mw_loan_app ap
+                                             WHERE     ap.crnt_rec_flg = 1
+                                                   AND ap.clnt_seq = mc.clnt_seq
+                                                   AND ap.loan_app_sts = 704
+                                                   AND ap.prd_seq <> 29
+                                                   AND ap.loan_cycl_num <
+                                                       AC.LOAN_CYCL_NUM)
+                                       AND ap.clnt_seq = mc.clnt_seq
+                                       AND ap.CRNT_REC_FLG = 1
+                                       AND ap.prd_seq <> 29
+                                       AND ap.loan_cycl_num < AC.LOAN_CYCL_NUM
+                                       AND ap.loan_app_sts = 704
+                              ORDER BY ap.EFF_START_DT DESC)
+                       WHERE ROWNUM = 1)
+        GROUP BY rch.rcvry_trx_seq)
+           prev_rcv_cash,
+       (  SELECT COUNT (MAX (rch.rcvry_trx_seq))
+            FROM mw_rcvry_trx     rch,
+                 mw_rcvry_dtl     rcd,
+                 mw_pymt_sched_dtl psd,
+                 mw_pymt_sched_hdr psh,
+                 MW_TYPS          T
+           WHERE     rch.rcvry_trx_seq = rcd.rcvry_trx_seq
+                 AND rch.crnt_rec_flg = 1
+                 AND rcd.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                 AND rcd.crnt_rec_flg = 1
+                 AND psd.pymt_sched_hdr_seq = psh.pymt_sched_hdr_seq
+                 AND psd.crnt_rec_flg = 1
+                 AND psh.crnt_rec_flg = 1
+                 AND psh.loan_app_seq =
+                     (SELECT loan_app_seq
+                        FROM (  SELECT ap.loan_app_seq
+                                  FROM mw_loan_app ap
+                                 WHERE     ap.loan_cycl_num =
+                                           (SELECT MAX (ap.loan_cycl_num)
+                                              FROM mw_loan_app ap
+                                             WHERE     ap.crnt_rec_flg = 1
+                                                   AND ap.clnt_seq = mc.clnt_seq
+                                                   AND ap.loan_app_sts = 704
+                                                   AND ap.prd_seq <> 29
+                                                   AND ap.loan_cycl_num <
+                                                       AC.LOAN_CYCL_NUM)
+                                       AND ap.clnt_seq = mc.clnt_seq
+                                       AND ap.loan_cycl_num < AC.LOAN_CYCL_NUM
+                                       AND ap.CRNT_REC_FLG = 1
+                                       AND ap.prd_seq <> 29
+                                       AND ap.loan_app_sts = 704
+                              ORDER BY ap.EFF_START_DT DESC)
+                       WHERE ROWNUM = 1)
+                 AND T.TYP_SEQ = RCH.RCVRY_TYP_SEQ
+                 AND T.CRNT_REC_FLG = 1
+                 AND T.TYP_ID <> '0001'
+        GROUP BY rch.rcvry_trx_seq)
+           prev_rcv_bank,
+       (SELECT DECODE (COUNT (1), 0, 'no', 'yes')
+          FROM MW_ANML_RGSTR MAR
+         WHERE MAR.LOAN_APP_SEQ = ac.loan_app_seq AND MAR.CRNT_REC_FLG = 1)
+           animal_tag,
+       (SELECT val3.REF_CD_DSCR
+          FROM MW_REF_CD_VAL val3, mw_loan_app ap
+         WHERE     val3.REF_CD_SEQ = AP.DNR_SEQ
+               AND ap.loan_app_seq = ac.loan_app_seq
+               AND val3.CRNT_REC_FLG = 1
+               AND ROWNUM = 1)
+           donor_nm
+  FROM KASHF_REPORTING.BI_PAR_ANALYSIS_HIST  ac,
+       mw_clnt                               mc,
+       (SELECT rl.CNIC_EXPRY_DT,
+               rl.FTHR_FRST_NM,
+               rl.FTHR_LAST_NM,
+               rl.REL_TYP_FLG,
+               val.REF_CD_DSCR                               nominee_relation,
+               rl.FTHR_FRST_NM || ' ' || rl.FTHR_LAST_NM     nom_fthr_nm,
+               rl.FRST_NM || ' ' || rl.LAST_NM               nom_nm,
+               rl.dob,
+               RL.CNIC_NUM,
+               rl.LOAN_APP_SEQ,
+               rl.PH_NUM                                     NOM_PH_NUM
+          FROM mw_clnt_rel rl, MW_REF_CD_VAL val
+         WHERE     rl.CRNT_REC_FLG = 1
+               AND rl.REL_TYP_FLG = 1
+               AND rl.REL_WTH_CLNT_KEY = val.REF_CD_SEQ
+               AND val.crnt_rec_flg = 1) rel,
+       (SELECT pd.CNIC_NUM,
+               val.REF_CD_DSCR                               pdc_relation,
+               pd.FRST_NM || ' ' || pd.last_nm               pdc_nm,
+               pd.dob,
+               pd.FTHR_FRST_NM || ' ' || pd.FTHR_LAST_NM     pd_fthr_nm,
+               pd.LOAN_APP_SEQ,
+               pd.PH_NUM                                     PDC_PH_NUM
+          FROM mw_clnt_rel pd, MW_REF_CD_VAL val
+         WHERE     pd.CRNT_REC_FLG = 1
+               AND pd.REL_TYP_FLG = 3
+               AND pd.REL_WTH_CLNT_KEY = val.REF_CD_SEQ
+               AND val.crnt_rec_flg = 1) pdc,
+       (SELECT pd.CNIC_NUM,
+               val.REF_CD_DSCR                               nok_relation,
+               pd.FRST_NM || ' ' || pd.last_nm               nok_nm,
+               pd.FTHR_FRST_NM || ' ' || pd.FTHR_LAST_NM     nok_fthr_nm,
+               pd.dob,
+               pd.LOAN_APP_SEQ,
+               pd.PH_NUM                                     NOK_PH_NUM
+          FROM mw_clnt_rel pd, MW_REF_CD_VAL val
+         WHERE     pd.CRNT_REC_FLG = 1
+               AND pd.REL_TYP_FLG = 2
+               AND pd.REL_WTH_CLNT_KEY = val.REF_CD_SEQ
+               AND val.crnt_rec_flg = 1) nok,
+       (SELECT bz.PRSN_RUN_THE_BIZ,
+               bz.LOAN_APP_SEQ,
+               bz.BIZ_APRSL_SEQ,
+               sec.BIZ_SECT_NM     sector,
+               act.BIZ_ACTY_NM     activity
+          FROM MW_BIZ_APRSL bz, MW_BIZ_SECT sec, MW_BIZ_ACTY act
+         WHERE     bz.CRNT_REC_FLG = 1
+               AND act.BIZ_ACTY_SEQ = bz.ACTY_KEY
+               AND sec.CRNT_REC_FLG = 1
+               AND bz.CRNT_REC_FLG = 1
+               AND sec.BIZ_SECT_SEQ = act.BIZ_SECT_SEQ
+               AND act.CRNT_REC_FLG = 1) biz
+ WHERE     ac.CLNT_SEQ = mc.CLNT_SEQ
+       AND mc.crnt_rec_flg = 1
+       AND ac.loan_app_seq = rel.loan_app_seq(+)
+       AND ac.loan_app_seq = pdc.loan_app_seq(+)
+       AND ac.loan_app_seq = nok.loan_app_seq(+)
+       AND ac.loan_app_seq = biz.LOAN_APP_SEQ(+)
+       AND ac.FOR_DATE = TO_DATE ( :p_asof_dt, 'dd-MM-rrrr')
+       AND ac.brNCH_SEQ = :p_brnch_seq

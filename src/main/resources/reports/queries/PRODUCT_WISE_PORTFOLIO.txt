@@ -1,0 +1,80 @@
+  SELECT /* FileName: PRODUCT_WISE_PORTFOLIO
+         * Writted by: Aisha Khan
+         * Review By: Ali Khubaib
+         * Date: 24-Nov-2022
+         * Reason: Finance Report (Portfolio) */
+  mpg.prd_grp_nm,
+         NVL (dsb.dsb_clnts, 0)         dsb_clnts,
+         NVL (dsb.dsb_amt, 0)           dsb_amt,
+         NVL (dsb.new_dsb_clnts, 0)     new_dsb_clnts,
+         NVL (dsb.new_dsb_amt, 0)       new_dsb_amt,
+         NVL (ost.OST_CLIENTS, 0)       OST_CLIENTS,
+         NVL (ost.OST_AMT, 0)           OST_AMT
+    FROM mw_prd_grp mpg,
+         (  SELECT cpm.PRODUCT_ID                                   product,
+                   COUNT (LOAN_CYCLE_ID)                            OST_CLIENTS,
+                   ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))     --                 + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                                                                    OST_AMT
+              FROM KASHF_REPORTING.CON_MON_FMTO_TMP CPM
+             WHERE     (   CPM.LOAN_COMPLETION_DATE IS NULL
+                        OR CPM.LOAN_COMPLETION_DATE >
+                           TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                   AND (NVL (OUTSTANDING_PRINCIPAL, 0) + NVL (OUTSTANDING_SC, 0)) >
+                       0
+                   AND CPM.PRODUCT_ID NOT IN (8)
+                   AND TRUNC (cpm.trn_date) = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+          GROUP BY cpm.product_id) ost,
+         (  SELECT PRODUCT_ID              product,
+                   SUM (dsb_clnts)         dsb_clnts,
+                   SUM (dsb_amt)           dsb_amt,
+                   SUM (new_dsb_clnts)     new_dsb_clnts,
+                   SUM (new_dsb_amt)       new_dsb_amt
+              FROM (  SELECT CPM1.PRODUCT_ID,
+                             COUNT (LOAN_CYCLE_ID)
+                                 dsb_clnts,
+                             ROUND (SUM (NVL (cpm1.DISBURSED_AMOUNT, 0)))
+                                 dsb_amt,
+                             CASE
+                                 WHEN cpm1.CYCLE_NO = 1 THEN COUNT (LOAN_CYCLE_ID)
+                             END
+                                 NEW_dsb_clnts,
+                             CASE
+                                 WHEN cpm1.CYCLE_NO = 1
+                                 THEN
+                                     ROUND (SUM (NVL (cpm1.DISBURSED_AMOUNT, 0)))
+                             END
+                                 new_dsb_amt
+                        FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                       WHERE     CPM1.PRODUCT_ID NOT IN (8)
+                             AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                  + NVL (OUTSTANDING_SC, 0)) >
+                                 0
+                             AND (   LOAN_COMPLETION_DATE IS NULL
+                                  OR LOAN_COMPLETION_DATE >
+                                     TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                             AND cpm1.DISBURSED_DATE BETWEEN TRUNC (
+                                                                 TRUNC (
+                                                                     TO_DATE (
+                                                                         :to_dt,
+                                                                         'dd-mm-RRRR'),
+                                                                     'month'),
+                                                                 'month')
+                                                         AND TRUNC (
+                                                                 TO_DATE (
+                                                                     :to_dt,
+                                                                     'dd-mm-RRRR'))
+                             AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                    GROUP BY CPM1.PRODUCT_ID, CYCLE_NO)
+          GROUP BY PRODUCT_ID) dsb
+   WHERE     mpg.prd_grp_seq = ost.product(+)
+         AND mpg.prd_grp_seq = dsb.product(+)
+         AND   NVL (dsb.dsb_clnts, 0)
+             + NVL (dsb.dsb_amt, 0)
+             + NVL (dsb.new_dsb_clnts, 0)
+             + NVL (dsb.new_dsb_amt, 0)
+             + +NVL (ost.OST_CLIENTS, 0)
+             + NVL (ost.OST_AMT, 0) >
+             0
+         AND mpg.prd_grp_seq <> -1
+         AND mpg.crnt_rec_flg = 1
+ORDER BY 1

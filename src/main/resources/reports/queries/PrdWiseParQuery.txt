@@ -1,0 +1,734 @@
+select mgp.PRD_GRP_SHORT_DESC PRODUCT_ID,  --mgp.PRD_GRP_NM PRODUCT_ID, 
+       round((NVL (p_1.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS.OUTSTANDING,1)) * 100,2) PAR_1_PERC,       
+       round((NVL (p_4.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS.OUTSTANDING,1)) * 100,2) PAR_5_PERC,
+       round((NVL (p_15.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS.OUTSTANDING,1)) * 100,2) PAR_15_PERC,
+       round((NVL (p_29.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS.OUTSTANDING,1)) * 100,2) PAR_30_PERC,
+       round((NVL (p_59.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS.OUTSTANDING,1)) * 100,2) PAR_45_PERC,
+       round((NVL (p_89.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS.OUTSTANDING,1)) * 100,2) PAR_60_PERC,
+       round((NVL (p_90.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS.OUTSTANDING,1)) * 100,2) PAR_90_PERC,
+       round((NVL (p_91.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS.OUTSTANDING,1)) * 100,2) PAR_91_PERC,
+       round((NVL ((p_30_abv.REGULAR_PAR_AMOUNT), 1) / nvl((OUTS.OUTSTANDING),0)) * 100,2) PAR_30_and_abv_PERC,
+       round((NVL (p_11.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS1.OUTSTANDING,1)) * 100,2) PAR_11_PERC, 
+       round((NVL (p_41.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS1.OUTSTANDING,1)) * 100,2) PAR_51_PERC,
+       round((NVL (p_151.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS1.OUTSTANDING,1)) * 100,2) PAR_151_PERC,
+       round((NVL (p_291.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS1.OUTSTANDING,1)) * 100,2) PAR_301_PERC,
+       round((NVL (p_591.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS1.OUTSTANDING,1)) * 100,2) PAR_451_PERC,
+       round((NVL (p_891.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS1.OUTSTANDING,1)) * 100,2) PAR_601_PERC,
+       round((NVL (p_901.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS1.OUTSTANDING,1)) * 100,2) PAR_901_PERC,
+       round((NVL (p_911.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS1.OUTSTANDING,1)) * 100,2) PAR_911_PERC,
+       round((NVL (p_301_abv.REGULAR_PAR_AMOUNT, 1) / nvl(OUTS1.OUTSTANDING,1)) * 100,2) PAR_301_and_abv_PERC
+       from mw_prd_grp mgp,
+(SELECT CPM.PRODUCT_ID, 
+       COUNT(LOAN_CYCLE_ID) ACTIVE_CLIENTS, 
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) OUTSTANDING
+FROM KASHF_REPORTING.con_mon_asofdate_rschd CPM,mw_prd_grp pr,mw_brnch mb,mw_area ma,mw_reg mr        
+WHERE (CPM.LOAN_COMPLETION_DATE IS NULL OR CPM.LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND  (NVL(OUTSTANDING_PRINCIPAL,0) + NVL(OUTSTANDING_SC,0)) > 0
+AND CPM.PRODUCT_ID = pr.prd_grp_seq and pr.CRNT_REC_FLG = 1
+and CPM.BRANCH_ID = mb.brnch_Seq and mb.CRNT_REC_FLG = 1
+and mb.AREA_SEQ = ma.AREA_SEQ and ma.CRNT_REC_FLG = 1
+and ma.REG_SEQ = mr.REG_SEQ and mr.CRNT_REC_FLG = 1
+and pr.prd_grp_seq not in (8)
+and TRUNC(cpm.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM.PRODUCT_ID
+)outs,
+(SELECT CPM1.PRODUCT_ID, 
+       COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+       FROM KASHF_REPORTING.con_mon_asofdate_rschd cpm1,mw_prd_grp pr1,mw_brnch mb1,mw_area ma1,mw_reg mr1 
+       WHERE disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) 
+AND CPM1.PRODUCT_ID = pr1.prd_grp_seq and pr1.CRNT_REC_FLG = 1
+and CPM1.BRANCH_ID = mb1.brnch_Seq and mb1.CRNT_REC_FLG = 1
+and mb1.AREA_SEQ = ma1.AREA_SEQ and ma1.CRNT_REC_FLG = 1
+and ma1.REG_SEQ = mr1.REG_SEQ and mr1.CRNT_REC_FLG = 1
+and pr1.prd_grp_seq not in (8)   
+and TRUNC(cpm1.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+GROUP BY CPM1.PRODUCT_ID
+)p_1, 
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2, mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS >=29.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM2.PRODUCT_ID
+)p_30_abv,
+(SELECT CPM2.PRODUCT_ID,
+       COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2, mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS between 0 and 3.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM2.PRODUCT_ID
+)p_4,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2, mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS between 3.51 and 14.50 
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM2.PRODUCT_ID
+)p_15,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2, mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS between 14.51 and 28.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM2.PRODUCT_ID
+)p_29,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS between 28.51 and 44.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')  
+GROUP BY CPM2.PRODUCT_ID
+)p_59,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS between 44.51 and 59.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM2.PRODUCT_ID
+)p_89,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2, mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS between 59.51 and 89.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM2.PRODUCT_ID
+)p_90,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS > 89.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM2.PRODUCT_ID
+)p_91,
+(
+SELECT CPM.PRODUCT_ID, 
+       COUNT(CPM.LOAN_CYCLE_ID) ACTIVE_CLIENTS, 
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) OUTSTANDING
+FROM KASHF_REPORTING.con_mon_asofdate_rschd CPM,mw_prd_grp pr,mw_brnch mb,mw_area ma,mw_reg mr        
+WHERE (CPM.LOAN_COMPLETION_DATE IS NULL OR CPM.LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND  (NVL(OUTSTANDING_PRINCIPAL,0) + NVL(OUTSTANDING_SC,0)) > 0
+AND CPM.PRODUCT_ID = pr.prd_grp_seq and pr.CRNT_REC_FLG = 1
+and CPM.BRANCH_ID = mb.brnch_Seq and mb.CRNT_REC_FLG = 1
+and mb.AREA_SEQ = ma.AREA_SEQ and ma.CRNT_REC_FLG = 1
+and ma.REG_SEQ = mr.REG_SEQ and mr.CRNT_REC_FLG = 1
+and pr.prd_grp_seq not in (8)  
+and TRUNC(cpm.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM.PRODUCT_ID
+)outs1,
+(
+SELECT CPM1.PRODUCT_ID, 
+       COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+       FROM KASHF_REPORTING.con_mon_asofdate_rschd cpm1,mw_prd_grp pr1,mw_brnch mb1,mw_area ma1,mw_reg mr1 
+       WHERE disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) 
+AND CPM1.PRODUCT_ID = pr1.prd_grp_seq and pr1.CRNT_REC_FLG = 1
+and CPM1.BRANCH_ID = mb1.brnch_Seq and mb1.CRNT_REC_FLG = 1
+and mb1.AREA_SEQ = ma1.AREA_SEQ and ma1.CRNT_REC_FLG = 1
+and ma1.REG_SEQ = mr1.REG_SEQ and mr1.CRNT_REC_FLG = 1
+and pr1.prd_grp_seq not in (8) 
+and TRUNC(cpm1.trn_date) = to_date(:to_dt,'dd-mm-RRRR')  -7
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+GROUP BY CPM1.PRODUCT_ID
+)p_11, 
+(SELECT CPM2.PRODUCT_ID,
+       COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2, mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) 
+AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS >= 29.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR') -7
+GROUP BY CPM2.PRODUCT_ID
+)p_301_abv,
+(
+SELECT CPM2.PRODUCT_ID,
+       COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2, mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) 
+AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS > 3.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR') -7
+GROUP BY CPM2.PRODUCT_ID
+)p_41,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS between 3.51 and 14.50  
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR') -7
+GROUP BY CPM2.PRODUCT_ID
+)p_151,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS between 14.51 and 28.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM2.PRODUCT_ID
+)p_291,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS between 28.51 and 44.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM2.PRODUCT_ID
+)p_591,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS between 44.51 and 59.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM2.PRODUCT_ID
+)p_891,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS between 59.51 and 89.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM2.PRODUCT_ID
+)p_901,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS > 89.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM2.PRODUCT_ID
+)p_911
+
+where outs.PRODUCT_ID = p_1.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_30_abv.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_4.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_15.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_29.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_59.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_89.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_90.PRODUCT_ID(+)
+and outs.PRODUCT_ID = p_91.PRODUCT_ID(+) 
+AND outs.PRODUCT_ID = OUTS1.PRODUCT_ID(+)
+AND outs.PRODUCT_ID = p_11.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_41.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_151.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_291.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_591.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_891.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_901.PRODUCT_ID(+)
+and outs.PRODUCT_ID = p_911.PRODUCT_ID(+)  
+and outs.PRODUCT_ID = p_301_abv.PRODUCT_ID(+)  
+
+and outs.product_id = mgp.PRD_GRP_SEQ 
+and mgp.CRNT_REC_FLG = 1
+union
+select 'AAOverall', 
+       round((NVL (sum(p_1.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS.OUTSTANDING),0)) * 100,2) PAR_1_PERC ,      
+       round((NVL (sum(p_4.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS.OUTSTANDING),0)) * 100,2) PAR_5_PERC,
+       round((NVL (sum(p_15.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS.OUTSTANDING),0)) * 100,2) PAR_15_PERC,
+       round((NVL (sum(p_29.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS.OUTSTANDING),0)) * 100,2) PAR_30_PERC,
+       round((NVL (sum(p_59.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS.OUTSTANDING),0)) * 100,2) PAR_45_PERC,
+       round((NVL (sum(p_89.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS.OUTSTANDING),0)) * 100,2) PAR_60_PERC,
+       round((NVL (sum(p_90.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS.OUTSTANDING),0)) * 100,2) PAR_90_PERC,
+       round((NVL (sum(p_91.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS.OUTSTANDING),0)) * 100,2) PAR_91_PERC,
+       round((NVL (sum(p_30_abv.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS.OUTSTANDING),0)) * 100,2) PAR_30_and_abv_PERC,
+      round((NVL (sum(p_11.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS1.OUTSTANDING),0)) * 100,2) PAR_11_PERC,   
+       round((NVL (sum(p_41.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS1.OUTSTANDING),0)) * 100,2) PAR_51_PERC,
+       round((NVL (sum(p_151.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS1.OUTSTANDING),0)) * 100,2) PAR_151_PERC,
+       round((NVL (sum(p_291.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS1.OUTSTANDING),0)) * 100,2) PAR_301_PERC,
+       round((NVL (sum(p_591.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS1.OUTSTANDING),0)) * 100,2) PAR_451_PERC,
+       round((NVL (sum(p_891.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS1.OUTSTANDING),0)) * 100,2) PAR_601_PERC,
+       round((NVL (sum(p_901.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS1.OUTSTANDING),0)) * 100,2) PAR_901_PERC,
+       round((NVL (sum(p_911.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS1.OUTSTANDING),0)) * 100,2) PAR_911_PERC,
+       round((NVL (sum(p_301_abv.REGULAR_PAR_AMOUNT), 1) / nvl(sum(OUTS1.OUTSTANDING),0)) * 100,2) PAR_301_and_abv_PERC
+       from mw_prd_grp mgp,
+(SELECT CPM.PRODUCT_ID, 
+       COUNT(CPM.LOAN_CYCLE_ID) ACTIVE_CLIENTS, 
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) OUTSTANDING
+FROM KASHF_REPORTING.con_mon_asofdate_rschd CPM,mw_prd_grp pr,mw_brnch mb,mw_area ma,mw_reg mr        
+WHERE (CPM.LOAN_COMPLETION_DATE IS NULL OR CPM.LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND  (NVL(OUTSTANDING_PRINCIPAL,0) + NVL(OUTSTANDING_SC,0)) > 0
+AND CPM.PRODUCT_ID = pr.prd_grp_seq and pr.CRNT_REC_FLG = 1
+and CPM.BRANCH_ID = mb.brnch_Seq and mb.CRNT_REC_FLG = 1
+and mb.AREA_SEQ = ma.AREA_SEQ and ma.CRNT_REC_FLG = 1
+and ma.REG_SEQ = mr.REG_SEQ and mr.CRNT_REC_FLG = 1
+and pr.prd_grp_seq not in (8)  
+and TRUNC(cpm.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM.PRODUCT_ID
+)outs,
+(SELECT CPM1.PRODUCT_ID, 
+       COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+       FROM KASHF_REPORTING.con_mon_asofdate_rschd cpm1,mw_prd_grp pr1,mw_brnch mb1,mw_area ma1,mw_reg mr1 
+       WHERE disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) 
+AND CPM1.PRODUCT_ID = pr1.prd_grp_seq and pr1.CRNT_REC_FLG = 1
+and CPM1.BRANCH_ID = mb1.brnch_Seq and mb1.CRNT_REC_FLG = 1
+and mb1.AREA_SEQ = ma1.AREA_SEQ and ma1.CRNT_REC_FLG = 1
+and ma1.REG_SEQ = mr1.REG_SEQ and mr1.CRNT_REC_FLG = 1
+and pr1.prd_grp_seq not in (8) 
+and TRUNC(cpm1.trn_date) = to_date(:to_dt,'dd-mm-RRRR')   
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+GROUP BY CPM1.PRODUCT_ID
+)p_1, 
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2, mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS >=29.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM2.PRODUCT_ID
+)p_30_abv,
+(SELECT CPM2.PRODUCT_ID,
+       COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS between 0 and 3.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM2.PRODUCT_ID
+)p_4,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS between 3.51 and 14.50 
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM2.PRODUCT_ID
+)p_15,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS between 14.51 and 28.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM2.PRODUCT_ID
+)p_29,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) 
+AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS between 28.51 and 44.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8) 
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR') 
+GROUP BY CPM2.PRODUCT_ID
+)p_59,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) 
+AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS between 44.51 and 59.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')  
+GROUP BY CPM2.PRODUCT_ID
+)p_89,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS between 59.51 and 89.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8) 
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR') 
+GROUP BY CPM2.PRODUCT_ID
+)p_90,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')
+AND OVERDUE_DAYS > 89.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')
+GROUP BY CPM2.PRODUCT_ID
+)p_91,
+(
+SELECT CPM.PRODUCT_ID, 
+       COUNT(CPM.LOAN_CYCLE_ID) ACTIVE_CLIENTS, 
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) OUTSTANDING
+FROM KASHF_REPORTING.con_mon_asofdate_rschd CPM,mw_prd_grp pr,mw_brnch mb,mw_area ma,mw_reg mr        
+WHERE (CPM.LOAN_COMPLETION_DATE IS NULL OR CPM.LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND  (NVL(OUTSTANDING_PRINCIPAL,0) + NVL(OUTSTANDING_SC,0)) > 0
+AND CPM.PRODUCT_ID = pr.prd_grp_seq and pr.CRNT_REC_FLG = 1
+and CPM.BRANCH_ID = mb.brnch_Seq and mb.CRNT_REC_FLG = 1
+and mb.AREA_SEQ = ma.AREA_SEQ and ma.CRNT_REC_FLG = 1
+and ma.REG_SEQ = mr.REG_SEQ and mr.CRNT_REC_FLG = 1
+and pr.prd_grp_seq not in (8)  
+and TRUNC(cpm.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM.PRODUCT_ID
+)outs1,
+(
+SELECT CPM1.PRODUCT_ID, 
+       COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+       FROM KASHF_REPORTING.con_mon_asofdate_rschd cpm1,mw_prd_grp pr1,mw_brnch mb1,mw_area ma1,mw_reg mr1 
+       WHERE disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) 
+AND CPM1.PRODUCT_ID = pr1.prd_grp_seq and pr1.CRNT_REC_FLG = 1
+and CPM1.BRANCH_ID = mb1.brnch_Seq and mb1.CRNT_REC_FLG = 1
+and mb1.AREA_SEQ = ma1.AREA_SEQ and ma1.CRNT_REC_FLG = 1
+and ma1.REG_SEQ = mr1.REG_SEQ and mr1.CRNT_REC_FLG = 1
+and pr1.prd_grp_seq not in (8)   
+and TRUNC(cpm1.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+GROUP BY CPM1.PRODUCT_ID
+)p_11, 
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS >= 29.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM2.PRODUCT_ID
+)p_301_ABV,
+(
+SELECT CPM2.PRODUCT_ID,
+       COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) 
+AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS between 0 and 3.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8) 
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM2.PRODUCT_ID
+)p_41,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS between 3.51 and 14.50 
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM2.PRODUCT_ID
+)p_151,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS between 14.51 and 28.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM2.PRODUCT_ID
+)p_291,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS between 28.51 and 44.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM2.PRODUCT_ID
+)p_591,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS between 44.51 and 59.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM2.PRODUCT_ID
+)p_891,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS between 59.51 and 89.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM2.PRODUCT_ID
+)p_901,
+(SELECT CPM2.PRODUCT_ID,
+        COUNT(LOAN_CYCLE_ID) REGULAR_OD_CLIENTS, 
+       ROUND(SUM(nvl(OVERDUE_AMOUNT,0))+SUM(nvl(OVERDUE_AMOUNT_sc,0))) REGULAR_OD_AMOUNT,
+       ROUND(SUM(NVL(OUTSTANDING_PRINCIPAL,0))) + ROUND(SUM(NVL(OUTSTANDING_SC,0))) REGULAR_PAR_AMOUNT 
+FROM KASHF_REPORTING.con_mon_asofdate_rschd  cpm2,mw_prd_grp pr2,mw_brnch mb2,mw_area ma2,mw_reg mr2 
+WHERE ( OVERDUE_AMOUNT>0 OR OVERDUE_AMOUNT_SC>0) AND disbursed_date between'01-may-2005' and to_date(:to_dt,'dd-mm-RRRR')-7
+AND OVERDUE_DAYS > 89.50
+AND (LOAN_COMPLETION_DATE IS NULL OR LOAN_COMPLETION_DATE >to_date(:to_dt,'dd-mm-RRRR')-7) 
+AND CPM2.PRODUCT_ID = pr2.prd_grp_seq and pr2.CRNT_REC_FLG = 1
+and CPM2.BRANCH_ID = mb2.brnch_Seq and mb2.CRNT_REC_FLG = 1
+and mb2.AREA_SEQ = ma2.AREA_SEQ and ma2.CRNT_REC_FLG = 1
+and ma2.REG_SEQ = mr2.REG_SEQ and mr2.CRNT_REC_FLG = 1
+and pr2.prd_grp_seq not in (8)  
+and TRUNC(cpm2.trn_date) = to_date(:to_dt,'dd-mm-RRRR')-7
+GROUP BY CPM2.PRODUCT_ID
+)p_911
+where outs.PRODUCT_ID = p_1.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_30_abv.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_4.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_15.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_29.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_59.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_89.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_90.PRODUCT_ID(+)
+and outs.PRODUCT_ID = p_91.PRODUCT_ID(+) 
+AND outs.PRODUCT_ID = OUTS1.PRODUCT_ID(+)
+AND outs.PRODUCT_ID = p_11.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_41.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_151.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_291.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_591.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_891.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_901.PRODUCT_ID(+)
+and outs.PRODUCT_ID = p_911.PRODUCT_ID(+) 
+and outs.PRODUCT_ID = p_301_abv.PRODUCT_ID(+)   
+and outs.product_id = mgp.PRD_GRP_SEQ 
+and mgp.CRNT_REC_FLG = 1 
+group by 'AAOverall'
+order by 1

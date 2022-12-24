@@ -1,0 +1,55 @@
+SELECT
+/* FileName: PROVINCE_WISE_OST_PORTFOLIO
+         * Writted by: Aisha Khan
+         * Review By: Ali Khubaib
+         * Date: 24-Nov-2022
+         * Reason: Finance Report (Portfolio) */
+prov_nm, SUM (OST_CLIENTS) OST_CLIENTS, SUM (OST_AMT) OST_AMT
+    FROM (SELECT (SELECT prov.ST_NM
+                    FROM mw_st prov, mw_dist dst
+                   WHERE     dst.st_seq = prov.st_seq
+                         AND dst.DIST_NM = loc.DISTRICT_NAME
+                         AND ROWNUM = 1)
+                     AS prov_nm,
+                 NVL (ost.OST_CLIENTS, 0)
+                     OST_CLIENTS,
+                 NVL (ost.OST_AMT, 0)
+                     OST_AMT
+            FROM mw_brnch              mb,
+                 kashf_reporting.br_loc loc,
+                 (  SELECT branch,
+                           SUM (OST_CLIENTS)     OST_CLIENTS,
+                           SUM (OST_LOANS)       OST_LOANS,
+                           SUM (OST_AMT)         OST_AMT
+                      FROM (  SELECT UPPER (cpm.branch)
+                                         branch,
+                                     CASE
+                                         WHEN CPM.PRODUCT_ID <> 19
+                                         THEN
+                                             COUNT (LOAN_CYCLE_ID)
+                                     END
+                                         OST_CLIENTS,
+                                     COUNT (LOAN_CYCLE_ID)
+                                         OST_LOANS,
+                                     ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                                         --+ ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                                         OST_AMT
+                                FROM KASHF_REPORTING.CON_MON_FMTO_TMP CPM
+                               WHERE     (   CPM.LOAN_COMPLETION_DATE IS NULL
+                                          OR CPM.LOAN_COMPLETION_DATE >
+                                             TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                                     AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                          + NVL (OUTSTANDING_SC, 0)) >
+                                         0
+                                     AND CPM.PRODUCT_ID NOT IN (8)
+                                     AND TRUNC (cpm.trn_date) =
+                                         TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                            GROUP BY cpm.branch, cpm.product_id)
+                  GROUP BY branch) ost
+           WHERE     mb.brnch_nm = ost.branch(+)
+                 AND mb.BRNCH_cd = loc.BRANCH_CD(+)
+                 AND (NVL (ost.OST_CLIENTS, 0) + NVL (ost.OST_AMT, 0)) > 0
+                 AND mb.brnch_seq <> -1
+                 AND mb.crnt_rec_flg = 1)
+GROUP BY prov_nm
+ORDER BY 2 desc

@@ -1,0 +1,743 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="MCB_DISBURSEMENT_REVERSAL_REQUEST_EXCEL" pageWidth="2200" pageHeight="595" orientation="Landscape"
+              whenNoDataType="AllSectionsNoDetail" columnWidth="2160" leftMargin="20" rightMargin="20" topMargin="20"
+              bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="bef00d12-a36b-4764-8597-cac7a6c08561">
+    <property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+    <property name="com.jaspersoft.studio.report.description" value=""/>
+    <property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
+    <property name="com.jaspersoft.studio.unit." value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+    <subDataset name="DISB_RVSL_RQST" uuid="909663a1-f8d4-4355-bd2c-c75dba08035b">
+        <property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+        <parameter name="TYP1" class="java.lang.String"/>
+        <queryString>
+            <![CDATA[]]>
+        </queryString>
+        <field name="REG_NM" class="java.lang.String"/>
+        <field name="REG_SEQ" class="java.lang.String"/>
+        <field name="BRNCH_NM" class="java.lang.String"/>
+        <field name="BRNCH_SEQ" class="java.lang.String"/>
+        <field name="AREA_NM" class="java.lang.String"/>
+        <field name="AREA_SEQ" class="java.lang.String"/>
+        <field name="DISURSEMENT_DATE" class="java.sql.Timestamp"/>
+        <field name="CLIENT_ID" class="java.lang.String"/>
+        <field name="CLIENT_NAME" class="java.lang.String"/>
+        <field name="WALLET_NUM" class="java.lang.String"/>
+        <field name="XPIN_NUMBER" class="java.lang.String"/>
+        <field name="CNIC" class="java.lang.String"/>
+        <field name="AMOUNT" class="java.lang.Long"/>
+        <field name="CONTACT_NUM" class="java.lang.String"/>
+        <field name="FUND_TRANSFER_DATE" class="java.sql.Timestamp"/>
+        <field name="TRANS_STATUS" class="java.lang.String"/>
+        <field name="TRANS_DATE" class="java.sql.Timestamp"/>
+        <field name="PRODUCT" class="java.lang.String"/>
+        <field name="MODE_OF_DISBURSEMENT" class="java.lang.String"/>
+        <field name="REASON" class="java.lang.String"/>
+        <field name="REVERSAL_LOG_DATE" class="java.sql.Timestamp"/>
+        <field name="REQUEST_CLOSE_DATE" class="java.sql.Timestamp"/>
+    </subDataset>
+    <parameter name="curr_user" class="java.lang.String"/>
+    <parameter name="from_dt" class="java.lang.String"/>
+    <parameter name="LOGO_IMG" class="java.lang.String"/>
+    <parameter name="to_dt" class="java.lang.String"/>
+    <parameter name="DISB_RVSL_RQST" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+    <parameter name="TYP" class="java.lang.String"/>
+    <queryString>
+        <![CDATA[]]>
+    </queryString>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="80" splitType="Stretch">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement x="0" y="50" width="450" height="20" uuid="0d4d54fc-5385-4359-90aa-18b60d19bbd1">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <textFieldExpression>
+                    <![CDATA[$P{TYP}.equals( "1" )  ? "MCB Remittance Disbursement Reversal Request" : "MCB Remittance Disbursement Reversal Request Logs"]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="0" width="150" height="20"
+                               uuid="f8d83e01-2c2f-42b8-b23a-bc651a549670">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Kashf Foundation]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="600" y="30" width="150" height="20" uuid="43aeb622-1c7d-4916-a951-366248065186">
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <printWhenExpression><![CDATA[!$P{TYP}.equals( "1" )]]></printWhenExpression>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font fontName="SansSerif" size="10" isUnderline="false"/>
+                </textElement>
+                <textFieldExpression><![CDATA["From: " + $P{from_dt}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="600" y="50" width="150" height="20" uuid="79010eee-7d36-4b59-9ae3-338627978c38">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font fontName="SansSerif" size="10" isUnderline="false"/>
+                </textElement>
+                <textFieldExpression><![CDATA["To:     " + $P{to_dt}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+    <summary>
+        <band height="30" splitType="Stretch">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+            <componentElement>
+                <reportElement positionType="Float" x="0" y="0" width="2160" height="30"
+                               uuid="56e0f440-923e-44e0-a4c2-ea016f1ae72a">
+                    <property name="com.jaspersoft.studio.layout"
+                              value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+                    <property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+                    <property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+                    <property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components"
+                          xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd"
+                          whenNoDataType="AllSectionsNoDetail">
+                    <datasetRun subDataset="DISB_RVSL_RQST" uuid="a72807c1-65e8-4735-93b1-ef3ec5c05c5c">
+                        <datasetParameter name="TYP1">
+                            <datasetParameterExpression><![CDATA[$P{TYP}]]></datasetParameterExpression>
+                        </datasetParameter>
+                        <dataSourceExpression><![CDATA[$P{DISB_RVSL_RQST}]]></dataSourceExpression>
+                    </datasetRun>
+                    <jr:column width="150" uuid="6e727c01-009b-4653-b866-bcf81ca1c4e8">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="30"
+                                               uuid="4adf5526-7a18-4d69-bf11-77fa9219be1d">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Region Name]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="20"
+                                               isRemoveLineWhenBlank="true" uuid="dcab4011-656e-41f7-a3df-8ab709323cd7">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{REG_NM}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="02db5264-131c-45f9-8c50-3e1df6bf6096">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="30"
+                                               uuid="6b8045b1-b0f7-411b-9d38-38ed1c76d988">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Branch Name]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="20"
+                                               isRemoveLineWhenBlank="true" uuid="e1a24b8b-f3c3-45a2-b8c1-bb89a3585da3">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{BRNCH_NM}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="d807f3a9-f09f-49ea-b00a-153c6a255add">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="30"
+                                               uuid="b3f204e0-f9ad-4dd0-aa44-7656bf648267">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Disbursement Date]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField isStretchWithOverflow="true" pattern="dd-MMM-yyyy" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="20"
+                                               isRemoveLineWhenBlank="true" uuid="d9adb8fe-c3b6-4f94-88b0-1e7346d05c3a">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="0" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{DISURSEMENT_DATE}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="f300596d-4f09-4f20-b379-e408c7962d6a">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="30"
+                                               uuid="ae7978c6-4166-4569-ba22-864943b30415">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                    <paragraph leftIndent="1" rightIndent="1"/>
+                                </textElement>
+                                <text><![CDATA[Reversal log Date]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField isStretchWithOverflow="true" pattern="dd-MMM-yyyy" isBlankWhenNull="false">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="20"
+                                               uuid="65a6600e-5126-4f19-8933-76b9aa02c9b4">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="0" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression>
+                                    <![CDATA[$F{REVERSAL_LOG_DATE} != null ? $F{REVERSAL_LOG_DATE} : ""]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="c3de5d32-c2f1-4272-ba02-9c37d4727837">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="30"
+                                               uuid="c4aba911-5598-4778-9cf4-9530d02a885d">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Client ID]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="20"
+                                               isRemoveLineWhenBlank="true" uuid="ca340136-0059-4fee-af0e-da242eb0ae59">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{CLIENT_ID}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="05328fad-a2ad-4d91-92c3-db5fd1a7d7b8">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="30"
+                                               uuid="2f44d5e8-2879-49e8-9fc4-4033242f33c0">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Client Name]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="20"
+                                               isRemoveLineWhenBlank="true" uuid="df58b49b-96e1-415f-9dbd-d93a2f1f20a3">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{CLIENT_NAME}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="ce072dd6-5b7c-4918-9074-8adb7d995552">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <textField>
+                                <reportElement x="0" y="0" width="150" height="30"
+                                               uuid="b6d5935e-768c-4b5e-870e-baf75f74f65e"/>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA["XPIN Number"]]></textFieldExpression>
+                            </textField>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="20"
+                                               isRemoveLineWhenBlank="true" uuid="515d3fc9-9e55-49ac-bb40-9e16e7c61f9e">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{XPIN_NUMBER}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="aa6efacb-a004-42d3-a686-2100610be478">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="30"
+                                               uuid="cc6b5b1f-0087-4fe2-84b5-ef75bb44624a">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[CNIC #]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="20"
+                                               isRemoveLineWhenBlank="true" uuid="e3534130-bc12-4a87-87d0-bbc0473f072e">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{CNIC}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="c8d62787-32a1-4922-9a29-3134aa07ec0a">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="30"
+                                               uuid="a2816b61-a8cd-4e0b-9972-2599939cbb64">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Amount]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField isStretchWithOverflow="true" pattern="#,##0" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="20"
+                                               isRemoveLineWhenBlank="true" uuid="fa383f1c-b2e0-4d7b-84a8-a1c41d8bdd84">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Right" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph rightIndent="1"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{AMOUNT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="6351facf-45bb-4d12-8d4f-9de9eb35d069">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column10"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="30"
+                                               uuid="d8cfa519-8bdc-42b8-b9c3-e3a404211e7c">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Product]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="20"
+                                               isRemoveLineWhenBlank="true" uuid="37424718-a774-48ad-9315-c117eba14124">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{PRODUCT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="c9bae4db-7b9f-486f-bc6c-e5aa39e8d6bf">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column11"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="30"
+                                               uuid="ae512d34-9f03-445e-8748-bf8017d9d3a5">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Made of Disbursement]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="20"
+                                               isRemoveLineWhenBlank="true" uuid="0ee9afc9-1aa3-4be5-bf58-07cdc9c78bdd">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{MODE_OF_DISBURSEMENT}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="9f9fd4dc-5ca5-48dd-8f99-4cf346732e20">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column12"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="150" height="30"
+                                               uuid="8d0f48e8-fd86-450c-a481-35453522594f">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Transaction Status]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="20"
+                                               isRemoveLineWhenBlank="true" uuid="5ad28be5-0494-4eb8-8745-8fd97ff99950">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{TRANS_STATUS}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="210" uuid="684aad07-0598-44ab-b2ed-e58c146b4ab8">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column13"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="210" height="30"
+                                               uuid="4818aa2d-0e4a-46d8-9487-232372eda5a5">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Reason]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="false">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="210" height="20"
+                                               uuid="35338de8-4231-4cb4-8e39-4a9ea84cb214">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="1" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression>
+                                    <![CDATA[$F{REASON} != null ? $F{REASON} : ""]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="150" uuid="f6e3cb11-0dca-4ca0-ab22-15aa7ebe59ed">
+                        <property name="com.jaspersoft.studio.components.table.model.column.name" value="Column14"/>
+                        <jr:columnHeader height="30" rowSpan="1">
+                            <box>
+                                <pen lineWidth="0.25"/>
+                            </box>
+                            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                                <reportElement key="" stretchType="ContainerHeight" isPrintRepeatedValues="false"
+                                               mode="Opaque" x="0" y="0" width="150" height="30"
+                                               uuid="08956ffa-6a54-49aa-9413-f48466da2c45">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  
+	( $F{TRANS_STATUS}.equals( "PENDING" ) ||  
+	  $F{TRANS_STATUS}.equals( "UNPAID" ) )  &&  
+	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="9" isBold="true"/>
+                                    <paragraph leftIndent="0" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression>
+                                    <![CDATA[$P{TYP1}.equals( "0" ) ?  "Request Close Date" : ""]]></textFieldExpression>
+                            </textField>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            <box>
+                                <pen lineWidth="0.0"/>
+                            </box>
+                            <textField isStretchWithOverflow="true" pattern="dd-MMM-yyyy" isBlankWhenNull="false">
+                                <reportElement stretchType="ContainerHeight" x="0" y="0" width="150" height="20"
+                                               uuid="805030ae-6f28-4eee-8780-43b5bbd4f9f3">
+                                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                    <printWhenExpression><![CDATA[$P{TYP1}.equals( "1" ) ?
+	(  	( $F{REASON} != null && !$F{REASON}.isEmpty() ) ?  true : false ) 
+	
+: $F{REASON} != null && !$F{REASON}.isEmpty()  ?  true : false]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <pen lineWidth="0.25"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="8"/>
+                                    <paragraph leftIndent="0" rightIndent="0"/>
+                                </textElement>
+                                <textFieldExpression>
+                                    <![CDATA[$P{TYP1}.equals( "0" ) ?  	( (  $F{TRANS_STATUS}.equals( "CANCELED" ) || $F{TRANS_STATUS}.equals( "REVERSED" ))  ?   $F{REQUEST_CLOSE_DATE} != null ? $F{REQUEST_CLOSE_DATE}  : ""  : "")  : ""]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                </jr:table>
+            </componentElement>
+        </band>
+    </summary>
+</jasperReport>

@@ -1,0 +1,268 @@
+/* Formatted on 10/24/2022 3:53:21 PM (QP5 v5.326) */
+SELECT DISTINCT
+       REGION_NAME,
+       AREA_NAME,
+       BRANCH,
+       (CASE
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 1 THEN 1
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 13 THEN 2
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 6 THEN 3
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 9 THEN 4
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 4 THEN 5
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 10 THEN 6
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 5 THEN 7
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 11 THEN 8
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 21 THEN 9
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 22 THEN 10
+            ELSE TO_NUMBER (PRD_GRP_SEQ)
+        END)
+           PRD_GRP_SEQ,
+       P.prd_grp_nm
+           PRODUCT,
+       ACTIVE_CLIENTS,
+       DISB_AMOUNT,
+       OS_AMOUNT,
+       --no_of_od_loans,
+       (  OD_CUST_1_4
+        + OD_CUST_5_15
+        + OD_CUST_16_29
+        + OD_CUST_30_89
+        + OD_CUST_90_179
+        + OD_CUST_364
+        + OD_CUST_365)
+           NO_OF_OD_LOANS,
+       OVERDUE_PRINCIPAL_CLOSING,
+       PAR_ABOVE_1,
+       OD_CUST_1_4,
+       PAR_1_4,
+       OD_CUST_5_15,
+       PAR_5_15,
+       OD_CUST_16_29,
+       PAR_16_29,
+       OD_CUST_30_89,
+       PAR_30_89,
+       OD_CUST_90_179,
+       PAR_90_179,
+       OD_CUST_364,
+       PAR_364,
+       OD_CUST_365,
+       PAR_365,
+       ROUND (PAR_1_4_PERC, 2)
+           PAR_1_4_PERC,
+       ROUND (PAR_5_15_PERC, 2)
+           PAR_5_15_PERC,
+       ROUND (PAR_16_29_PERC)
+           PAR_16_29_PERC,
+       ROUND (PAR_30_89_PERC)
+           PAR_30_89_PERC,
+       ROUND (PAR_90_179_PERC)
+           PAR_90_179_PERC,
+       ROUND (PAR_364_PERC, 2)
+           PAR_364_PERC,
+       ROUND (PAR_365_PERC, 2)
+           PAR_365_PERC
+  FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ CPM, mw_prd_grp P
+ WHERE     CPM.PRODUCT_ID = P.PRD_GRP_SEQ
+       AND P.CRNT_REC_FLG = 1
+       and :p_type=1
+       AND P.PRD_GRP_SEQ <> 8
+       
+UNION ALL
+---rescheduled--------
+SELECT DISTINCT
+       REGION_NAME,
+       AREA_NAME,
+       BRANCH,
+       (CASE
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 1 THEN 1
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 13 THEN 2
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 6 THEN 3
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 9 THEN 4
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 4 THEN 5
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 10 THEN 6
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 5 THEN 7
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 11 THEN 8
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 21 THEN 9
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 22 THEN 10
+            ELSE TO_NUMBER (PRD_GRP_SEQ)
+        END)
+           PRD_GRP_SEQ,
+       P.prd_grp_nm
+           PRODUCT,
+       res_ACTIVE_CLIENTS,
+       res_DISB_AMOUNT,
+       res_OS_AMOUNT,
+       --no_of_od_loans,
+       (  res_OD_CUST_1_4
+        + res_OD_CUST_5_15
+        + res_OD_CUST_16_29
+        + res_OD_CUST_30_89
+        + res_OD_CUST_90_179
+        + res_OD_CUST_364
+        + res_OD_CUST_365)
+           NO_OF_OD_LOANS,
+       res_OVERDUE_PRINCIPAL_CLOSING,
+       res_PAR_ABOVE_1,
+       res_OD_CUST_1_4,
+       res_PAR_1_4,
+       res_OD_CUST_5_15,
+       res_PAR_5_15,
+       res_OD_CUST_16_29,
+       res_PAR_16_29,
+       res_OD_CUST_30_89,
+       res_PAR_30_89,
+       res_OD_CUST_90_179,
+       res_PAR_90_179,
+       res_OD_CUST_364,
+       res_PAR_364,
+       res_OD_CUST_365,
+       res_PAR_365,
+       ROUND (res_PAR_1_4_PERC, 2)
+           res_PAR_1_4_PERC,
+       ROUND (res_PAR_5_15_PERC, 2)
+           res_PAR_5_15_PERC,
+       ROUND (res_PAR_16_29_PERC)
+           res_PAR_16_29_PERC,
+       ROUND (res_PAR_30_89_PERC)
+           res_PAR_30_89_PERC,
+       ROUND (res_PAR_90_179_PERC)
+           res_PAR_90_179_PERC,
+       ROUND (res_PAR_364_PERC, 2)
+           res_PAR_364_PERC,
+       ROUND (res_PAR_365_PERC, 2)
+           res_PAR_365_PERC
+  FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ CPM, mw_prd_grp P
+ WHERE     CPM.PRODUCT_ID = P.PRD_GRP_SEQ
+       AND P.CRNT_REC_FLG = 1
+       AND P.PRD_GRP_SEQ <> 8
+       and :p_type=2
+       AND (  NVL (res_ACTIVE_CLIENTS, 0)
+            + NVL (res_DISB_AMOUNT, 0)
+            + NVL (res_OS_AMOUNT, 0)
+            + NVL (res_OVERDUE_PRINCIPAL_CLOSING, 0)
+            + NVL (res_PAR_ABOVE_1, 0)
+            + NVL (res_OD_CUST_1_4, 0)
+            + NVL (res_PAR_1_4, 0)
+            + NVL (res_OD_CUST_5_15, 0)
+            + NVL (res_PAR_5_15, 0)
+            + NVL (res_OD_CUST_16_29, 0)
+            + NVL (res_PAR_16_29, 0)
+            + NVL (res_OD_CUST_30_89, 0)
+            + NVL (res_PAR_30_89, 0)
+            + NVL (res_OD_CUST_90_179, 0)
+            + NVL (res_PAR_90_179, 0)
+            + NVL (res_OD_CUST_364, 0)
+            + NVL (res_PAR_364, 0)
+            + NVL (res_OD_CUST_365, 0)
+            + NVL (res_PAR_365, 0)
+            + NVL (ROUND (res_PAR_1_4_PERC, 2), 0)
+            + NVL (ROUND (res_PAR_5_15_PERC, 2), 0)
+            + NVL (ROUND (res_PAR_16_29_PERC), 0)
+            + NVL (ROUND (res_PAR_30_89_PERC), 0)
+            + NVL (ROUND (res_PAR_90_179_PERC), 0)
+            + NVL (ROUND (res_PAR_364_PERC, 2), 0)
+            + NVL (ROUND (res_PAR_365_PERC, 2), 0)) >
+           0
+UNION ALL
+----nonrescheduled----
+
+
+SELECT DISTINCT
+       REGION_NAME,
+       AREA_NAME,
+       BRANCH,
+       (CASE
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 1 THEN 1
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 13 THEN 2
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 6 THEN 3
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 9 THEN 4
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 4 THEN 5
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 10 THEN 6
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 5 THEN 7
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 11 THEN 8
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 21 THEN 9
+            WHEN TO_NUMBER (PRD_GRP_SEQ) = 22 THEN 10
+            ELSE TO_NUMBER (PRD_GRP_SEQ)
+        END)
+           PRD_GRP_SEQ,
+       P.prd_grp_nm
+           PRODUCT,
+       nonres_ACTIVE_CLIENTS,
+       nonres_DISB_AMOUNT,
+       nonres_OS_AMOUNT,
+       --no_of_od_loans,
+       (  nonres_OD_CUST_1_4
+        + nonres_OD_CUST_5_15
+        + nonres_OD_CUST_16_29
+        + nonres_OD_CUST_30_89
+        + nonres_OD_CUST_90_179
+        + nonres_OD_CUST_364
+        + nonres_OD_CUST_365)
+           NO_OF_OD_LOANS,
+       nonres_OVERDUE_PRINCIPAL_CLOSING,
+       nonres_PAR_ABOVE_1,
+       nonres_OD_CUST_1_4,
+       nonres_PAR_1_4,
+       nonres_OD_CUST_5_15,
+       nonres_PAR_5_15,
+       nonres_OD_CUST_16_29,
+       nonres_PAR_16_29,
+       nonres_OD_CUST_30_89,
+       nonres_PAR_30_89,
+       nonres_OD_CUST_90_179,
+       nonres_PAR_90_179,
+       nonres_OD_CUST_364,
+       nonres_PAR_364,
+       nonres_OD_CUST_365,
+       nonres_PAR_365,
+       ROUND (nonres_PAR_1_4_PERC, 2)
+           nonres_PAR_1_4_PERC,
+       ROUND (nonres_PAR_5_15_PERC, 2)
+           nonres_PAR_5_15_PERC,
+       ROUND (nonres_PAR_16_29_PERC)
+           nonres_PAR_16_29_PERC,
+       ROUND (nonres_PAR_30_89_PERC)
+           nonres_PAR_30_89_PERC,
+       ROUND (nonres_PAR_90_179_PERC)
+           nonres_PAR_90_179_PERC,
+       ROUND (nonres_PAR_364_PERC, 2)
+           nonres_PAR_364_PERC,
+       ROUND (nonres_PAR_365_PERC, 2)
+           nonres_PAR_365_PERC
+  FROM KASHF_REPORTING.CON_MON_FMTO_PQ_ CPM, mw_prd_grp P
+ WHERE     CPM.PRODUCT_ID = P.PRD_GRP_SEQ
+       AND P.CRNT_REC_FLG = 1
+       AND P.PRD_GRP_SEQ <> 8
+       and :p_type = 3
+       AND (  NVL (nonres_ACTIVE_CLIENTS, 0)
+            + NVL (nonres_DISB_AMOUNT, 0)
+            + NVL (nonres_OS_AMOUNT, 0)
+            + NVL (nonres_OVERDUE_PRINCIPAL_CLOSING, 0)
+            + NVL (nonres_PAR_ABOVE_1, 0)
+            + NVL (nonres_OD_CUST_1_4, 0)
+            + NVL (nonres_PAR_1_4, 0)
+            + NVL (nonres_OD_CUST_5_15, 0)
+            + NVL (nonres_PAR_5_15, 0)
+            + NVL (nonres_OD_CUST_16_29, 0)
+            + NVL (nonres_PAR_16_29, 0)
+            + NVL (nonres_OD_CUST_30_89, 0)
+            + NVL (nonres_PAR_30_89, 0)
+            + NVL (nonres_OD_CUST_90_179, 0)
+            + NVL (nonres_PAR_90_179, 0)
+            + NVL (nonres_OD_CUST_364, 0)
+            + NVL (nonres_PAR_364, 0)
+            + NVL (nonres_OD_CUST_365, 0)
+            + NVL (nonres_PAR_365, 0)
+            + NVL (ROUND (nonres_PAR_1_4_PERC, 2), 0)
+            + NVL (ROUND (nonres_PAR_5_15_PERC, 2), 0)
+            + NVL (ROUND (nonres_PAR_16_29_PERC), 0)
+            + NVL (ROUND (nonres_PAR_30_89_PERC), 0)
+            + NVL (ROUND (nonres_PAR_90_179_PERC), 0)
+            + NVL (ROUND (nonres_PAR_364_PERC, 2), 0)
+            + NVL (ROUND (nonres_PAR_365_PERC, 2), 0)) >
+           0
+ORDER BY
+    4,
+    1,
+    2,
+    3

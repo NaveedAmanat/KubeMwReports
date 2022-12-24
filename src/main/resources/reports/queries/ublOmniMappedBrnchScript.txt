@@ -1,0 +1,4 @@
+select mb.BRNCH_NM, mb.BRNCH_PH_NUM, mb.EMAIL
+from mw_brnch mb
+where mb.CRNT_REC_FLG = 1 and mb.brnch_seq <> -1
+order by 1

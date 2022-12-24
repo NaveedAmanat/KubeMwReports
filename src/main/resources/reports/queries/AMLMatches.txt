@@ -1,0 +1,20 @@
+select rg.reg_nm,
+ar.area_nm,
+brnch_nm,
+emp.emp_nm BdoNm,
+mc.crtd_dt,
+mc.cnic_num,
+clnt.frst_nm || ' '||clnt.last_nm clnt_nm,
+ag.ref_cd_dscr TypOfMatch
+from mw_aml_mtchd_clnt mc
+join mw_loan_app ap on ap.loan_app_seq=mc.loan_app_seq and ap.crnt_rec_flg=1
+join mw_clnt clnt on clnt.clnt_seq=ap.clnt_seq and clnt.crnt_rec_flg=1
+join mw_port prt on prt.port_seq = mc.port_seq and prt.crnt_rec_flg=1
+join mw_port_emp_rel prl on prl.port_seq=prt.port_seq and prl.crnt_rec_flg=1
+join mw_emp emp on emp.emp_seq=prl.emp_seq
+join mw_brnch br on br.brnch_seq = prt.brnch_seq and br.crnt_rec_flg=1
+join mw_area ar on ar.area_seq=br.area_seq and ar.crnt_rec_flg=1
+join mw_reg rg on rg.reg_seq=ar.reg_seq and rg.crnt_rec_flg=1
+join mw_ref_cd_val ag on ag.ref_cd_seq=mc.aml_src_agy and ag.crnt_rec_flg=1
+where mc.crtd_dt between to_date(:frmDt||' 00:00:00','DD-MM-YYYY HH24:MI:SS') and to_date(:toDt||' 23:59:59','DD-MM-YYYY HH24:MI:SS')
+and prt.brnch_seq = case when to_number(:brnchSeq)=0 then prt.brnch_seq else to_number(:brnchSeq) end

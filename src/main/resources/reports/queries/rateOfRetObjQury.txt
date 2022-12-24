@@ -1,0 +1,29 @@
+select mnth dsbmt_mnth, mnth_ordr, tgt.trgt_clnts,
+Agencies,month01,month02,month03,month04,month05,month06,month07,month08,month09,month10,month11,month12
+from (
+select to_char(exp.crtd_dt,'Mon-YYYY') mnth, to_char(to_date(exp.crtd_dt),'YYYYMM') mnth_ordr,
+count(distinct ap.loan_app_seq) Agencies,
+count(distinct case when to_char(dvh.dsbmt_dt,'MM')='01' and ap.loan_app_sts=703 then ap.loan_app_seq else null end) month01,
+count(distinct case when to_char(dvh.dsbmt_dt,'MM')='02' and ap.loan_app_sts=703 then ap.loan_app_seq else null end) month02,
+count(distinct case when to_char(dvh.dsbmt_dt,'MM')='03' and ap.loan_app_sts=703 then ap.loan_app_seq else null end) month03,
+count(distinct case when to_char(dvh.dsbmt_dt,'MM')='04' and ap.loan_app_sts=703 then ap.loan_app_seq else null end) month04,
+count(distinct case when to_char(dvh.dsbmt_dt,'MM')='05' and ap.loan_app_sts=703 then ap.loan_app_seq else null end) month05,
+count(distinct case when to_char(dvh.dsbmt_dt,'MM')='06' and ap.loan_app_sts=703 then ap.loan_app_seq else null end) month06,
+count(distinct case when to_char(dvh.dsbmt_dt,'MM')='07' and ap.loan_app_sts=703 then ap.loan_app_seq else null end) month07,
+count(distinct case when to_char(dvh.dsbmt_dt,'MM')='08' and ap.loan_app_sts=703 then ap.loan_app_seq else null end) month08,
+count(distinct case when to_char(dvh.dsbmt_dt,'MM')='09' and ap.loan_app_sts=703 then ap.loan_app_seq else null end) month09,
+count(distinct case when to_char(dvh.dsbmt_dt,'MM')='10' and ap.loan_app_sts=703 then ap.loan_app_seq else null end) month10,
+count(distinct case when to_char(dvh.dsbmt_dt,'MM')='11' and ap.loan_app_sts=703 then ap.loan_app_seq else null end) month11,
+count(distinct case when to_char(dvh.dsbmt_dt,'MM')='12' and ap.loan_app_sts=703 then ap.loan_app_seq else null end) month12
+from mw_loan_app ap
+join mw_exp exp on exp.exp_ref=ap.loan_app_seq and exp.crnt_rec_flg=1 and exp.expns_typ_seq=12595
+join mw_dsbmt_vchr_hdr dvh on dvh.loan_app_seq=ap.loan_app_seq and dvh.crnt_rec_flg=1
+join mw_port prt on prt.port_seq= ap.port_seq and prt.crnt_rec_flg=1 and prt.brnch_seq=:brnchSeq
+--join mw_ref_cd_val lsts on lsts.ref_cd_seq=ap.loan_app_sts and lsts.crnt_rec_flg=1
+where ap.crnt_rec_flg=1
+and to_number(to_char(exp.crtd_dt,'YYYY'))=to_number(to_char(sysdate,'YYYY'))
+group by to_char(exp.crtd_dt,'Mon-YYYY'), to_char(to_date(exp.crtd_dt),'YYYYMM')) disb
+left outer join
+( select trgt_perd,sum(trgt_clients) trgt_clnts from mw_brnch_trgt t where brnch_seq=:brnchSeq and del_flg=0 and trgt_yr=to_char(sysdate,'YYYY') and t.PRD_SEQ in (6)
+group by trgt_perd) tgt on tgt.trgt_perd=disb.mnth_ordr
+order by 2

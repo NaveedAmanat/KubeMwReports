@@ -1,0 +1,31 @@
+SELECT reg.reg_nm,
+         COUNT (1)
+             AS "Loans Written Off from Pre-Covid Portfolio",
+         SUM (wrt.OUTSD_PPAL_AMT + wrt.OUTSD_SRVC_CHRG_AMT)
+             AS "Amount Written Off from Pre-Covid Portfolio",
+         SUM (CASE WHEN wrt.loan_app_sts = 704 THEN 1 ELSE 0 END)
+             AS "Written off Loans Recovered to date",
+         nvl(SUM((
+            SELECT sum(dtl.pymt_amt) 
+            from MW_WRT_OF_RCVRY_TRX trx
+            join MW_WRT_OF_RCVRY_DTL dtl on dtl.WRT_OF_RCVRY_TRX_SEQ = trx.WRT_OF_RCVRY_TRX_SEQ 
+            and trx.CRNT_REC_FLG = 1 and dtl.loan_app_seq = la.loan_app_seq          
+          )),0) 
+             AS "Written Off Amount Recovered to date",
+         reg.reg_seq
+    FROM mw_wrt_of_clnt wrt
+         INNER JOIN mw_loan_app la ON wrt.loan_app_seq = la.loan_app_seq
+         INNER JOIN mw_prd_grp prdgrp ON prdgrp.prd_grp_seq = wrt.prd_grp_seq
+         INNER JOIN mw_brnch brnch ON wrt.brnch_seq = brnch.brnch_seq
+         INNER JOIN mw_area area ON brnch.area_seq = area.area_seq
+         INNER JOIN mw_reg reg ON reg.reg_seq = area.reg_seq         
+         INNER JOIN PRE_COVID_APR20_OUTS_LOAN_APPS apr on la.LOAN_APP_SEQ = apr.LOAN_APP_SEQ
+   WHERE     wrt.crnt_rec_flg = 1         
+         AND la.crnt_rec_flg = 1
+         AND prdgrp.crnt_rec_flg = 1
+         AND brnch.crnt_rec_flg = 1
+         AND area.crnt_rec_flg = 1
+         AND reg.crnt_rec_flg = 1
+GROUP BY 
+         reg.reg_nm,
+         reg.reg_seq

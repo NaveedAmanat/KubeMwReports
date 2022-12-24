@@ -1,0 +1,63 @@
+select grp, perd_key, frmDt frmDt, todt todt, typ_seq, typ_str, 
+bdgt_amt,  (case when CRDT_DBT_FLG = 1 and acct = '000.000.401101.00000' then amt else 0 end) cash_db_amt, 
+(case when CRDT_DBT_FLG = 0 and acct = '000.000.401101.00000' then amt else 0 end) cash_cr_amt, 
+(case when CRDT_DBT_FLG = 1 and acct is null then amt else 0 end) bnk_db_amt, 
+(case when CRDT_DBT_FLG = 0 and acct is null then amt else 0 end) bnk_cr_amt  from  ( 
+select '1.Monthly Expenses' grp, mper.perd_key,   
+:frmDt frmdt, :toDt todt, ptyp.typ_seq, ptyp.typ_str,mjd.CRDT_DBT_FLG, 
+max((select max(mjd1.GL_ACCT_NUM) from mw_jv_dtl mjd1 where mjd1.JV_HDR_SEQ = mjd.JV_HDR_SEQ and mjd1.GL_ACCT_NUM = '000.000.401101.00000')) acct, 
+nvl(max((select nvl(bdgt_amt,0) from mw_brnch_bdgt bdgt where bdgt.brnch_seq=mjh.brnch_seq and bdgt.bdgt_ctgry_key=ptyp.typ_seq and bdgt.bdgt_perd = perd_key and bdgt.del_flg=0)),0) bdgt_amt,   
+sum(mjd.amt) amt   from mw_jv_hdr mjh, mw_jv_dtl mjd, mw_perd mper, mw_typs ptyp 
+where mjh.JV_HDR_SEQ = mjd.JV_HDR_SEQ  and mjh.BRNCH_SEQ = :brnch 
+and  ptyp.typ_seq not in (422) and to_date(mjh.jv_dt) between :frmDt and :toDt   
+and mjd.GL_ACCT_NUM = ptyp.GL_ACCT_NUM 
+and ptyp.typ_id not in ('0005','0006','0007','0500','0299','0336','0338','0339','0343','0297',   
+'0345','0346','0347','0351','0354','0356','0357','0358','0359',   
+'0360','0361','0362','0363','0364','0365','0366','0342','0420',   
+'0421','0423','0424','0450','0451','0452','0454','0455','0456','0008','0331') and ptyp.perd_flg=1  
+and ptyp.typ_ctgry_key=2   and mjh.BRNCH_SEQ = :brnch  and ptyp.CRNT_REC_FLG = 1 
+and mjh.ENTY_TYP = 'Expense'  and mper.perd_key=to_char(mjh.jv_dt,'yyyymm') 
+group by mper.perd_key,mper.perd_strt_dt,mper.perd_end_dt,ptyp.typ_seq,ptyp.typ_str,mjd.CRDT_DBT_FLG  ) 
+
+
+union  select grp, qtr_key, frmDt , toDt, typ_seq, typ_str,  bdgt_amt, 
+(case when CRDT_DBT_FLG = 1 and acct = '000.000.401101.00000' then amt else 0 end) cash_db_amt, 
+(case when CRDT_DBT_FLG = 0 and acct = '000.000.401101.00000' then amt else 0 end) cash_cr_amt, 
+(case when CRDT_DBT_FLG = 1 and acct is null then amt else 0 end) bnk_db_amt, 
+(case when CRDT_DBT_FLG = 0 and acct is null then amt else 0 end) bnk_cr_amt  from  ( 
+select '2.Quarterly Expenses' grp, mper.qtr_key,   
+to_char(mper.qtr_strt_dt,'MON-yyyy') frmDt, to_char(mper.qtr_end_dt,'MON-yyyy') toDt, 
+ ptyp.typ_seq, ptyp.typ_str,mjd.CRDT_DBT_FLG, 
+max((select max(mjd1.GL_ACCT_NUM) from mw_jv_dtl mjd1 where mjd1.JV_HDR_SEQ = mjd.JV_HDR_SEQ and mjd1.GL_ACCT_NUM = '000.000.401101.00000')) acct, 
+nvl(max((select max(bdgt_amt) from mw_brnch_bdgt bdgt where bdgt.brnch_seq=mjh.brnch_seq and bdgt.bdgt_ctgry_key=ptyp.typ_seq and bdgt.bdgt_perd = qtr_key and bdgt.del_flg=0)),0) bdgt_amt,   
+sum(mjd.amt) amt   from mw_jv_hdr mjh, mw_jv_dtl mjd, mw_perd mper, mw_typs ptyp 
+where mjh.JV_HDR_SEQ = mjd.JV_HDR_SEQ  and mjh.BRNCH_SEQ = :brnch  and mjd.GL_ACCT_NUM = ptyp.GL_ACCT_NUM 
+and ptyp.typ_id not in ('0005','0006','0007','0500','0299','0336','0338','0339','0343','0297',   
+'0345','0346','0347','0351','0354','0356','0357','0358','0359',   
+'0360','0361','0362','0363','0364','0365','0366','0342','0420',   
+'0421','0423','0424','0450','0451','0452','0454','0455','0456','0008','0331') and ptyp.perd_flg=2 
+and ptyp.typ_ctgry_key=2   and mjh.BRNCH_SEQ = :brnch  and ptyp.CRNT_REC_FLG = 1 
+and mjh.ENTY_TYP = 'Expense'  and mper.perd_key=to_char(mjh.jv_dt,'yyyymm') 
+and mper.perd_key <= to_char(to_date(:toDt),'yyyymm') and mper.fin_yr = (select fin_yr from mw_perd where perd_key= to_char(to_date(:toDt),'yyyymm')) 
+group by mper.qtr_key,to_char(mper.qtr_strt_dt,'MON-yyyy'),to_char(mper.qtr_end_dt,'MON-yyyy'),ptyp.typ_seq,ptyp.typ_str,mjd.CRDT_DBT_FLG 
+)  union  select grp, BI_ANL_KEY, frmDt , toDt, typ_seq, typ_str,  bdgt_amt, 
+(case when CRDT_DBT_FLG = 1 and acct = '000.000.401101.00000' then amt else 0 end) cash_db_amt, 
+(case when CRDT_DBT_FLG = 0 and acct = '000.000.401101.00000' then amt else 0 end) cash_cr_amt, 
+(case when CRDT_DBT_FLG = 1 and acct is null then amt else 0 end) bnk_db_amt, 
+(case when CRDT_DBT_FLG = 0 and acct is null then amt else 0 end) bnk_cr_amt  from  ( 
+select '3.Bi-Annual Expenses' grp, mper.BI_ANL_KEY,   
+to_char(mper.BI_ANL_STRT_DT,'MON-yyyy') frmDt, to_char(mper.BI_ANL_end_DT,'MON-yyyy') toDt, 
+ ptyp.typ_seq, ptyp.typ_str,mjd.CRDT_DBT_FLG, 
+max((select max(mjd1.GL_ACCT_NUM) from mw_jv_dtl mjd1 where mjd1.JV_HDR_SEQ = mjd.JV_HDR_SEQ and mjd1.GL_ACCT_NUM = '000.000.401101.00000')) acct, 
+nvl(max((select max(bdgt_amt) from mw_brnch_bdgt bdgt where bdgt.brnch_seq=mjh.brnch_seq and bdgt.bdgt_ctgry_key=ptyp.typ_seq and bdgt.bdgt_perd = BI_ANL_KEY and bdgt.del_flg=0)),0) bdgt_amt,   
+sum(mjd.amt) amt   from mw_jv_hdr mjh, mw_jv_dtl mjd, mw_perd mper, mw_typs ptyp 
+where mjh.JV_HDR_SEQ = mjd.JV_HDR_SEQ  and mjh.BRNCH_SEQ = :brnch  and mjd.GL_ACCT_NUM = ptyp.GL_ACCT_NUM 
+and ptyp.typ_id not in ('0005','0006','0007','0500','0299','0336','0338','0339','0343','0297',   
+'0345','0346','0347','0351','0354','0356','0357','0358','0359',   
+'0360','0361','0362','0363','0364','0365','0366','0342','0420',   
+'0421','0423','0424','0450','0451','0452','0454','0455','0456','0008','0331') and ptyp.perd_flg=3 
+and ptyp.typ_ctgry_key=2   and mjh.BRNCH_SEQ = :brnch  and ptyp.CRNT_REC_FLG = 1 
+and mjh.ENTY_TYP = 'Expense'  and mper.perd_key=to_char(mjh.jv_dt,'yyyymm') 
+and mper.perd_key <= to_char(to_date(:toDt),'yyyymm') and mper.fin_yr = (select fin_yr from mw_perd where perd_key= to_char(to_date(:toDt),'yyyymm')) 
+group by mper.BI_ANL_KEY,to_char(mper.BI_ANL_STRT_DT,'MON-yyyy'),to_char(mper.BI_ANL_end_DT,'MON-yyyy'),ptyp.typ_seq,ptyp.typ_str,mjd.CRDT_DBT_FLG 
+)

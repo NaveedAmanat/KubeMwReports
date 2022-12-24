@@ -1,0 +1,598 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="Mobile_Wallet_funds_Letter" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail"
+              columnWidth="555" leftMargin="20" rightMargin="20" topMargin="70" bottomMargin="20"
+              uuid="6ed18ed8-16a7-4f11-9195-5bce791d2dd6">
+    <property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+    <property name="com.jaspersoft.studio.data.defaultdataadapter" value="MWX_DB"/>
+    <property name="com.jaspersoft.studio.report.description" value=""/>
+    <property name="com.jaspersoft.studio.unit." value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+    <parameter name="AMOUNT" class="java.lang.Long"/>
+    <parameter name="ref_dt" class="java.lang.String"/>
+    <parameter name="account" class="java.lang.String"/>
+    <parameter name="account_no" class="java.lang.String"/>
+    <parameter name="addr" class="java.lang.String"/>
+    <parameter name="typyId" class="java.lang.String"/>
+    <parameter name="bankCd" class="java.lang.String"/>
+    <parameter name="account1" class="java.lang.String"/>
+    <queryString language="SQL">
+        <![CDATA[select
+    sum((select mjd.amt from mw_jv_hdr mjh, mw_jv_dtl mjd
+        where mjh.JV_HDR_SEQ = mjd.JV_HDR_SEQ and mjh.ENTY_SEQ = dvh.DSBMT_HDR_SEQ 
+        and UPPER(mjh.ENTY_TYP) = 'DISBURSEMENT'
+        AND mjd.CRDT_DBT_FLG = 0 AND mjd.GL_ACCT_NUM = mt.GL_ACCT_NUM
+        )) DISB_AMOUNT
+    from mw_loan_app ap              
+    join mw_prd prd on ap.PRD_SEQ = prd.PRD_SEQ and prd.CRNT_REC_FLG = 1                 
+    join mw_port prt on prt.port_seq=ap.port_seq and prt.crnt_rec_flg=1
+    join mw_brnch mb on prt.brnch_seq = mb.brnch_seq and mb.crnt_rec_flg = 1
+    join mw_area ma on ma.area_seq = mb.area_seq  and ma.crnt_rec_flg = 1 
+    join mw_reg mr on mr.reg_seq = ma.reg_seq  and mr.crnt_rec_flg = 1,    
+    mw_dsbmt_vchr_hdr dvh, mw_dsbmt_vchr_dtl dsd, mw_typs mt      
+    where ap.CRNT_REC_FLG = 1 and dvh.DSBMT_HDR_SEQ = dsd.DSBMT_HDR_SEQ and dsd.CRNT_REC_FLG = 1              
+    and dvh.loan_app_seq = ap.loan_app_seq and dvh.crnt_rec_flg = 1    
+    and mt.TYP_SEQ = dsd.PYMT_TYPS_SEQ and mt.CRNT_REC_FLG = 1 and mt.TYP_ID in (16228,16229)  
+    --and mr.reg_seq in (28)
+    --and mb.brnch_seq in (5)
+    and trunc(dvh.dsbmt_dt) between to_date('09-Mar-2021', 'DD-Mon-YYYY') and to_date('09-Mar-2021', 'DD-Mon-YYYY')]]>
+    </queryString>
+    <field name="DISB_AMOUNT" class="java.lang.Long">
+        <property name="com.jaspersoft.studio.field.label" value="DISB_AMOUNT"/>
+    </field>
+    <variable name="AMOUNT1" class="java.lang.Long" calculation="Sum">
+        <variableExpression><![CDATA[$P{AMOUNT}]]></variableExpression>
+    </variable>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <summary>
+        <band height="700">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+            <staticText>
+                <reportElement x="0" y="314" width="15" height="30" uuid="9d8f03da-d0c1-42a1-a35a-eec41076ca6a">
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Sr#]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="15" y="314" width="80" height="30" uuid="02bd00fc-4b7b-41cd-8231-f9fad936d2f1">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Kashf Foundation Branch]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="95" y="314" width="80" height="30" uuid="cb55a086-2513-4fa9-a61a-a3489e545232">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Kashf Foundation Account no.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="175" y="314" width="95" height="30" uuid="a8fae627-3066-467e-b4c1-a75c0ad88c13">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Bank]]></text>
+            </staticText>
+            <staticText>
+                <reportElement stretchType="ElementGroupHeight" x="0" y="344" width="15" height="25"
+                               uuid="cd19645b-6a9f-41ff-812b-4c7170cee1b9">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[1]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="270" y="314" width="40" height="30" uuid="2c899103-992a-4275-90a5-b95d383f0b3d">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Branch Status]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="310" y="314" width="135" height="30" uuid="c8200b9e-db15-4565-9470-4685c1caa5b8">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Region Name / Branch Name]]></text>
+            </staticText>
+            <staticText>
+                <reportElement stretchType="ElementGroupHeight" x="15" y="344" width="80" height="25"
+                               uuid="884d4495-12d0-4381-8297-c81b43d3f572">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Kashf Foundation]]></text>
+            </staticText>
+            <staticText>
+                <reportElement stretchType="ElementGroupHeight" x="270" y="344" width="40" height="25"
+                               uuid="94b31847-93ec-4404-8b26-6da0933cb829">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Online]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="430" width="310" height="15" uuid="fa6b837d-cb26-4281-ba96-14411ce16737">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph leftIndent="2"/>
+                </textElement>
+                <text><![CDATA[Yours Truly,]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="219" width="80" height="15" uuid="3d480904-c2c6-4586-810b-79820a2bd91e">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph leftIndent="2"/>
+                </textElement>
+                <text><![CDATA[Subject:]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="80" y="219" width="300" height="15" uuid="0ddc8c1f-1e38-4346-be6d-5481472efaf6">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph leftIndent="2"/>
+                </textElement>
+                <text><![CDATA[Debit Instruction for Disbursement to Beneficiary Mobile Wallet]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="255" width="180" height="15" uuid="a94b21d3-7746-4cd3-ae4b-6bcde9e6e276">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph leftIndent="2"/>
+                </textElement>
+                <text><![CDATA[Dear Sir,]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="480" y="369" width="75" height="20" isRemoveLineWhenBlank="true"
+                               uuid="9bd02b6b-460f-4f86-8746-8c56741de211">
+                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <printWhenExpression><![CDATA[$P{bankCd} != null ? true : false]]></printWhenExpression>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph rightIndent="1"/>
+                </textElement>
+                <textFieldExpression>
+                    <![CDATA[$P{AMOUNT} != null ? new java.text.DecimalFormat("#,##0").format($P{AMOUNT}) : 0]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="20" y="631" width="93" height="24"
+                               uuid="01eb7a50-d299-490c-81dd-4271dedca256">
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Center">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Authorised signature]]></text>
+            </staticText>
+            <line>
+                <reportElement positionType="Float" x="19" y="631" width="94" height="1"
+                               uuid="852144f3-7358-4ee3-b40d-4700ca320107">
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                </reportElement>
+            </line>
+            <staticText>
+                <reportElement positionType="Float" x="430" y="631" width="109" height="24"
+                               uuid="c69b0d98-2224-4a85-a153-57220c0f99fb">
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                </reportElement>
+                <textElement textAlignment="Center">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Authorised signature]]></text>
+            </staticText>
+            <line>
+                <reportElement positionType="Float" x="429" y="631" width="110" height="1"
+                               uuid="7de4905d-dc50-4f09-8784-45af817ce144">
+                    <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                </reportElement>
+            </line>
+            <textField>
+                <reportElement x="70" y="80" width="209" height="15" uuid="87f6bfad-e33a-4b0b-81d6-4847042a1a91">
+                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph rightIndent="1"/>
+                </textElement>
+                <textFieldExpression>
+                    <![CDATA[new SimpleDateFormat("EEEE, MMMM dd, yyyy").format(new Date())]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="80" width="70" height="15" uuid="0e338dfe-bcce-4722-b22c-92e5b2232c31">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph leftIndent="2"/>
+                </textElement>
+                <text><![CDATA[Date:]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="2" y="130" width="180" height="15" uuid="e753d87e-2616-4156-818c-42522ba587a1">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph leftIndent="2"/>
+                </textElement>
+                <text><![CDATA[To,]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="2" y="145" width="180" height="15" uuid="9d8a8589-0301-4781-8683-3ce2ce16b0fa">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph leftIndent="2"/>
+                </textElement>
+                <text><![CDATA[The Manager,]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="2" y="183" width="180" height="15" uuid="1e865004-f73e-459e-bdfc-febbcebb66dc">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph leftIndent="2"/>
+                </textElement>
+                <text><![CDATA[Lahore.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="65" width="70" height="15" uuid="863a5f91-378e-4e7e-ad91-9390d18d8e82">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph leftIndent="2"/>
+                </textElement>
+                <text><![CDATA[BR.REF #]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="70" y="65" width="210" height="15" uuid="2c207353-4229-4de1-afbc-992e03e20fdf">
+                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph rightIndent="1"/>
+                </textElement>
+                <textFieldExpression>
+                    <![CDATA[$P{ref_dt} + "-" +($P{bankCd} != null  ? $P{bankCd} : "0000")]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="270" width="555" height="35" uuid="9d97009c-5995-42a1-b32f-d1c038bbaeb4">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph leftIndent="1" rightIndent="0"/>
+                </textElement>
+                <textFieldExpression>
+                    <![CDATA["Please debit KASHF Foundation's following account maintained with " +$P{account}+ " for Disbursement to our beneficiaries/Clients. The details are shared on excel format via email form respective POC's."]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="2" y="160" width="180" height="12" uuid="1443f04c-26af-44d1-a7c2-28d464b29908">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph leftIndent="1" rightIndent="0"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{account}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="310" y="344" width="135" height="25" uuid="1de941aa-cd40-4659-8530-3af35b524f41">
+                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph rightIndent="1"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{addr}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="95" y="344" width="80" height="25" uuid="3a832b13-2b6a-418c-9db3-32092da13915">
+                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph rightIndent="1"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{account_no}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="175" y="344" width="95" height="25" uuid="6a3de5b1-e435-47cd-abf4-d39e2256c0a8">
+                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph rightIndent="1"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{account}]]></textFieldExpression>
+            </textField>
+            <frame>
+                <reportElement x="445" y="314" width="110" height="55" uuid="499c29f5-0fd3-4aea-8aa4-a938a76cccd5">
+                    <property name="ShowOutOfBoundContent" value="true"/>
+                    <property name="com.jaspersoft.studio.layout"/>
+                </reportElement>
+                <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                    <reportElement positionType="Float" x="0" y="0" width="35" height="30" isRemoveLineWhenBlank="true"
+                                   uuid="a4feb6d7-4a90-4a91-82f6-43e104d49cf2">
+                        <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                        <printWhenExpression><![CDATA[$P{bankCd} != null ? true : false]]></printWhenExpression>
+                    </reportElement>
+                    <box>
+                        <pen lineWidth="0.25"/>
+                    </box>
+                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                        <font size="8" isBold="false"/>
+                        <paragraph rightIndent="1"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[$P{bankCd} != null ? "Bank Code" : null]]></textFieldExpression>
+                </textField>
+                <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                    <reportElement positionType="Float" x="0" y="30" width="35" height="25" isRemoveLineWhenBlank="true"
+                                   uuid="3b5de0b4-470d-42e0-a76e-283102f76564">
+                        <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                        <printWhenExpression><![CDATA[$P{bankCd} != null ? true : false]]></printWhenExpression>
+                    </reportElement>
+                    <box>
+                        <pen lineWidth="0.25"/>
+                    </box>
+                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                        <font size="8" isBold="false"/>
+                        <paragraph rightIndent="1"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[$P{bankCd}]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement positionType="Float" x="35" y="0" width="75" height="30" isRemoveLineWhenBlank="true"
+                                   uuid="762b15e3-ad6f-429f-a805-78775fcd0b3c">
+                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                        <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                        <printWhenExpression><![CDATA[$P{bankCd} != null ? true : false]]></printWhenExpression>
+                    </reportElement>
+                    <box>
+                        <pen lineWidth="0.25"/>
+                    </box>
+                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                        <font size="8" isBold="false"/>
+                    </textElement>
+                    <text><![CDATA[Amount]]></text>
+                </staticText>
+                <textField isStretchWithOverflow="true">
+                    <reportElement positionType="Float" stretchType="ContainerBottom" x="35" y="30" width="75"
+                                   height="25" isRemoveLineWhenBlank="true" uuid="6471f146-a0ce-49ac-9438-84319c396bcb">
+                        <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                        <printWhenExpression><![CDATA[$P{bankCd} != null ? true : false]]></printWhenExpression>
+                    </reportElement>
+                    <box>
+                        <pen lineWidth="0.25"/>
+                    </box>
+                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                        <font size="8" isBold="false"/>
+                        <paragraph lineSpacing="Single" rightIndent="1"/>
+                    </textElement>
+                    <textFieldExpression>
+                        <![CDATA[$P{AMOUNT} != null ? new java.text.DecimalFormat("#,##0").format($P{AMOUNT}) : 0]]></textFieldExpression>
+                </textField>
+                <staticText>
+                    <reportElement positionType="Float" x="0" y="0" width="110" height="30" isRemoveLineWhenBlank="true"
+                                   uuid="b0aa9a93-bc00-4ccd-bdaa-36d31b73a2eb">
+                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                        <property name="com.jaspersoft.studio.unit.y" value="px"/>
+                        <printWhenExpression><![CDATA[$P{bankCd} != null ? false : true]]></printWhenExpression>
+                    </reportElement>
+                    <box>
+                        <pen lineWidth="0.25"/>
+                    </box>
+                    <textElement textAlignment="Center" verticalAlignment="Middle">
+                        <font size="8" isBold="false"/>
+                    </textElement>
+                    <text><![CDATA[Amount]]></text>
+                </staticText>
+                <textField isStretchWithOverflow="true">
+                    <reportElement positionType="Float" stretchType="ContainerBottom" x="0" y="30" width="110"
+                                   height="25" isRemoveLineWhenBlank="true" uuid="d82833e2-1471-4e25-82ce-3c6ad0be57c3">
+                        <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                        <printWhenExpression><![CDATA[$P{bankCd} != null ? false : true]]></printWhenExpression>
+                    </reportElement>
+                    <box>
+                        <pen lineWidth="0.25"/>
+                    </box>
+                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                        <font size="8" isBold="false"/>
+                        <paragraph lineSpacing="Single" rightIndent="1"/>
+                    </textElement>
+                    <textFieldExpression>
+                        <![CDATA[$P{AMOUNT} != null ? new java.text.DecimalFormat("#,##0").format($P{AMOUNT}) : 0]]></textFieldExpression>
+                </textField>
+            </frame>
+            <textField isBlankWhenNull="true">
+                <reportElement x="2" y="172" width="180" height="11" isRemoveLineWhenBlank="true"
+                               uuid="2f456da2-9ca8-4c9c-bca4-4c9ed149b511">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.0"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph leftIndent="1" rightIndent="0"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{account1}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="445" y="369" width="110" height="20" isRemoveLineWhenBlank="true"
+                               uuid="64793bd5-163c-4e83-b773-50ddc454f101">
+                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                    <printWhenExpression><![CDATA[$P{bankCd} != null ? false : true]]></printWhenExpression>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                    <paragraph rightIndent="1"/>
+                </textElement>
+                <textFieldExpression>
+                    <![CDATA[$P{AMOUNT} != null ? new java.text.DecimalFormat("#,##0").format($P{AMOUNT}) : 0]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+</jasperReport>

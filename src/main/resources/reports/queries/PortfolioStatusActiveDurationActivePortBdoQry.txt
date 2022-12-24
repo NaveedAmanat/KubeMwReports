@@ -1,0 +1,71 @@
+select 
+    grp_nm,         
+       count( distinct tot_clnt) tot_clnt, 
+       sum(tot_clnt_amt) tot_clnt_amt, 
+       count(new_clnt) new_clnt, 
+       sum(distinct new_clnt_amt) new_clnt_amt, 
+       count(distinct rpt_clnt) rpt_clnt, 
+       sum(rpt_clnt_amt) rpt_clnt_amt, 
+       max(rnw_clnt_month) rnw_clnt_month,    
+       max(cmpltd_mnth) cmpltd_mnth,                  
+        max(dsbmt_mnth) dsbmt_mnth
+from (
+select case when :rpt_flg = 1 then emp.emp_nm when :rpt_flg = 2 then bm.emp_nm else am.emp_nm end grp_nm,         
+       app.clnt_seq tot_clnt, 
+       app.aprvd_loan_amt tot_clnt_amt, 
+       case when app.loan_cycl_num =1 then app.clnt_seq else null end new_clnt, 
+       case when app.loan_cycl_num = 1 then app.aprvd_loan_amt else 0 end new_clnt_amt, 
+       case when app.loan_cycl_num > 1 then app.clnt_seq else null end rpt_clnt, 
+       case when app.loan_cycl_num > 1 then app.aprvd_loan_amt else 0 end rpt_clnt_amt, 
+       (select count(distinct app.clnt_seq)  
+            from mw_loan_app app 
+            join mw_port prt on prt.port_seq=app.port_seq and prt.crnt_rec_flg=1
+            join mw_brnch brnch on brnch.brnch_seq=prt.brnch_seq and brnch.crnt_rec_flg=1
+            join mw_area ar on ar.area_seq=brnch.area_seq and ar.crnt_rec_flg=1                        
+            join mw_acl acl on acl.port_seq=app.port_seq and acl.user_id=:user_id 
+            where app.crnt_rec_flg=1  and loan_app_sts=703  and app.port_seq=erl.port_seq 
+            and brnch.brnch_seq=case when to_number(:brnchSeq)=0 then brnch.brnch_seq else to_number(:brnchSeq) end
+            and ar.area_seq=case when to_number(:areaSeq)=0 then brnch.Area_seq else to_number(:areaSeq) end
+            and ar.reg_seq=case when to_number(:regSeq)=0 then ar.reg_seq else to_number(:regSeq) end 
+            and to_date(loan_app_sts_dt) between to_date(:frm_dt,'dd-mm-yyyy') and to_date(:to_dt,'dd-mm-yyyy') 
+            and to_char(lst_loan_cmpltn_dt(app.loan_app_seq),'YYYYMM')=TO_CHAR(to_date(:to_dt,'dd-mm-yyyy'),'YYYYMM') 
+        ) rnw_clnt_month,    
+        (select count(distinct app.clnt_seq)  
+            from mw_loan_app app 
+            join mw_port prt on prt.port_seq=app.port_seq and prt.crnt_rec_flg=1
+            join mw_brnch brnch on brnch.brnch_seq=prt.brnch_seq and brnch.crnt_rec_flg=1
+            join mw_area ar on ar.area_seq=brnch.area_seq and ar.crnt_rec_flg=1            
+            join mw_acl acl on acl.port_seq=app.port_seq and acl.user_id=:user_id 
+            where app.crnt_rec_flg=1  and app.port_seq=erl.port_seq  and loan_app_sts=704 
+            and brnch.brnch_seq=case when to_number(:brnchSeq)=0 then brnch.brnch_seq else to_number(:brnchSeq) end
+            and ar.area_seq=case when to_number(:areaSeq)=0 then brnch.Area_seq else to_number(:areaSeq) end
+            and ar.reg_seq=case when to_number(:regSeq)=0 then ar.reg_seq else to_number(:regSeq) end 
+             and to_date(loan_app_sts_dt) between to_date(:frm_dt,'dd-mm-yyyy') and to_date(:to_dt,'dd-mm-yyyy') 
+        ) cmpltd_mnth,                  
+        (select count(distinct app.clnt_seq)  
+            from mw_loan_app app 
+            join mw_port prt on prt.port_seq=app.port_seq and prt.crnt_rec_flg=1
+            join mw_brnch brnch on brnch.brnch_seq=prt.brnch_seq and brnch.crnt_rec_flg=1
+            join mw_area ar on ar.area_seq=brnch.area_seq and ar.crnt_rec_flg=1
+            join mw_acl acl on acl.port_seq=app.port_seq and acl.user_id=:user_id 
+            and brnch.brnch_seq=case when to_number(:brnchSeq)=0 then brnch.brnch_seq else to_number(:brnchSeq) end
+            and ar.area_seq=case when to_number(:areaSeq)=0 then brnch.Area_seq else to_number(:areaSeq) end
+            and ar.reg_seq=case when to_number(:regSeq)=0 then ar.reg_seq else to_number(:regSeq) end 
+            where app.crnt_rec_flg=1  and app.port_seq=erl.port_seq  and loan_app_sts=703 
+            and to_date(loan_app_sts_dt) between to_date(:frm_dt,'dd-mm-yyyy') and to_date(:to_dt,'dd-mm-yyyy') 
+        ) dsbmt_mnth                   
+from mw_loan_app app  
+join mw_port prt on prt.port_seq=app.port_seq and prt.crnt_rec_flg=1
+join mw_brnch brnch on brnch.brnch_seq=prt.brnch_seq and brnch.crnt_rec_flg=1
+join mw_area ar on ar.area_seq=brnch.area_seq and ar.crnt_rec_flg=1
+join mw_port_emp_rel erl on erl.port_seq=app.port_seq and erl.crnt_rec_flg=1 
+join mw_brnch_emp_rel berl on berl.brnch_seq=brnch.brnch_seq and berl.crnt_rec_flg=1
+join mw_emp bm on bm.emp_seq=berl.emp_seq
+join mw_area_emp_rel aerl on aerl.area_seq=brnch.area_seq and aerl.crnt_rec_flg=1
+join mw_emp am on am.emp_seq=aerl.emp_seq 
+join mw_emp emp on emp.emp_seq=erl.emp_seq 
+join mw_acl acl on acl.port_seq=app.port_seq and acl.user_id=:user_id where app.crnt_rec_flg=1 
+and loan_app_sts=703 
+and to_date(loan_app_sts_dt) between to_date(:frm_dt,'dd-mm-yyyy') and to_date(:to_dt,'dd-mm-yyyy') 
+)
+group by grp_nm

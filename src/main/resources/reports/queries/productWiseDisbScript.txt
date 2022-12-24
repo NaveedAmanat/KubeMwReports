@@ -1,0 +1,74 @@
+          
+
+select brnch_nm,prd_nm, remittance_typ, 
+count(case when nvl(DISB_AMOUNT,0) > 0 then clnts end) clnts,
+sum(nvl(DISB_AMOUNT,0)) DISB_AMOUNT
+from ( 
+select initcap(mb.brnch_nm) brnch_nm, initcap(grp.PRD_GRP_NM) prd_nm,trunc(dvh.dsbmt_dt) dsbmt_dt,
+    initcap(case when mt.TYP_STR like 'BANK%' then 'Bank' else mt.TYP_STR end) remittance_typ ,ap.clnt_seq clnts,
+    dsd.AMT DISB_AMOUNT   
+    from mw_loan_app ap              
+    join mw_prd prd on ap.PRD_SEQ = prd.PRD_SEQ and prd.CRNT_REC_FLG = 1 
+    join mw_prd_grp grp on grp.PRD_GRP_SEQ = prd.PRD_GRP_SEQ and grp.CRNT_REC_FLG = 1                
+    join mw_port prt on prt.port_seq=ap.port_seq and prt.crnt_rec_flg=1
+    join mw_brnch mb on prt.brnch_seq = mb.brnch_seq and mb.crnt_rec_flg = 1
+    join mw_area ma on ma.area_seq = mb.area_seq  and ma.crnt_rec_flg = 1 
+    join mw_reg mr on mr.reg_seq = ma.reg_seq  and mr.crnt_rec_flg = 1,    
+    mw_dsbmt_vchr_hdr dvh, mw_dsbmt_vchr_dtl dsd, mw_typs mt      
+    where ap.CRNT_REC_FLG = 1 and dvh.DSBMT_HDR_SEQ = dsd.DSBMT_HDR_SEQ and dsd.CRNT_REC_FLG = 1              
+    and dvh.loan_app_seq = ap.loan_app_seq and dvh.crnt_rec_flg = 1    
+    and mt.TYP_SEQ = dsd.PYMT_TYPS_SEQ and mt.CRNT_REC_FLG = 1 and mt.TYP_ID in ('16228','16229','0007','0008','0004','0001','0019', '0021')  
+    --and mr.reg_seq in (28)
+    --and mb.brnch_seq in (5)
+   -- and ap.CLNT_SEQ in (5600037438,7200089065,19300039338)
+    and trunc(dvh.dsbmt_dt) between to_date(:frmdt, 'dd-MON-yyyy') and to_date(:todt, 'dd-MON-yyyy')
+    union
+    SELECT initcap(b.brnch_nm) brnch_nm,initcap(grp.PRD_GRP_NM) prd_nm, TO_DATE(ME.EFF_START_DT) dsbmt_dt,  
+    initcap(case when ty.TYP_STR like 'BANK%' then 'Bank' else ty.TYP_STR end) remittance_typ,
+    la.clnt_seq clnts,
+    ME.EXPNS_AMT DISB_AMOUNT      
+        FROM MW_REG R,
+             MW_AREA A,
+             MW_BRNCH B,
+             MW_BRNCH_REMIT_REL BRR,        
+             MW_PORT P,
+             MW_LOAN_APP LA,      
+             MW_EXP ME,     
+             MW_PRD PRD,
+             MW_PRD_GRP GRP,
+             MW_TYPS TY,
+             MW_CLNT MC
+       WHERE R.REG_SEQ = A.REG_SEQ
+             AND A.AREA_SEQ = B.AREA_SEQ
+             AND B.BRNCH_SEQ = BRR.BRNCH_SEQ        
+             AND B.BRNCH_SEQ = P.BRNCH_SEQ
+             AND P.PORT_SEQ = LA.PORT_SEQ
+             AND LA.PRD_SEQ = PRD.PRD_SEQ        
+             AND PRD.PRD_GRP_SEQ = GRP.PRD_GRP_SEQ AND GRP.CRNT_REC_FLG = 1              
+             AND ME.PYMT_TYP_SEQ = TY.TYP_SEQ
+             AND TY.TYP_SEQ in (select mt1.TYP_SEQ from mw_typs mt1 where mt1.CRNT_REC_FLG = 1 AND mt1.TYP_CTGRY_KEY = 3
+                    AND mt1.TYP_ID IN ('0007','0004','0008','16228','16229','0001','0019', '0021') and mt1.BRNCH_SEQ = B.BRNCH_SEQ
+                    )
+             AND ME.EXP_REF = LA.LOAN_APP_SEQ
+             AND ME.POST_FLG = 1
+             AND ME.EXPNS_TYP_SEQ = 12595
+             AND B.CRNT_REC_FLG = 1
+             AND ME.CRNT_REC_FLG = 1
+             AND ME.DEL_FLG = 0
+             AND MC.CLNT_SEQ = LA.CLNT_SEQ
+             AND PRD.PRD_GRP_SEQ = 6 --LA.PRD_SEQ = 10
+             AND LA.LOAN_APP_STS in (1305,703)
+             AND LA.CRNT_REC_FLG = 1
+             AND TO_DATE(ME.EFF_START_DT) between to_date(:frmdt, 'dd-MON-yyyy') and to_date(:todt, 'dd-MON-yyyy')
+             AND B.CRNT_REC_FLG = A.CRNT_REC_FLG
+             AND R.CRNT_REC_FLG = A.CRNT_REC_FLG
+             AND R.CRNT_REC_FLG = BRR.CRNT_REC_FLG         
+             AND R.CRNT_REC_FLG = MC.CRNT_REC_FLG
+             AND R.CRNT_REC_FLG = P.CRNT_REC_FLG
+             AND R.CRNT_REC_FLG = LA.CRNT_REC_FLG
+             AND R.CRNT_REC_FLG = ME.CRNT_REC_FLG             
+             AND R.CRNT_REC_FLG = PRD.CRNT_REC_FLG
+             AND R.CRNT_REC_FLG = TY.CRNT_REC_FLG     
+           )
+           group by brnch_nm,prd_nm, remittance_typ
+           order by 1,2,3

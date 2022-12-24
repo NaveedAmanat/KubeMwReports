@@ -1,0 +1,42 @@
+select mb.brnch_nm,
+                (select me.EMP_nm from mw_emp me, mw_port_emp_rel mer 
+                where me.EMP_SEQ = mer.EMP_SEQ and mer.CRNT_REC_FLG = 1 
+                and mer.PORT_SEQ = mp.port_seq) emp_nm,
+                mpg.PRD_GRP_NM, mc.CLNT_SEQ, ap.loan_app_seq, mc.FRST_NM||' '||mc.LAST_NM clnt_nm,
+                to_date(dsh.DSBMT_DT) DSBMT_DT, mc.CNIC_EXPRY_DT, 'Client' Identification
+                from mw_clnt mc, mw_loan_app ap, mw_port mp, mw_acl mac, MW_DSBMT_VCHR_HDR dsh,
+                mw_prd mpd, mw_prd_grp mpg, mw_brnch mb
+                where mc.CLNT_SEQ = ap.CLNT_SEQ and mc.CRNT_REC_FLG = 1
+                and ap.LOAN_APP_STS = 703 and ap.CRNT_REC_FLG = 1
+                and dsh.DSBMT_DT > '30-apr-2005'
+                and mp.brnch_seq = mb.brnch_seq and mb.CRNT_REC_FLG = 1
+                and ap.PORT_SEQ = mp.PORT_SEQ and mp.CRNT_REC_FLG = 1
+                and mp.PORT_SEQ = mac.PORT_SEQ and mac.USER_ID = :userId
+                and ap.LOAN_APP_SEQ = dsh.LOAN_APP_SEQ and dsh.CRNT_REC_FLG = 1
+                and ap.PRD_SEQ = mpd.PRD_SEQ and mpd.CRNT_REC_FLG = 1
+                and mpd.PRD_GRP_SEQ = mpg.PRD_GRP_SEQ and mpg.CRNT_REC_FLG = 1
+                and mc.CNIC_EXPRY_DT <= to_date(sysdate)
+                union
+                select mb.brnch_nm,
+                (select me.EMP_nm from mw_emp me, mw_port_emp_rel mer 
+                where me.EMP_SEQ = mer.EMP_SEQ and mer.CRNT_REC_FLG = 1 
+                and mer.PORT_SEQ = mp.port_seq) emp_nm,
+                mpg.PRD_GRP_NM, ap.CLNT_SEQ, ap.loan_app_seq, mc.FRST_NM||' '||mc.LAST_NM clnt_nm,
+                to_date(dsh.DSBMT_DT) DSBMT_DT, mc.CNIC_EXPRY_DT, 
+                case when REL_TYP_FLG = 1 then 'Nominee'
+                when REL_TYP_FLG = 2 then 'Next of Kin'
+				when REL_TYP_FLG = 3 then 'Co-borrower'                
+                else 'Relative'
+                end Identification
+                from mw_clnt_rel mc, mw_loan_app ap, mw_port mp, mw_acl mac, MW_DSBMT_VCHR_HDR dsh,
+                mw_prd mpd, mw_prd_grp mpg,mw_brnch mb
+                where mc.LOAN_APP_SEQ = ap.LOAN_APP_SEQ and mc.CRNT_REC_FLG = 1
+                and ap.LOAN_APP_STS = 703 and ap.CRNT_REC_FLG = 1
+                and dsh.DSBMT_DT > '30-apr-2005'
+                and mp.brnch_seq = mb.brnch_seq and mb.CRNT_REC_FLG = 1
+                and ap.PORT_SEQ = mp.PORT_SEQ and mp.CRNT_REC_FLG = 1
+                and mp.PORT_SEQ = mac.PORT_SEQ and mac.USER_ID = :userId
+                and ap.LOAN_APP_SEQ = dsh.LOAN_APP_SEQ and dsh.CRNT_REC_FLG = 1
+                and ap.PRD_SEQ = mpd.PRD_SEQ and mpd.CRNT_REC_FLG = 1
+                and mpd.PRD_GRP_SEQ = mpg.PRD_GRP_SEQ and mpg.CRNT_REC_FLG = 1
+                and mc.CNIC_EXPRY_DT <= to_date(sysdate)

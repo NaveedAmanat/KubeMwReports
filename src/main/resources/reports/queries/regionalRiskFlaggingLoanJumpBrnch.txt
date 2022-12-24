@@ -1,0 +1,73 @@
+
+--CREATED BY AISHA KHAN 1/24/2022-------------------LOAN JUMPS---PRODUCTIVE LOANS-------------
+with 
+qry as
+(select reg.reg_nm region,ar.area_nm area,br.brnch_nm branch,lap.clnt_seq clnt,prd.prd_nm PRODUCT,LAP.LOAN_APP_STS LOAN_APP_STS,
+loan_cycl_num,LAP.LOAN_APP_SEQ LOAN_APP_SEQ,lap.prd_seq prd_seq,lap.aprvd_loan_amt-lst_loan_aprvd_amt(lap.loan_app_seq) loan_jump 
+from mw_loan_app lap  
+join mw_dsbmt_vchr_hdr dhdr on lap.loan_app_seq = dhdr.loan_app_seq
+and dhdr.crnt_rec_flg=lap.crnt_rec_flg 
+join mw_port prt on lap.PORT_SEQ = prt.PORT_SEQ
+and prt.crnt_rec_flg=dhdr.crnt_rec_flg 
+join mw_prd prd on lap.prd_seq = prd.prd_seq
+and prt.crnt_rec_flg=prd.crnt_rec_flg 
+join mw_brnch br on prt.brnch_seq = br.brnch_seq
+and prt.crnt_rec_flg=br.crnt_rec_flg 
+join mw_area ar on ar.area_seq = br.area_seq
+and ar.crnt_rec_flg=br.crnt_rec_flg
+--AND AR.AREA_SEQ =4
+join mw_reg reg on reg.reg_seq=ar.reg_seq
+and ar.crnt_rec_flg=reg.crnt_rec_flg 
+where reg.reg_seq = DECODE(:REG_SEQ, -1, REG.REG_SEQ, :REG_SEQ) --NVL ( :reg_seq, reg.reg_seq)
+                AND ar.area_seq = DECODE(:AREA_SEQ, -1, AR.AREA_SEQ, :AREA_SEQ) --NVL ( :AREA_seq, ar.area_seq)
+and lap.crnt_rec_flg=1 AND LOAN_CYCL_NUM>1 and lap.prd_seq<>29 
+and  trunc(DSBMT_DT) between TO_DATE(:fromdt, 'dd-MM-yyyy') and TO_DATE(:todt, 'dd-MM-yyyy')
+)
+--
+--select BRANCH,CLNT
+--from qry where branch like 'ABBOTTABAD-01';
+
+---------------------BRANCH WISE---------------
+-------------------------------------LOAN_JUMPS-----------------------
+select a.region,a.area,a.branch,b.total_clnts_disb,
+                                "REDUCED",
+                                NO_JUMP,
+                                --"1-4K",
+                                "1K-20K",
+                                "21K-35K",
+                                "36K-50K",
+                                "51K-65K",
+                                "66K-90K",
+                                "91K-105K",
+                                "Above 105K"
+from (
+select region,area,BRANCH,NVL(SUM("REDUCED"),0) "REDUCED",
+                          NVL(SUM(NO_JUMP),0) NO_JUMP,
+                          --NVL(sum("1-4K"),0) "1-4K",
+                          NVL(sum("1K-20K"),0) "1K-20K",
+                          NVL(sum("21K-35K"),0) "21K-35K",
+                          NVL(sum("36K-50K"),0) "36K-50K",
+                          NVL(sum("51K-65K"),0) "51K-65K",
+                          NVL(sum("66K-90K"),0) "66K-90K",
+                          NVL(sum("91K-105K"),0) "91K-105K",
+                          NVL(sum("Above 105K"),0) "Above 105K"
+from (select region,area,BRANCH,
+  (CASE WHEN LOAN_JUMP <0 THEN COUNT(LOAN_JUMP) END) "REDUCED", 
+ (CASE WHEN LOAN_JUMP =0 THEN COUNT(LOAN_JUMP) END) NO_JUMP,
+ --(CASE WHEN LOAN_JUMP BETWEEN 1 AND 4000 THEN COUNT(LOAN_JUMP) END) "1-4K",
+ (CASE WHEN LOAN_JUMP BETWEEN 1000 AND 20000 THEN COUNT(LOAN_JUMP) END) "1K-20K",
+ (CASE WHEN LOAN_JUMP BETWEEN 21000 AND 35000 THEN COUNT(LOAN_JUMP) END) "21K-35K",
+ (CASE WHEN LOAN_JUMP BETWEEN 36000 AND 50000 THEN COUNT(LOAN_JUMP) END) "36K-50K",
+ (CASE WHEN LOAN_JUMP BETWEEN 51000 AND 65000 THEN COUNT(LOAN_JUMP) END) "51K-65K",
+ (CASE WHEN LOAN_JUMP BETWEEN 66000 AND 90000 THEN COUNT(LOAN_JUMP) END) "66K-90K",
+ (CASE WHEN LOAN_JUMP BETWEEN 91000 AND 105000 THEN COUNT(LOAN_JUMP) END) "91K-105K",
+ (CASE WHEN LOAN_JUMP >105000 THEN COUNT(LOAN_JUMP) END) "Above 105K"
+from QRY where exists (select prd_seq from mw_prd_form_rel where form_seq in (7,8) and crnt_rec_flg=1) 
+group by REGION,AREA,BRANCH,loan_jump
+)
+group by REGION,AREA,BRANCH) A JOIN 
+(select region,area,branch,count ( clnt) total_clnts_disb
+from QRY where exists (select prd_seq from mw_prd_form_rel where form_seq in (7,8) and crnt_rec_flg=1) 
+group by area ,region,branch
+) B ON A.BRANCH=B.BRANCH 
+order by region, area, branch

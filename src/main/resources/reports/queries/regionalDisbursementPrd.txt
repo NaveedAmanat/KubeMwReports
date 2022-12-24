@@ -1,0 +1,190 @@
+  
+--CREATED BY AISHA KHAN 3/22/2022-------------------regional disb product wise complete-------------
+with 
+qry as
+(select reg.reg_nm region,ar.area_nm area,br.brnch_nm branch,lap.clnt_seq clnt,prd.PRD_SEQ ,br.brnch_seq brnch_seq,prdgrp.prd_grp_nm product,
+LOAN_APP_STS_dt,
+(select 
+            nvl(sum(
+            nvl(PPAL_AMT_DUE,0) + nvl(TOT_CHRG_DUE,0) +
+            nvl((
+                select sum(nvl(psc.AMT,0)) from mw_pymt_sched_chrg psc 
+                where psc.pymt_sched_dtl_seq=psd.pymt_sched_dtl_seq and psc.crnt_rec_flg=1
+            ),0)
+            ),0) -
+            nvl(sum((
+                select sum(nvl(rdtl.pymt_amt,0)) from mw_rcvry_dtl rdtl, mw_rcvry_trx rht  
+                where rdtl.pymt_sched_dtl_seq=psd.pymt_sched_dtl_seq and rdtl.crnt_rec_flg=1
+                and rht.RCVRY_TRX_SEQ = rdtl.RCVRY_TRX_SEQ and rht.crnt_rec_flg=1
+                and trunc(rht.PYMT_DT) <= TO_DATE(:todt, 'dd-MM-yyyy') --'30-apr-2019'
+            )),0) 
+            from mw_loan_app ap
+            join mw_pymt_sched_hdr psh on psh.loan_app_seq=ap.loan_app_seq and psh.crnt_rec_flg=1
+            join mw_pymt_sched_dtl psd on psd.pymt_sched_hdr_seq=psh.pymt_sched_hdr_seq and psd.crnt_rec_flg=1
+            --mw_port mp
+            where ap.LOAN_APP_SEQ = lap.LOAN_APP_SEQ --9800017291
+            and ap.crnt_rec_flg=1
+            group by ap.LOAN_APP_SEQ) OLP,
+LAP.LOAN_APP_STS LOAN_APP_STS,
+dhdr.DSBMT_DT DSBMT_DT,
+--trg.trgt_perd trgt_perd,
+--trg.trgt_clients trgt_clients,
+lap.port_seq port_seq,
+lap.aprvd_loan_amt aprvd_loan_amt,
+loan_cycl_num,LAP.LOAN_APP_SEQ LOAN_APP_SEQ,lap.prd_seq prd_seq
+from mw_loan_app lap  
+--JOIN mw_ref_cd_val asts
+--ON     asts.ref_cd_seq = lap.loan_app_sts
+--AND asts.crnt_rec_flg = 1 
+join mw_dsbmt_vchr_hdr dhdr on lap.loan_app_seq = dhdr.loan_app_seq
+and dhdr.crnt_rec_flg=lap.crnt_rec_flg 
+join mw_port prt on lap.PORT_SEQ = prt.PORT_SEQ
+and prt.crnt_rec_flg=dhdr.crnt_rec_flg 
+join mw_prd prd on lap.prd_seq = prd.prd_seq
+and prt.crnt_rec_flg=prd.crnt_rec_flg 
+join mw_prd_grp prdgrp on prd.prd_grp_seq = prdgrp.prd_grp_seq
+and prdgrp.crnt_rec_flg=prd.crnt_rec_flg 
+join mw_brnch br on prt.brnch_seq = br.brnch_seq
+and prt.crnt_rec_flg=br.crnt_rec_flg 
+--join mw_brnch_trgt trg on br.brnch_seq=trg.brnch_seq
+--and trg.crnt_rec_flg=br.crnt_rec_flg
+join mw_area ar on ar.area_seq = br.area_seq
+and ar.crnt_rec_flg=br.crnt_rec_flg
+--AND AR.AREA_SEQ =4
+join mw_reg reg on reg.reg_seq=ar.reg_seq
+and ar.crnt_rec_flg=reg.crnt_rec_flg 
+where reg.reg_seq = DECODE(:REG_SEQ, -1, REG.REG_SEQ, :REG_SEQ) --NVL ( :REG_SEQ, reg.reg_seq)
+AND ar.area_seq = DECODE(:AREA_SEQ, -1, AR.AREA_SEQ, :AREA_SEQ) --NVL ( :AREA_seq, ar.area_seq)
+and lap.crnt_rec_flg=1 
+--AND AR.AREA_NM='LAHORE-01'
+and prd.prd_grp_seq<>8
+--and br.brnch_seq=98
+)
+
+--
+select coalesce(a.name_1,c.name_1,b.name_1) region,
+                coalesce(a.PRODUCT,c.PRODUCT,b.PRODUCT) PRODUCT,
+                                nvl(a.active_clnts,0) active_clnts,
+                                nvl(a.OLP,0) OLP,
+                                nvl(a.tot_dsb_amt,0) tot_dsb_amt,
+                                nvl(a.portfolio_count,0)portfolio_count,
+                                round(nvl(active_clnts,0)/nvl(portfolio_count,1),2) BDO_Caseload,
+                                round(nvl(tot_dsb_amt/nvl(active_clnts,1),0),2) ADS,
+                                nvl(c.trgt_clients,0)trgt_clients,
+                                nvl(b.achvd_clnts,0)achvd_clnts,
+                                nvl(c.trgt_amt,0)trgt_amt,
+                                nvl(b.achvd_amt,0)achvd_amt,
+                                round(nvl((nvl(b.achvd_amt,0)/nvl(b.achvd_clnts,1)),0),2) tot_loan_size,
+                               -- nvl(b.new_loan_size,0)new_loan_size,
+                               -- nvl(b.rpt_loan_size,0)rpt_loan_size
+                               nvl(new_clnt,0) new_clnt, 
+                               nvl(rpt_clnt,0) rpt_clnt, 
+                               nvl(new_clnt_amt,0) new_clnt_amt, 
+                               nvl(rpt_clnt_amt,0) rpt_clnt_amt
+                                
+from(
+        select CASE WHEN :AREA_SEQ <>-1 THEN AREA ELSE REGION END name_1,PRODUCT,
+                              count( clnt) active_clnts,
+                              sum(QRY.OLP) OLP,
+                              nvl(sum(aprvd_loan_amt),0) tot_dsb_amt,
+                              count( distinct port_seq) portfolio_count                              
+    from qry
+    where (   (    qry.loan_app_sts=703
+                            AND TRUNC (qry.loan_app_sts_dt) <=
+                                TO_DATE ( :todt, 'dd-MM-yyyy')
+                            --AND qry.crnt_rec_flg = 1
+                            )
+                        OR (   qry.loan_app_sts=704
+                            AND TRUNC (qry.loan_app_sts_dt) >
+                                TO_DATE ( :todt, 'dd-MM-yyyy')
+                            AND TRUNC (qry.dsbmt_dt) <=
+                                TO_DATE ( :todt, 'dd-MM-yyyy')
+                            --AND qry.crnt_rec_flg = 1
+                            )
+                        OR (    qry.loan_app_sts=1245
+                            AND TRUNC (qry.loan_app_sts_dt) >
+                                TO_DATE ( :todt, 'dd-MM-yyyy')))
+--                   AND dhdr.loan_app_seq = lap.loan_app_seq
+--                   AND dhdr.crnt_rec_flg = 1
+                   AND ( select nvl(sum(
+            nvl(PPAL_AMT_DUE,0) + nvl(TOT_CHRG_DUE,0)
+            ),0) -
+            nvl(sum((
+                select sum(nvl(rdtl.pymt_amt,0)) from mw_rcvry_trx rht ,mw_rcvry_dtl rdtl
+                left outer join mw_typs rtyp on rtyp.typ_seq=rdtl.chrg_typ_key and rtyp.crnt_rec_flg=1             
+                where rdtl.pymt_sched_dtl_seq=psd.pymt_sched_dtl_seq and rdtl.crnt_rec_flg=1
+                and rht.RCVRY_TRX_SEQ = rdtl.RCVRY_TRX_SEQ and rht.crnt_rec_flg=1
+                and (rdtl.chrg_typ_key=-1 or rtyp.typ_id=17)   
+                and to_date(rht.PYMT_DT) <=  TO_DATE ( :todt, 'dd-MM-yyyy')
+            )),0) rec
+            from mw_loan_app ap
+            join mw_pymt_sched_hdr psh on psh.loan_app_seq=ap.loan_app_seq and psh.crnt_rec_flg=1
+            join mw_pymt_sched_dtl psd on psd.pymt_sched_hdr_seq=psh.pymt_sched_hdr_seq and psd.crnt_rec_flg=1
+            --mw_port mp
+            where ap.LOAN_APP_SEQ = qry.loan_app_seq
+            --and ap.PORT_SEQ = mp.PORT_SEQ
+            --and mp.BRNCH_SEQ = p_brnch_seq
+            and ap.crnt_rec_flg=1
+            group by ap.LOAN_APP_SEQ) >
+                       0
+                   AND NOT EXISTS
+                           (SELECT DISTINCT ctl.loan_app_seq
+                              FROM mw_clnt_tag_list ctl
+                             WHERE     ctl.loan_app_seq = qry.loan_app_seq
+                                   AND TRUNC (ctl.eff_start_dt) <=
+                                       TO_DATE ( :todt, 'dd-MM-yyyy')
+                                   AND ctl.tags_seq = 4)
+
+    group by  CASE WHEN :AREA_SEQ <>-1 THEN AREA ELSE REGION END,
+              PRODUCT
+    ) a 
+   FULL OUTER join 
+     (select name_1,PRODUCT,nvl(new_clnt,0)+nvl(rpt_clnt,0) achvd_clnts,
+                       nvl(new_clnt_amt,0)+nvl(rpt_clnt_amt,0) achvd_amt, new_clnt, rpt_clnt, new_clnt_amt, rpt_clnt_amt
+                     --  CASE WHEN  (new_clnt) <> 0 THEN  round((new_clnt_amt) /  (new_clnt),0) ELSE 0 END new_loan_size, 
+                     -- CASE WHEN  (rpt_clnt) <> 0 THEN  round((rpt_clnt_amt) /  (rpt_clnt),0) ELSE 0 END rpt_loan_size
+    from(                   
+   select CASE WHEN :AREA_SEQ <>-1 THEN AREA ELSE REGION END name_1,PRODUCT,
+        COUNT (CASE WHEN qry.loan_cycl_num = 1 THEN qry.clnt ELSE NULL END) new_clnt,
+        COUNT (CASE WHEN qry.loan_cycl_num > 1 THEN qry.clnt ELSE NULL END) rpt_clnt,
+        SUM (CASE WHEN qry.loan_cycl_num = 1 THEN qry.aprvd_loan_amt ELSE NULL END) new_clnt_amt,
+        SUM (CASE WHEN qry.loan_cycl_num > 1 THEN qry.aprvd_loan_amt ELSE NULL END) rpt_clnt_amt
+    from qry where trunc(DSBMT_DT) between TO_DATE(:frmdt, 'dd-MM-yyyy') and TO_DATE(:todt, 'dd-MM-yyyy')
+    
+    group by  CASE WHEN :AREA_SEQ <>-1 THEN AREA ELSE REGION END,PRODUCT
+    )) 
+   b on a.name_1||a.product=b.name_1||b.product
+    
+    FULL OUTER JOIN
+    (
+  SELECT CASE WHEN :AREA_SEQ <>-1 THEN ma.area_nm ELSE reg.reg_nm END
+             name_1,
+         prd_grp_nm
+             product,
+         NVL (SUM (trgt_clients), 0)
+             trgt_clients,
+         NVL (SUM (trgt_amt), 0)
+             trgt_amt
+    FROM mw_brnch_trgt tgt
+         JOIN mw_prd_grp prdgrp
+             ON TGT.prd_seq = prdgrp.prd_grp_seq AND prdgrp.crnt_rec_flg = 1
+         JOIN mw_brnch mb
+             ON mb.BRNCH_SEQ = tgt.BRNCH_SEQ AND mb.Crnt_rec_flg = 1
+         JOIN mw_area ma
+             ON     ma.AREA_SEQ = mb.AREA_SEQ
+                AND ma.CRNT_REC_FLG = 1
+                AND ma.reg_seq = DECODE(:REG_SEQ, -1, ma.REG_SEQ, :REG_SEQ) 
+                AND ma.area_seq = DECODE(:AREA_SEQ, -1, ma.AREA_SEQ, :AREA_SEQ)
+         JOIN mw_reg reg ON ma.REG_SEQ = reg.reg_seq
+   WHERE     tgt.del_flg = 0
+         AND tgt.prd_seq != 8
+         --and mb.brnch_seq=98
+         AND tgt.trgt_perd BETWEEN (TO_CHAR (TO_DATE ( :frmdt, 'dd-MM-yyyy'),
+                                             'YYYYMM'))
+                               AND TO_CHAR (TO_DATE ( :todt, 'dd-MM-yyyy'),
+                                            'YYYYMM')
+--AND tgt.brnch_seq = :branch
+GROUP BY CASE WHEN :AREA_SEQ <>-1 THEN ma.area_nm ELSE reg.reg_nm END,
+         prdgrp.prd_grp_nm) c 
+          on a.name_1||a.product=c.name_1||c.product
+          order by a.OLP desc

@@ -1,0 +1,193 @@
+--CREATED BY AISHA KHAN 3/17/2022-------------------reg disb area wise complete-------------with KSK modifications
+--EDITED BY AISHA KHAN 3/17/2022--------------------AM modifications----------------------------------------------
+
+------------active portfolio-----
+
+WITH
+    qry
+    AS
+        (SELECT reg.reg_nm
+                    region,
+                ar.area_seq
+                    area_seq,
+                ar.area_nm
+                    area,
+                br.brnch_nm
+                    branch,
+                br.brnch_seq
+                    brnch_seq,
+                lap.clnt_seq
+                    clnt,
+                prdgrp.prd_grp_seq
+                    product,
+                LOAN_APP_STS_dt,
+                (  SELECT   NVL (
+                                SUM (
+                                      NVL (PPAL_AMT_DUE, 0)
+                                    + NVL (TOT_CHRG_DUE, 0)
+                                    + NVL (
+                                          (SELECT SUM (NVL (psc.AMT, 0))
+                                             FROM mw_pymt_sched_chrg psc
+                                            WHERE     psc.pymt_sched_dtl_seq =
+                                                      psd.pymt_sched_dtl_seq
+                                                  AND psc.crnt_rec_flg = 1),
+                                          0)),
+                                0)
+                          - NVL (
+                                SUM (
+                                    (SELECT SUM (NVL (rdtl.pymt_amt, 0))
+                                       FROM mw_rcvry_dtl rdtl, mw_rcvry_trx rht
+                                      WHERE     rdtl.pymt_sched_dtl_seq =
+                                                psd.pymt_sched_dtl_seq
+                                            AND rdtl.crnt_rec_flg = 1
+                                            AND rht.RCVRY_TRX_SEQ =
+                                                rdtl.RCVRY_TRX_SEQ
+                                            AND rht.crnt_rec_flg = 1
+                                            AND TRUNC (rht.PYMT_DT) <=
+                                                TO_DATE ( :todt, 'dd-MM-yyyy') --'30-apr-2019'
+                                                                              )),
+                                0)
+                     FROM mw_loan_app ap
+                          JOIN mw_pymt_sched_hdr psh
+                              ON     psh.loan_app_seq = ap.loan_app_seq
+                                 AND psh.crnt_rec_flg = 1
+                          JOIN mw_pymt_sched_dtl psd
+                              ON     psd.pymt_sched_hdr_seq =
+                                     psh.pymt_sched_hdr_seq
+                                 AND psd.crnt_rec_flg = 1
+                    --mw_port mp
+                    WHERE     ap.LOAN_APP_SEQ = lap.LOAN_APP_SEQ  --9800017291
+                          AND ap.crnt_rec_flg = 1
+                 GROUP BY ap.LOAN_APP_SEQ)
+                    OLP,
+                
+                LAP.LOAN_APP_STS
+                    LOAN_APP_STS,
+                dhdr.DSBMT_DT
+                    DSBMT_DT,
+                lap.port_seq
+                    port_seq,
+                lap.aprvd_loan_amt
+                    aprvd_loan_amt,
+                loan_cycl_num,
+                LAP.LOAN_APP_SEQ
+                    LOAN_APP_SEQ,
+                lap.prd_seq
+                    prd_seq
+           FROM mw_loan_app  lap
+                
+                JOIN mw_dsbmt_vchr_hdr dhdr
+                    ON     lap.loan_app_seq = dhdr.loan_app_seq
+                       AND dhdr.crnt_rec_flg = 1
+                JOIN mw_port prt
+                    ON     lap.PORT_SEQ = prt.PORT_SEQ
+                       AND prt.crnt_rec_flg = 1
+                JOIN mw_prd prd
+                    ON     lap.prd_seq = prd.prd_seq
+                       AND  prd.crnt_rec_flg=1
+                JOIN mw_prd_grp prdgrp
+                    ON     prd.prd_grp_seq = prdgrp.prd_grp_seq
+                       AND prdgrp.crnt_rec_flg = 1
+                JOIN mw_brnch br
+                    ON     prt.brnch_seq = br.brnch_seq
+                       AND  br.crnt_rec_flg=1
+                JOIN mw_area ar
+                    ON     ar.area_seq = br.area_seq
+                       AND ar.crnt_rec_flg = 1
+                --AND AR.AREA_SEQ =4
+                JOIN mw_reg reg
+                    ON     reg.reg_seq = ar.reg_seq
+                       AND reg.crnt_rec_flg=1
+          WHERE     reg.reg_seq = DECODE(:REG_SEQ, -1, REG.REG_SEQ, :REG_SEQ)
+                AND ar.area_seq = DECODE(:AREA_SEQ, -1, AR.AREA_SEQ, :AREA_SEQ)
+                AND lap.crnt_rec_flg = 1                 --and lap.prd_seq<>29
+                AND prd.prd_grp_seq <> 8)
+                
+  SELECT a.name_1,
+         a.name_2,
+         SUM (NVL ((CASE WHEN product <> 19 THEN a.active_clnts END), 0))
+             active_clnts,
+         SUM (A.OLP)
+             OLP,
+         SUM (a.tot_dsb_amt)
+             tot_dsb_amt,
+         MAX (a.portfolio_count)
+             portfolio_count,
+         a.seq
+    --,round(nvl(active_clnts,0)/nvl(portfolio_count,1),2) BDO_Caseload,
+    --round(nvl(tot_dsb_amt/nvl(active_clnts,1),0),2) ADS
+    FROM (  SELECT CASE WHEN :AREA_SEQ <>-1 THEN AREA ELSE region END AS name_1,
+                   CASE WHEN :AREA_SEQ <>-1 THEN branch ELSE AREA END AS name_2,
+                   CASE WHEN :AREA_SEQ <>-1 THEN brnch_seq ELSE area_seq END     AS seq,
+                   product,
+                   COUNT (clnt)                      AS active_clnts,
+                   NVL (SUM (QRY.OLP), 0)            OLP,
+                   NVL (SUM (aprvd_loan_amt), 0)     tot_dsb_amt,
+                   COUNT (DISTINCT port_seq)         portfolio_count
+              FROM qry
+             WHERE     (   (    qry.loan_app_sts=703
+                            AND TRUNC (qry.loan_app_sts_dt) <=
+                                TO_DATE ( :todt, 'dd-MM-yyyy') --AND qry.crnt_rec_flg = 1
+                                                              )
+                        OR (    qry.loan_app_sts=704
+                            AND TRUNC (qry.loan_app_sts_dt) >
+                                TO_DATE ( :todt, 'dd-MM-yyyy')
+                            AND TRUNC (qry.dsbmt_dt) <=
+                                TO_DATE ( :todt, 'dd-MM-yyyy') --AND qry.crnt_rec_flg = 1
+                                                              )
+                        OR (    qry.loan_app_sts=1245
+                            AND TRUNC (qry.loan_app_sts_dt) >
+                                TO_DATE ( :todt, 'dd-MM-yyyy')))
+                   -- AND dhdr.loan_app_seq = lap.loan_app_seq
+                   -- AND dhdr.crnt_rec_flg = 1
+                   AND (  SELECT   NVL (
+                                       SUM (
+                                             NVL (PPAL_AMT_DUE, 0)
+                                           + NVL (TOT_CHRG_DUE, 0)),
+                                       0)
+                                 - NVL (
+                                       SUM (
+                                           (SELECT SUM (NVL (rdtl.pymt_amt, 0))
+                                              FROM mw_rcvry_trx rht,
+                                                   mw_rcvry_dtl rdtl
+                                                   LEFT OUTER JOIN mw_typs rtyp
+                                                       ON     rtyp.typ_seq =
+                                                              rdtl.chrg_typ_key
+                                                          AND rtyp.crnt_rec_flg = 1
+                                             WHERE     rdtl.pymt_sched_dtl_seq =
+                                                       psd.pymt_sched_dtl_seq
+                                                   AND rdtl.crnt_rec_flg = 1
+                                                   AND rht.RCVRY_TRX_SEQ =
+                                                       rdtl.RCVRY_TRX_SEQ
+                                                   AND rht.crnt_rec_flg = 1
+                                                   AND (   rdtl.chrg_typ_key = -1
+                                                        OR rtyp.typ_id = 17)
+                                                   AND TO_DATE (rht.PYMT_DT) <=
+                                                       TO_DATE ( :todt,
+                                                                'dd-MM-yyyy'))),
+                                       0)
+                                     rec
+                            FROM mw_loan_app ap
+                                 JOIN mw_pymt_sched_hdr psh
+                                     ON     psh.loan_app_seq = ap.loan_app_seq
+                                        AND psh.crnt_rec_flg = 1
+                                 JOIN mw_pymt_sched_dtl psd
+                                     ON     psd.pymt_sched_hdr_seq =
+                                            psh.pymt_sched_hdr_seq
+                                        AND psd.crnt_rec_flg = 1
+                           WHERE     ap.LOAN_APP_SEQ = qry.loan_app_seq
+                                 AND ap.crnt_rec_flg = 1
+                        GROUP BY ap.LOAN_APP_SEQ) >
+                       0
+                   AND NOT EXISTS
+                           (SELECT DISTINCT ctl.loan_app_seq
+                              FROM mw_clnt_tag_list ctl
+                             WHERE     ctl.loan_app_seq = qry.loan_app_seq
+                                   AND TRUNC (ctl.eff_start_dt) <=
+                                       TO_DATE ( :todt, 'dd-MM-yyyy')
+                                   AND ctl.tags_seq = 4)
+          GROUP BY CASE WHEN :AREA_SEQ <>-1 THEN AREA ELSE region END,
+                   CASE WHEN :AREA_SEQ <>-1 THEN branch ELSE AREA END  ,   
+                   CASE WHEN :AREA_SEQ <>-1 THEN brnch_seq ELSE area_seq END,product   ) a
+GROUP BY a.name_1, a.name_2,a.seq
+ORDER BY name_1, name_2,seq

@@ -1,0 +1,94 @@
+--CREATED BY AISHA KHAN 1/26/2022-------------------regional disb area wise-------------
+with 
+qry as
+(select reg.reg_nm region,ar.area_nm area,br.brnch_nm branch,lap.clnt_seq clnt ,br.brnch_seq brnch_seq,
+nvl(loan_app_ost(lap.loan_app_seq,to_date(:todt, 'dd-MM-yyyy'),'psc'),0) OLP,
+LAP.LOAN_APP_STS LOAN_APP_STS,
+dhdr.DSBMT_DT DSBMT_DT,
+--trg.trgt_perd trgt_perd,
+--trg.trgt_clients trgt_clients,
+lap.port_seq port_seq,
+lap.aprvd_loan_amt aprvd_loan_amt,
+loan_cycl_num,LAP.LOAN_APP_SEQ LOAN_APP_SEQ,lap.prd_seq prd_seq
+from mw_loan_app lap  
+join mw_dsbmt_vchr_hdr dhdr on lap.loan_app_seq = dhdr.loan_app_seq
+and dhdr.crnt_rec_flg=lap.crnt_rec_flg 
+join mw_port prt on lap.PORT_SEQ = prt.PORT_SEQ
+and prt.crnt_rec_flg=dhdr.crnt_rec_flg 
+--join mw_prd prd on lap.prd_seq = prd.prd_seq
+--and prt.crnt_rec_flg=prd.crnt_rec_flg 
+--join mw_prd_grp prdgrp on prd.prd_grp_seq = prdgrp.prd_grp_seq
+--and prdgrp.crnt_rec_flg=prd.crnt_rec_flg 
+join mw_brnch br on prt.brnch_seq = br.brnch_seq
+and prt.crnt_rec_flg=br.crnt_rec_flg 
+--join mw_brnch_trgt trg on br.brnch_seq=trg.brnch_seq
+--and trg.crnt_rec_flg=br.crnt_rec_flg
+join mw_area ar on ar.area_seq = br.area_seq
+and ar.crnt_rec_flg=br.crnt_rec_flg
+--AND AR.AREA_SEQ =4
+join mw_reg reg on reg.reg_seq=ar.reg_seq
+and ar.crnt_rec_flg=reg.crnt_rec_flg 
+where reg.reg_seq=:reg_seq and lap.crnt_rec_flg=1 and lap.prd_seq<>29 
+--and  trunc(DSBMT_DT) between (:fromdt) and (:todt)
+--AND trg.trgt_perd = extract(year from :todt)||extract(month from :todt)
+ --and br.brnch_seq=2
+)
+
+
+
+select a.region,a.area,d.brnch_count,
+                                nvl(a.active_clnts,0) active_clnts,
+                                nvl(a.OLP,0) OLP,
+                                nvl(a.tot_dsb_amt,0) tot_dsb_amt,
+                                nvl(a.portfolio_count,0)portfolio_count,
+                                nvl(a.BDO_Caseload,0)BDO_Caseload,
+                                nvl(a.ADS,0)ADS ,
+                                nvl(c.trgt_clients,0)trgt_clients,
+                                nvl(b.achvd_clnts,0)achvd_clnts,
+                                nvl(c.trgt_amt,0)trgt_amt,
+                                nvl(b.achvd_amt,0)achvd_amt,
+                                nvl((nvl(b.new_loan_size,0)+nvl(b.new_loan_size,0)),0) tot_loan_size,
+                                nvl(b.new_loan_size,0)new_loan_size,
+                                nvl(b.rpt_loan_size,0)rpt_loan_size
+from(    select region,area,
+                              count( clnt) active_clnts,
+                              sum(QRY.OLP) OLP,
+                              nvl(sum(aprvd_loan_amt),0) tot_dsb_amt,
+                              count( distinct port_seq) portfolio_count,
+                              round(nvl(sum(port_seq),0)/nvl(count(clnt),1),2) BDO_Caseload,
+                              round(nvl(nvl(sum(aprvd_loan_amt),0)/nvl(count( clnt),1),0),2) ADS
+    from qry
+    where LOAN_APP_STS=703 and trunc(DSBMT_DT) = to_date(:todt, 'dd-MM-yyyy')
+    group by  region,area
+    ) a 
+    join 
+     (    select region,area,nvl(new_clnt,0)+nvl(rpt_clnt,0) achvd_clnts,
+                       nvl(new_clnt_amt,0)+nvl(rpt_clnt_amt,0) achvd_amt,
+                       CASE WHEN  (new_clnt) <> 0 THEN  round((new_clnt_amt) /  (new_clnt),0) ELSE 0 END new_loan_size, 
+                       CASE WHEN  (rpt_clnt) <> 0 THEN  round((rpt_clnt_amt) /  (rpt_clnt),0) ELSE 0 END rpt_loan_size
+    from(                   
+   select region,area,
+        COUNT (CASE WHEN qry.loan_cycl_num = 1 THEN qry.clnt ELSE NULL END) new_clnt,
+        COUNT (CASE WHEN qry.loan_cycl_num > 1 THEN qry.clnt ELSE NULL END) rpt_clnt,
+        SUM (CASE WHEN qry.loan_cycl_num = 1 THEN qry.aprvd_loan_amt ELSE NULL END) new_clnt_amt,
+        SUM (CASE WHEN qry.loan_cycl_num > 1 THEN qry.aprvd_loan_amt ELSE NULL END) rpt_clnt_amt
+    from qry where trunc(DSBMT_DT) between to_date(:frmdt, 'dd-MM-yyyy') and to_date(:todt, 'dd-MM-yyyy')
+    group by  region,area
+    )) 
+   b on a.region||a.area=b.region||b.area
+     
+    JOIN
+    (select region,area ,sum(trgt_clients) trgt_clients,sum(trgt_amt) trgt_amt 
+    from(
+        select region,area ,(trgt_clients) trgt_clients,trgt_amt,trg.trgt_perd
+        from qry  join mw_brnch_trgt trg on qry.brnch_seq=trg.brnch_seq
+        and qry.prd_seq=trg.prd_seq
+        where trg.del_flg=0
+	    AND trg.TRGT_PERD between TO_cHAR(TO_DATE(:frmdt, 'dd-MM-yyyy'),'RRRRMM') and TO_cHAR(TO_DATE(:todt, 'dd-MM-yyyy'),'RRRRMM')
+        group by region,area,trgt_clients,trgt_amt,trg.trgt_perd
+       )
+   group by region,area) c on a.region||a.area=c.region||c.area
+   join 
+   (select region,area,count (distinct brnch_seq) brnch_count from qry 
+    group by region,area   )d on a.region||a.area=d.region||d.area
+    order by region, area

@@ -1,0 +1,91 @@
+--------------CREATED BY AISHA KHAN 1/24/2022------------EARLY MATURITY RATIO---------------------ADVANCE PAYMENT
+
+with 
+qry as
+(select reg.reg_nm region,ar.area_nm area,br.brnch_nm branch,lap.loan_app_seq loan_app_seq, loan_app_sts,lap.loan_app_sts_dt,
+lap.clnt_seq clnt,loan_cycl_num,prd.prd_nm PRODUCT,dhdr.DSBMT_DT,
+round(dhdr.DSBMT_DT-
+(SELECT MAX (loan_app_sts_dt) 
+    FROM mw_loan_app lapp
+    WHERE lapp.loan_app_sts=704 
+    and clnt_seq=lap.clnt_seq
+    GROUP BY clnt_seq),0) tat,
+    lap.prd_seq prd_seq
+from mw_loan_app lap  
+join mw_dsbmt_vchr_hdr dhdr on lap.loan_app_seq = dhdr.loan_app_seq
+and dhdr.crnt_rec_flg=lap.crnt_rec_flg  
+join mw_port prt on lap.PORT_SEQ = prt.PORT_SEQ
+and prt.crnt_rec_flg=dhdr.crnt_rec_flg 
+join mw_prd prd on lap.prd_seq = prd.prd_seq
+and prt.crnt_rec_flg=prd.crnt_rec_flg 
+join mw_brnch br on prt.brnch_seq = br.brnch_seq
+and prt.crnt_rec_flg=br.crnt_rec_flg 
+join mw_area ar on ar.area_seq = br.area_seq
+and ar.crnt_rec_flg=br.crnt_rec_flg
+--AND AR.AREA_SEQ =4
+join mw_reg reg on reg.reg_seq=ar.reg_seq
+and ar.crnt_rec_flg=reg.crnt_rec_flg 
+where reg.reg_seq = DECODE(:REG_SEQ, -1, REG.REG_SEQ, :REG_SEQ) --NVL ( :reg_seq, reg.reg_seq)
+                AND ar.area_seq = DECODE(:AREA_SEQ, -1, AR.AREA_SEQ, :AREA_SEQ) --NVL ( :AREA_seq, ar.area_seq)
+and lap.crnt_rec_flg=1 and trunc(dhdr.DSBMT_DT) between TO_DATE(:fromdt, 'dd-MM-yyyy') and TO_DATE(:todt, 'dd-MM-yyyy')   
+and lap.prd_seq<>29
+)
+
+----------------max installment with advance pymt--------------------------------------BRANCH WISE--------------------
+
+select a.region,a.area, a.branch,b.total_clnts_disb,
+    d.total_clnts_matured_early,round((d.total_clnts_matured_early/b.total_clnts_disb)*100,2) "total_clnts_matured_early_%",
+    "1-2 installments",round(("1-2 installments"/d.total_clnts_matured_early)*100,2) "1-2 installments_%",
+    "3-4 installments",round(("3-4 installments"/d.total_clnts_matured_early)*100,2) "3-4 installments_%",
+    "5-6 installments",round(("5-6 installments"/d.total_clnts_matured_early)*100,2) "5-6 installments_%",
+    "More than 6 installments",round(("More than 6 installments"/d.total_clnts_matured_early)*100,2) "More than 6 installments_%"
+    from
+     (
+select region,area,BRANCH,NVL(sum("1-2 installments"),0) "1-2 installments",
+                          NVL(sum("3-4 installments"),0) "3-4 installments",
+                          NVL(sum("5-6 installments"),0) "5-6 installments",
+                          NVL(sum("More than 6 installments"),0) "More than 6 installments"
+       from
+(select region,area,branch,(CASE WHEN (tot_inst) in (1,2) THEN COUNT(tot_inst) END) "1-2 installments",
+ (CASE WHEN tot_inst in (3,4) THEN COUNT(tot_inst) END) "3-4 installments",
+ (CASE WHEN tot_inst in (5,6) THEN COUNT(tot_inst) END) "5-6 installments",
+ (CASE WHEN tot_inst >6 THEN COUNT(tot_inst) END) "More than 6 installments"
+    from (
+        select region,area,branch,qry.loan_app_seq,MAX(inst_num) tot_inst    --phdr.PYMT_SCHED_HDR_SEQ,
+        from qry join mw_pymt_sched_hdr phdr on qry.loan_app_seq = phdr.loan_app_seq
+        join mw_pymt_sched_dtl pdtl on phdr.pymt_sched_hdr_seq = pdtl.pymt_sched_hdr_seq
+        join mw_rcvry_dtl rdtl on pdtl.PYMT_SCHED_DTL_SEQ = rdtl.PYMT_SCHED_DTL_SEQ
+        where rdtl.CRTD_DT< pdtl.due_dt and phdr.crnt_rec_flg=1 and pdtl.crnt_rec_flg=1 and rdtl.crnt_rec_flg=1 
+        and loan_cycl_num>1 and tat<=30
+        group by region,area,branch, qry.loan_app_seq
+        )
+    group by region,area,branch,tot_inst)group by region,area,branch) a join 
+    (select region,area,branch,count (clnt) total_clnts_disb
+    from qry 
+    where loan_cycl_num>1 
+    group by area ,region,branch) b on a.branch=b.branch 
+    join      
+        (select region,area,branch,count(CLNT) total_clnts_matured_early --repeating--tat<30
+        from (select region,area,branch,
+        qry.loan_app_seq,qry.CLNT
+        from qry
+     join mw_pymt_sched_hdr phdr on qry.loan_app_seq = phdr.loan_app_seq
+        join mw_pymt_sched_dtl pdtl on phdr.pymt_sched_hdr_seq = pdtl.pymt_sched_hdr_seq
+        join mw_rcvry_dtl rdtl on pdtl.PYMT_SCHED_DTL_SEQ = rdtl.PYMT_SCHED_DTL_SEQ
+        where rdtl.CRTD_DT< pdtl.due_dt and phdr.crnt_rec_flg=1 and pdtl.crnt_rec_flg=1 and rdtl.crnt_rec_flg=1 
+        and loan_cycl_num>1 and tat<=30
+        group by region,area,branch,qry.clnt,qry.loan_app_seq)
+        group by  region,area,branch) d on b.branch=d.branch
+--        join      
+--        (select region,area,branch,count(CLNT) total_clnts_matured_early_1
+--        from (select region,area,branch,
+--        qry.loan_app_seq,qry.CLNT
+--        from qry
+--     join mw_pymt_sched_hdr phdr on qry.loan_app_seq = phdr.loan_app_seq
+--        join mw_pymt_sched_dtl pdtl on phdr.pymt_sched_hdr_seq = pdtl.pymt_sched_hdr_seq
+--        join mw_rcvry_dtl rdtl on pdtl.PYMT_SCHED_DTL_SEQ = rdtl.PYMT_SCHED_DTL_SEQ
+--        where rdtl.CRTD_DT< pdtl.due_dt and phdr.crnt_rec_flg=1 and pdtl.crnt_rec_flg=1 and rdtl.crnt_rec_flg=1 
+--        --and loan_cycl_num>1
+--        group by region,area,branch,qry.clnt,qry.loan_app_seq)
+--        group by  region,area,branch) e on e.branch=d.branch
+        order by region,area,branch

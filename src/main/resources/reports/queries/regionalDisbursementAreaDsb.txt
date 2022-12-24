@@ -1,0 +1,85 @@
+-------------------------------------------achvd------------------
+
+WITH
+    qry
+    AS
+        (SELECT reg.reg_nm region,
+                ar.area_nm             area,
+                ar.area_seq            area_seq,
+                br.brnch_nm            branch,
+                br.brnch_seq           brnch_seq,
+                lap.clnt_seq           clnt,
+                prdgrp.PRD_GRP_seq     product,
+                LOAN_APP_STS_dt,
+                ref_cd,
+                LAP.LOAN_APP_STS       LOAN_APP_STS,
+                dhdr.DSBMT_DT          DSBMT_DT,
+                --trg.trgt_perd trgt_perd,
+                --trg.trgt_clients trgt_clients,
+                lap.port_seq           port_seq,
+                lap.aprvd_loan_amt     aprvd_loan_amt,
+                loan_cycl_num
+           FROM mw_loan_app  lap
+                JOIN mw_ref_cd_val asts
+                    ON     asts.ref_cd_seq = lap.loan_app_sts
+                       AND asts.crnt_rec_flg = 1
+                JOIN mw_dsbmt_vchr_hdr dhdr
+                    ON     lap.loan_app_seq = dhdr.loan_app_seq
+                       AND dhdr.crnt_rec_flg = 1
+                JOIN mw_port prt
+                    ON     lap.PORT_SEQ = prt.PORT_SEQ
+                       AND prt.crnt_rec_flg = 1
+                JOIN mw_prd prd
+                    ON     lap.prd_seq = prd.prd_seq
+                       AND prd.crnt_rec_flg=1
+                JOIN mw_prd_grp prdgrp
+                    ON     prd.prd_grp_seq = prdgrp.prd_grp_seq
+                       AND prdgrp.crnt_rec_flg = 1
+                JOIN mw_brnch br
+                    ON     prt.brnch_seq = br.brnch_seq
+                       AND br.crnt_rec_flg=1
+                JOIN mw_area ar
+                    ON     ar.area_seq = br.area_seq
+                       AND ar.crnt_rec_flg = 1
+                --AND AR.AREA_SEQ =4
+                JOIN mw_reg reg
+                    ON     reg.reg_seq = ar.reg_seq
+                       AND  reg.crnt_rec_flg=1
+          WHERE     reg.reg_seq = DECODE(:REG_SEQ, -1, REG.REG_SEQ, :REG_SEQ) 
+                AND ar.area_seq = DECODE(:AREA_SEQ, -1, AR.AREA_SEQ, :AREA_SEQ)
+                AND lap.crnt_rec_flg = 1
+                AND prd.prd_grp_seq <> 8                  --and br.brnch_seq=1
+                                        )
+
+select name_1,name_2,
+--nvl(new_clnt,0)+nvl(rpt_clnt,0) achvd_clnts,
+--nvl(new_clnt_amt,0)+nvl(rpt_clnt_amt,0) achvd_amt,
+--nvl(new_clnt_1,0)+nvl(rpt_clnt_1,0) achvd_clnts_1,
+nvl(new_clnt, 0) new_clnt,
+nvl(rpt_clnt, 0) rpt_clnt,
+nvl(new_clnt_amt, 0) new_clnt_amt,
+nvl(rpt_clnt_amt, 0) rpt_clnt_amt,
+nvl(new_clnt_1, 0) new_clnt_1,
+nvl(rpt_clnt_1, 0) rpt_clnt_1,
+--nvl(new_clnt_amt_1, 0) new_clnt_amt_1,
+--nvl(rpt_clnt_amt_1, 0) rpt_clnt_amt_1,
+seq
+-- CASE WHEN (new_clnt_1) <> 0 THEN round((achvd_amt) / (achvd_clnts_1),0) ELSE 0 END tot_loan_size,
+-- CASE WHEN (new_clnt_1) <> 0 THEN round((new_clnt_amt) / (new_clnt_1),0) ELSE 0 END new_loan_size,
+-- CASE WHEN (rpt_clnt_1) <> 0 THEN round((rpt_clnt_amt) / (rpt_clnt_1),0) ELSE 0 END rpt_loan_size
+from(
+select CASE WHEN :AREA_SEQ <>-1 THEN AREA ELSE region END AS name_1,
+       CASE WHEN :AREA_SEQ <>-1 THEN branch ELSE AREA END AS name_2,   
+COUNT (CASE WHEN qry.loan_cycl_num = 1 THEN qry.clnt ELSE NULL END) new_clnt,
+COUNT (CASE WHEN qry.loan_cycl_num > 1 THEN qry.clnt ELSE NULL END) rpt_clnt,
+SUM (CASE WHEN qry.loan_cycl_num = 1 THEN qry.aprvd_loan_amt ELSE NULL END) new_clnt_amt,
+SUM (CASE WHEN qry.loan_cycl_num > 1 THEN qry.aprvd_loan_amt ELSE NULL END) rpt_clnt_amt,
+------without ksk----
+COUNT (CASE WHEN qry.loan_cycl_num = 1 and product<>19 THEN qry.clnt ELSE NULL END) new_clnt_1,
+COUNT (CASE WHEN qry.loan_cycl_num > 1 and product<>19 THEN qry.clnt ELSE NULL END) rpt_clnt_1,
+CASE WHEN :AREA_SEQ <>-1 THEN brnch_seq ELSE area_seq END as seq
+from qry where trunc(DSBMT_DT) between TO_DATE(:frmdt, 'dd-MM-yyyy') and TO_DATE(:todt, 'dd-MM-yyyy')
+group by CASE WHEN :AREA_SEQ <>-1 THEN AREA ELSE region END,
+                   CASE WHEN :AREA_SEQ <>-1 THEN branch ELSE AREA END  ,   
+                   CASE WHEN :AREA_SEQ <>-1 THEN brnch_seq ELSE area_seq END
+)

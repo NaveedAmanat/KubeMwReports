@@ -1,0 +1,76 @@
+SELECT /*PDC Details Report*/ MC.CLNT_SEQ,
+       MC.FRST_NM || ' ' || MC.LAST_NM AS CLNT_NM,
+       AP.LOAN_APP_SEQ,
+       CASE
+         WHEN (MC.CO_BWR_SAN_FLG = 1 AND MC.SLF_PDC_FLG = 0) THEN
+          (SELECT MRL.FRST_NM || ' ' || MRL.LAST_NM
+             FROM MW_CLNT_REL MRL
+            WHERE MRL.LOAN_APP_SEQ = AP.LOAN_APP_SEQ
+              AND MRL.CRNT_REC_FLG = 1
+              AND MRL.REL_TYP_FLG = 1)
+         WHEN (MC.CO_BWR_SAN_FLG = 0 AND MC.SLF_PDC_FLG = 0) THEN
+          NVL((SELECT MRL.FRST_NM || ' ' || MRL.LAST_NM
+                FROM MW_CLNT_REL MRL
+               WHERE MRL.LOAN_APP_SEQ = AP.LOAN_APP_SEQ
+                 AND MRL.CRNT_REC_FLG = 1
+                 AND MRL.REL_TYP_FLG = 3),
+              (SELECT MRL.FRST_NM || ' ' || MRL.LAST_NM
+                 FROM MW_CLNT_REL MRL
+                WHERE MRL.LOAN_APP_SEQ = AP.LOAN_APP_SEQ
+                  AND MRL.CRNT_REC_FLG = 1
+                  AND MRL.REL_TYP_FLG = 1))
+         WHEN (MC.SLF_PDC_FLG = 1) THEN
+          MC.FRST_NM || ' ' || MC.LAST_NM
+       END PDC_PROVIDER_NM,
+       NVL(VL.REF_CD_DSCR, PDH.BRNCH_NM) AS BANK_NM,
+       PDH.ACCT_NUM,
+       REGEXP_SUBSTR(LISTAGG(PDD.CHQ_NUM, ',') WITHIN
+                     GROUP(ORDER BY PDD.PDC_ID),
+                     '[^,]+',
+                     1,
+                     1) AS PDC1,
+       REGEXP_SUBSTR(LISTAGG(PDD.CHQ_NUM, ',') WITHIN
+                     GROUP(ORDER BY PDD.PDC_ID),
+                     '[^,]+',
+                     1,
+                     2) AS PDC2,
+       REGEXP_SUBSTR(LISTAGG(PDD.CHQ_NUM, ',') WITHIN
+                     GROUP(ORDER BY PDD.PDC_ID),
+                     '[^,]+',
+                     1,
+                     3) AS PDC3,
+       REGEXP_SUBSTR(LISTAGG(PDD.CHQ_NUM, ',') WITHIN
+                     GROUP(ORDER BY PDD.PDC_ID),
+                     '[^,]+',
+                     1,
+                     4) AS PDC4
+  FROM MW_CLNT           MC,
+       MW_LOAN_APP       AP,
+       MW_PDC_HDR        PDH,
+       MW_PDC_DTL        PDD,
+       MW_DSBMT_VCHR_HDR DSH,
+       MW_REF_CD_VAL     VL
+ WHERE MC.CLNT_SEQ = AP.CLNT_SEQ
+   AND AP.PRNT_LOAN_APP_SEQ = PDH.LOAN_APP_SEQ
+   AND PDH.PDC_HDR_SEQ = PDD.PDC_HDR_SEQ
+   AND AP.LOAN_APP_SEQ = DSH.LOAN_APP_SEQ
+   AND PDH.BANK_KEY = VL.REF_CD_SEQ
+   AND VL.REF_CD_GRP_KEY = 178
+   AND AP.CRNT_REC_FLG = 1
+   AND PDH.CRNT_REC_FLG = 1
+   AND PDD.CRNT_REC_FLG = 1
+   AND DSH.CRNT_REC_FLG = 1
+   AND VL.CRNT_REC_FLG = 1
+   AND TRUNC(DSH.DSBMT_DT) BETWEEN TO_DATE(:frmdt, 'DD-MM-RRRR') AND
+       TO_DATE(:todt, 'DD-MM-RRRR')
+   AND AP.LOAN_APP_STS = 703
+   AND AP.PRD_SEQ NOT IN (29, 13, 14)
+   AND AP.BRNCH_SEQ = :brnchSeq
+ GROUP BY MC.CLNT_SEQ,
+          MC.FRST_NM || ' ' || MC.LAST_NM,
+          AP.LOAN_APP_SEQ,
+          MC.CO_BWR_SAN_FLG,
+          MC.SLF_PDC_FLG,
+          NVL(VL.REF_CD_DSCR, PDH.BRNCH_NM),
+          PDH.ACCT_NUM,
+          MC.CO_BWR_SAN_FLG

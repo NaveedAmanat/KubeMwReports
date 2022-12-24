@@ -1,0 +1,127 @@
+  SELECT CL.CLNT_SEQ,
+         CL.FRST_NM || ' ' || CL.LAST_NM
+             CLNT_NM,
+         AP.LOAN_APP_SEQ
+             LOAN_APP_SEQ,
+         CL.CNIC_NUM,
+         (SELECT V.REF_CD_DSCR
+            FROM MW_REF_CD_VAL V
+           WHERE V.REF_CD_SEQ = CL.GNDR_KEY AND V.CRNT_REC_FLG = 1)
+             GENDER,
+         'Kashf Foundation'
+             AS BANK,
+         (SELECT BRNCH.BRNCH_NM || ' - ' || DIST.DIST_NM
+            FROM MW_LOAN_APP LA
+                 JOIN MW_BRNCH_LOCATION_REL BLR
+                     ON     BLR.BRNCH_SEQ = BRNCH.BRNCH_SEQ
+                        AND BLR.CRNT_REC_FLG = BRNCH.CRNT_REC_FLG
+                 JOIN MW_CITY_UC_REL CUR
+                     ON     CUR.CITY_UC_REL_SEQ = BLR.CITY_SEQ
+                        AND CUR.CRNT_REC_FLG = BLR.CRNT_REC_FLG
+                 JOIN MW_UC UC
+                     ON     UC.UC_SEQ = CUR.UC_SEQ
+                        AND UC.CRNT_REC_FLG = CUR.CRNT_REC_FLG
+                 JOIN MW_THSL THSL
+                     ON     THSL.THSL_SEQ = UC.THSL_SEQ
+                        AND THSL.CRNT_REC_FLG = UC.CRNT_REC_FLG
+                 JOIN MW_DIST DIST
+                     ON     DIST.DIST_SEQ = THSL.DIST_SEQ
+                        AND DIST.CRNT_REC_FLG = THSL.CRNT_REC_FLG
+           WHERE     LA.CRNT_REC_FLG = AP.CRNT_REC_FLG
+                 AND LA.LOAN_APP_SEQ = AP.LOAN_APP_SEQ
+                 AND ROWNUM = 1)
+             BRNCH_DIST_NM,
+         (SELECT RCD.REF_CD_DSCR
+            FROM MW_REF_CD_VAL RCD
+           WHERE     RCD.REF_CD_SEQ = BRNCH.BRNCH_TYP_KEY
+                 AND RCD.CRNT_REC_FLG = AP.CRNT_REC_FLG)
+             BRNCH_TYP,
+         NVL (
+             (SELECT MAX (AC.BIZ_ACTY_NM)
+                FROM MW_BIZ_ACTY AC, MW_BIZ_APRSL BIZ
+               WHERE     BIZ.LOAN_APP_SEQ = AP.LOAN_APP_SEQ
+                     AND BIZ.CRNT_REC_FLG = AP.CRNT_REC_FLG
+                     AND AC.BIZ_ACTY_SEQ = BIZ.ACTY_KEY),
+             'DOMESTIC')
+             ACTIVITY,
+         NVL (
+             (SELECT MAX (SEC.BIZ_SECT_NM)
+                FROM MW_BIZ_ACTY AC, MW_BIZ_SECT SEC, MW_BIZ_APRSL BIZ
+               WHERE     BIZ.LOAN_APP_SEQ = AP.LOAN_APP_SEQ
+                     AND BIZ.CRNT_REC_FLG = AP.CRNT_REC_FLG
+                     AND AC.BIZ_ACTY_SEQ = BIZ.ACTY_KEY
+                     AND AC.BIZ_SECT_SEQ = SEC.BIZ_SECT_SEQ
+                     AND SEC.CRNT_REC_FLG = AP.CRNT_REC_FLG),
+             'DOMESTIC')
+             SECTOR,
+         PRD.PRD_CMNT,
+         AP.LOAN_CYCL_NUM,
+         RCV.REF_CD_DSCR
+             AS DONOR_NM,
+         TO_CHAR (DVH.DSBMT_DT - 3, 'dd-MM-yyyy')
+             AS SANCT_DT,
+         TO_CHAR (DVH.DSBMT_DT, 'dd-MM-yyyy')
+             AS DSBMT_DT,
+         AP.APRVD_LOAN_AMT
+             AS APRVD_LOAN_AMT,
+         LOAN_APP_OST (AP.LOAN_APP_SEQ, TO_DATE ( :P_TODT, 'dd-MM-yyyy'), 'p')
+             OST_AMT,
+           AP.APRVD_LOAN_AMT
+         - NVL (
+               LOAN_APP_OST (AP.LOAN_APP_SEQ,
+                             TO_DATE ( :P_TODT, 'dd-MM-yyyy'),
+                             'p'),
+               0)
+             REC_AMT,
+         CASE
+             WHEN AP.LOAN_APP_STS = 703 THEN 'Active'
+             WHEN AP.LOAN_APP_STS = 704 THEN 'Completed'
+             WHEN AP.LOAN_APP_STS = 1245 THEN 'Write-Off'
+             WHEN AP.LOAN_APP_STS = 1285 THEN 'Deferred'
+             ELSE 'Others'
+         END
+             LOAN_STS,
+         CHRG.CHRG_VAL
+             MARK_UP_RATE,
+         --         PRD.IRR_VAL
+         --             APR,
+         laps.IRR_RATE
+             APR,
+         'Clean Lending'
+             COLLATERAL,
+         NVL (TO_CHAR (LOAN_MTURTY_DT (AP.LOAN_APP_SEQ), 'dd-MM-yyyy'),
+              TO_CHAR (AP.LOAN_APP_STS_DT, 'dd-MM-yyyy'))
+             SETTLEMENT_DT,
+         GET_OD_INFO (AP.LOAN_APP_SEQ, TO_DATE ( :P_TODT, 'dd-MM-yyyy'), 'd')
+             OD_DYS
+    FROM MW_LOAN_APP AP
+         JOIN MW_CLNT CL ON CL.CLNT_SEQ = AP.CLNT_SEQ AND CL.CRNT_REC_FLG = 1
+         JOIN MW_BRNCH BRNCH
+             ON BRNCH.BRNCH_SEQ = AP.BRNCH_SEQ AND BRNCH.CRNT_REC_FLG = 1
+         JOIN MW_PRD PRD ON AP.PRD_SEQ = PRD.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+         JOIN MW_PRD_CHRG CHRG
+             ON CHRG.PRD_SEQ = PRD.PRD_SEQ AND CHRG.CRNT_REC_FLG = 1
+         JOIN MW_TYPS TYP
+             ON     TYP.TYP_SEQ = CHRG.CHRG_TYP_SEQ
+                AND TYP.CRNT_REC_FLG = 1
+                AND TYP.TYP_ID = '0017'
+         --         --
+         JOIN MW_DSBMT_VCHR_HDR DVH
+             ON DVH.LOAN_APP_SEQ = AP.LOAN_APP_SEQ AND DVH.CRNT_REC_FLG = 1
+         --         -- Donor Detail
+         JOIN MW_REF_CD_VAL RCV
+             ON RCV.REF_CD_SEQ = AP.DNR_SEQ AND RCV.CRNT_REC_FLG = 1
+         -----IRR LOAN WISE----
+         JOIN mw_loan_app_ppal_stngs laps
+             ON ap.loan_app_seq = laps.loan_app_seq
+   WHERE     AP.CRNT_REC_FLG = 1
+         AND AP.LOAN_APP_STS IN (703,
+                                 704,
+                                 1245,
+                                 1285)
+         AND TRUNC (DVH.DSBMT_DT) BETWEEN TO_DATE ( :P_FRMDT, 'dd-MM-yyyy')
+                                      AND TO_DATE ( :P_TODT, 'dd-MM-yyyy')
+         AND AP.DNR_SEQ =
+             (CASE WHEN :P_DNRSEQ = -1 THEN AP.DNR_SEQ ELSE :P_DNRSEQ END)
+--and cl.cnic_num=3510201747874
+ORDER BY DVH.DSBMT_DT, CL.FRST_NM || ' ' || CL.LAST_NM

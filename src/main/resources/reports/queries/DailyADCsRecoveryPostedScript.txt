@@ -1,0 +1,53 @@
+SELECT DISTINCT 
+ mr.REG_NM, 
+ ma.AREA_NM, 
+ MB.BRNCH_NM , 
+ MC.CLNT_SEQ , 
+ sum(rdtl.PYMT_AMT) PYMT_AMT, 
+ MRT.PYMT_DT,
+ mRT.CRTD_DT,
+ mrt.RCVRY_TRX_SEQ, 
+ mt.TYP_STR, 
+ mrt.INSTR_NUM, 
+ (case when rdtl.CHRG_TYP_KEY = 241 then 'Excess' else 'Recovery' end) , 
+ mrt.CRTD_BY 
+ FROM mw_rcvry_trx mrt, 
+ mw_rcvry_dtl rdtl, 
+ mw_clnt mc, 
+ MW_TYPS mt, 
+ mw_port mp, 
+ mw_brnch mb, 
+ mw_area ma, 
+ mw_reg mr 
+ WHERE rdtl.RCVRY_TRX_SEQ = mrt.RCVRY_TRX_SEQ 
+ and MB.BRNCH_SEQ = MB.BRNCH_SEQ 
+ AND MB.AREA_SEQ = MA.AREA_SEQ 
+ AND MA.REG_SEQ = MR.REG_SEQ 
+ AND MRT.PYMT_REF = MC.CLNT_SEQ 
+ AND MC.PORT_KEY = MP.PORT_SEQ 
+ AND MP.BRNCH_SEQ = MB.BRNCH_SEQ 
+ AND Mb.CRNT_REC_FLG = 1 
+ and MRT.POST_FLG = 1 
+ and mrt.RCVRY_TYP_SEQ = mt.TYP_SEQ and mt.BRNCH_SEQ = mp.BRNCH_SEQ and mt.CRNT_REC_FLG = 1 
+ and MT.TYP_SEQ not in (10,124,161,201) 
+ AND Mb.CRNT_REC_FLG = Mb.CRNT_REC_FLG 
+ AND Mb.CRNT_REC_FLG = MRT.CRNT_REC_FLG 
+ AND Mb.CRNT_REC_FLG = MT.CRNT_REC_FLG 
+ AND Mb.CRNT_REC_FLG = MC.CRNT_REC_FLG 
+ AND Mb.CRNT_REC_FLG = MP.CRNT_REC_FLG 
+ AND Mb.CRNT_REC_FLG = Ma.CRNT_REC_FLG 
+ AND Mb.CRNT_REC_FLG = Mr.CRNT_REC_FLG 
+ and TRUNC(mRT.CRTD_DT) BETWEEN TO_DATE(:frmdt, 'dd-MON-yyyy')  AND to_date(:todt, 'dd-MON-yyyy')
+ group by mr.REG_NM, 
+ ma.AREA_NM, MB.BRNCH_NM , 
+ MC.CLNT_SEQ , 
+ MRT.PYMT_AMT, 
+ MRT.PYMT_DT, 
+ mRT.CRTD_DT, 
+ mrt.RCVRY_TRX_SEQ, 
+ mt.TYP_STR, 
+ mrt.INSTR_NUM, 
+ MT.TYP_STR, 
+ mrt.CRTD_BY, 
+ (case when rdtl.CHRG_TYP_KEY = 241 then 'Excess' else 'Recovery' end)
+ order by mr.REG_NM, ma.AREA_NM, MB.BRNCH_NM ,  MC.CLNT_SEQ 

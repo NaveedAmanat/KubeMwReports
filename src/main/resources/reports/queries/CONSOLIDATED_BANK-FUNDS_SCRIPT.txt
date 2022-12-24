@@ -1,0 +1,205 @@
+  SELECT reg_nm,
+         brnch_nm,
+         brnch_cd,
+         acct_num,
+         cheque_disb_amt,
+         kszb_amt,
+         SUM (amt),
+         LISTAGG (crtd_by, ', ') WITHIN GROUP (ORDER BY crtd_by)     crtd_by,
+         LISTAGG (remarks, ', ') WITHIN GROUP (ORDER BY remarks)     remarks,
+         BANK_NM
+    FROM (SELECT reg.reg_nm,
+                 br.brnch_nm,
+                 br.brnch_cd,
+                 ac.acct_num,
+                 ac.BANK_NM,
+                 (SELECT SUM (dtl.amt)
+                    FROM mw_loan_app app
+                         JOIN mw_dsbmt_vchr_hdr hdr
+                             ON     hdr.loan_app_seq = app.loan_app_seq
+                                AND hdr.crnt_rec_flg = 1
+                         JOIN mw_dsbmt_vchr_dtl dtl
+                             ON     dtl.dsbmt_hdr_seq = hdr.dsbmt_hdr_seq
+                                AND dtl.crnt_rec_flg = 1
+                         JOIN mw_typs typ
+                             ON     typ.typ_seq = dtl.pymt_typs_seq
+                                AND typ.typ_seq IN
+                                        (SELECT mt.typ_seq
+                                           FROM mw_typs mt
+                                          WHERE     mt.brnch_seq = br.brnch_seq
+                                                AND typ_id = '0008'
+                                                AND mt.typ_ctgry_key = 3)
+                   WHERE     app.crnt_rec_flg = 1
+                         AND app.brnch_seq = br.brnch_seq
+                         AND app.prd_seq NOT IN (10, 33, 34)
+                         AND TRUNC (hdr.dsbmt_dt) BETWEEN TO_DATE (
+                                                              :P_FROM_DATE,
+                                                              'dd-MM-yyyy')
+                                                      AND TO_DATE (
+                                                              :P_TO_DATE,
+                                                              'dd-MM-yyyy')
+                  HAVING SUM (dtl.amt) > 0
+                  UNION ALL
+                  SELECT SUM (dtl.amt)
+                    FROM mw_loan_app app
+                         JOIN mw_exp ex
+                             ON     ex.exp_ref = app.loan_app_seq
+                                AND ex.expns_typ_seq = 12595
+                                AND ex.crnt_rec_flg = 1
+                         JOIN mw_dsbmt_vchr_hdr hdr
+                             ON     hdr.loan_app_seq = app.loan_app_seq
+                                AND hdr.crnt_rec_flg = 1
+                         JOIN mw_dsbmt_vchr_dtl dtl
+                             ON     dtl.dsbmt_hdr_seq = hdr.dsbmt_hdr_seq
+                                AND dtl.crnt_rec_flg = 1
+                         JOIN mw_typs typ
+                             ON     typ.typ_seq = dtl.pymt_typs_seq
+                                AND typ.typ_seq IN
+                                        (SELECT mt.typ_seq
+                                           FROM mw_typs mt
+                                          WHERE     mt.brnch_seq = br.brnch_seq
+                                                AND typ_id = '0008'
+                                                AND mt.typ_ctgry_key = 3)
+                   WHERE     app.crnt_rec_flg = 1
+                         AND app.brnch_seq = br.brnch_seq
+                         AND app.prd_seq = 10
+                         AND TRUNC (ex.eff_start_dt) BETWEEN TO_DATE (
+                                                                 :P_FROM_DATE,
+                                                                 'dd-MM-yyyy')
+                                                         AND TO_DATE (
+                                                                 :P_TO_DATE,
+                                                                 'dd-MM-yyyy')
+                  HAVING SUM (dtl.amt) > 0
+                  UNION ALL
+                  SELECT SUM (
+                             (SELECT mjd.amt
+                                FROM mw_jv_hdr mjh, mw_jv_dtl mjd
+                               WHERE     mjh.jv_hdr_seq = mjd.jv_hdr_seq
+                                     AND mjh.enty_seq = dtl.dsbmt_hdr_seq
+                                     AND UPPER (mjh.enty_typ) = 'DISBURSEMENT'
+                                     AND mjd.crdt_dbt_flg = 0
+                                     AND mjd.gl_acct_num = typ.gl_acct_num))
+                             disb_amount
+                    FROM mw_loan_app app
+                         JOIN mw_dsbmt_vchr_hdr hdr
+                             ON     hdr.loan_app_seq = app.loan_app_seq
+                                AND hdr.crnt_rec_flg = 1
+                         JOIN mw_dsbmt_vchr_dtl dtl
+                             ON     dtl.dsbmt_hdr_seq = hdr.dsbmt_hdr_seq
+                                AND dtl.crnt_rec_flg = 1
+                         JOIN mw_typs typ
+                             ON     typ.typ_seq = dtl.pymt_typs_seq
+                                AND typ.typ_seq IN
+                                        (SELECT mt.typ_seq
+                                           FROM mw_typs mt
+                                          WHERE     mt.brnch_seq = br.brnch_seq
+                                                AND typ_id = '0008'
+                                                AND mt.typ_ctgry_key = 3)
+                   WHERE     app.crnt_rec_flg = 1
+                         AND app.brnch_seq = br.brnch_seq
+                         AND app.prd_seq IN (33, 34)
+                         AND TRUNC (hdr.dsbmt_dt) BETWEEN TO_DATE (
+                                                              :P_FROM_DATE,
+                                                              'dd-MM-yyyy')
+                                                      AND TO_DATE (
+                                                              :P_TO_DATE,
+                                                              'dd-MM-yyyy')
+                  HAVING SUM (
+                             (SELECT mjd.amt
+                                FROM mw_jv_hdr mjh, mw_jv_dtl mjd
+                               WHERE     mjh.jv_hdr_seq = mjd.jv_hdr_seq
+                                     AND mjh.enty_seq = dtl.dsbmt_hdr_seq
+                                     AND UPPER (mjh.enty_typ) = 'DISBURSEMENT'
+                                     AND mjd.crdt_dbt_flg = 0
+                                     AND mjd.gl_acct_num = typ.gl_acct_num)) >
+                         0)
+                     cheque_disb_amt,
+                 (SELECT NVL (
+                             SUM (
+                                 NVL (
+                                     (CASE
+                                          WHEN mjd.crdt_dbt_flg = 0
+                                          THEN
+                                              NVL (mjd.amt, 0)
+                                      END),
+                                     0)),
+                             0)
+                    FROM mw_jv_hdr mjh, mw_jv_dtl mjd
+                   WHERE     mjh.jv_hdr_seq = mjd.jv_hdr_seq
+                         AND mjh.brnch_seq = br.brnch_seq
+                         AND INITCAP (mjh.enty_typ) = 'Expense'
+                         AND mjd.gl_acct_num = '000.000.201113.00000'
+                         AND TRUNC (mjh.jv_dt) BETWEEN TO_DATE ( :P_FROM_DATE,
+                                                                'dd-MM-yyyy')
+                                                   AND TO_DATE ( :P_TO_DATE,
+                                                                'dd-MM-yyyy'))
+                     kszb_amt,
+                 rqst.amt,
+                 rqst.crtd_by,
+                 rqst.remarks
+            FROM mw_reg reg
+                 JOIN mw_area ar
+                     ON ar.reg_seq = reg.reg_seq AND ar.crnt_rec_flg = 1
+                 JOIN mw_brnch br ON br.area_seq = ar.area_seq
+                 JOIN mw_brnch_acct_set ac
+                     ON ac.brnch_seq = br.brnch_seq AND ac.crnt_rec_flg = 1
+                 LEFT JOIN mw_fund_request rqst
+                     ON     rqst.enty_seq = br.brnch_seq
+                        AND rqst.enty_typ = 'BR'
+                        AND rqst.crnt_rec_flg = 1
+                        AND TRUNC (rqst.crtd_dt) BETWEEN TO_DATE (
+                                                             :P_FROM_DATE,
+                                                             'dd-MM-yyyy')
+                                                     AND TO_DATE ( :P_TO_DATE,
+                                                                  'dd-MM-yyyy')
+           WHERE reg.crnt_rec_flg = 1 AND reg.reg_seq <> -1)
+   WHERE cheque_disb_amt > 0 OR kszb_amt > 0 OR amt > 0
+GROUP BY reg_nm,
+         brnch_nm,
+         brnch_cd,
+         acct_num,
+         BANK_NM,
+         cheque_disb_amt,
+         kszb_amt
+UNION ALL
+  SELECT reg_nm,
+         brnch_nm,
+         brnch_cd,
+         acct_num,
+         cheque_disb_amt,
+         kszb_amt,
+         SUM (amt),
+         LISTAGG (crtd_by, ', ') WITHIN GROUP (ORDER BY crtd_by)     crtd_by,
+         LISTAGG (remarks, ', ') WITHIN GROUP (ORDER BY remarks)     remarks,
+         BANK_NM
+    FROM (SELECT reg.reg_nm,
+                 NULL     BRNCH_NM,
+                 NULL     brnch_cd,
+                 ac.acct_num,
+                 ac.BANK_NM,
+                 0        cheque_disb_amt,
+                 0        kszb_amt,
+                 rqst.amt,
+                 rqst.crtd_by,
+                 rqst.remarks
+            FROM mw_reg reg
+                 JOIN mw_reg_acct_set ac
+                     ON ac.reg_seq = reg.reg_seq AND ac.crnt_rec_flg = 1
+                 JOIN mw_fund_request rqst
+                     ON     rqst.enty_seq = reg.reg_seq
+                        AND rqst.enty_typ = 'REG'
+                        AND rqst.crnt_rec_flg = 1
+                        AND TRUNC (rqst.crtd_dt) BETWEEN TO_DATE (
+                                                             :P_FROM_DATE,
+                                                             'dd-MM-yyyy')
+                                                     AND TO_DATE ( :P_TO_DATE,
+                                                                  'dd-MM-yyyy')
+           WHERE reg.crnt_rec_flg = 1 AND reg.reg_seq <> -1)
+   WHERE   amt > 0
+GROUP BY reg_nm,
+         brnch_nm,
+         brnch_cd,
+         acct_num,
+         BANK_NM,
+         cheque_disb_amt,
+         kszb_amt

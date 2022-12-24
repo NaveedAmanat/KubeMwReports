@@ -1,0 +1,56 @@
+----------------CREATED BY AISHA KHAN 1/24/2022---------Rented Client Ratio--------------------
+----------------EDITED BY AISHA KHAN 3/18/2022---------Rented Client Ratio-------------------AM
+----43---own,44---rented
+with
+qry as
+(select reg.reg_nm region,ar.area_nm area,br.brnch_nm branch,cln.clnt_seq clnt,LAP.clnt_seq clnt1,res_typ_key res
+from mw_clnt cln
+join mw_loan_app lap on cln.CLNT_SEQ = lap.CLNT_SEQ
+and lap.crnt_rec_flg=cln.crnt_rec_flg
+join mw_dsbmt_vchr_hdr dhdr on lap.loan_app_seq = dhdr.loan_app_seq
+and dhdr.crnt_rec_flg=lap.crnt_rec_flg
+join mw_port prt on lap.PORT_SEQ = prt.PORT_SEQ
+and prt.crnt_rec_flg=dhdr.crnt_rec_flg
+join mw_brnch br on prt.brnch_seq = br.brnch_seq
+and prt.crnt_rec_flg=br.crnt_rec_flg
+join mw_area ar on ar.area_seq = br.area_seq
+and ar.crnt_rec_flg=br.crnt_rec_flg
+--AND AR.AREA_SEQ =11
+join mw_reg reg on reg.reg_seq=ar.reg_seq
+and ar.crnt_rec_flg=reg.crnt_rec_flg
+AND reg.reg_seq = DECODE(:REG_SEQ, -1, REG.REG_SEQ, :REG_SEQ) --NVL ( :REG_SEQ, reg.reg_seq)
+AND ar.area_seq = DECODE(:AREA_SEQ, -1, AR.AREA_SEQ, :AREA_SEQ) --NVL ( :AREA_seq, ar.area_seq)
+--AND br.brnch_seq = NVL(:BRNCH_SEQ, br.brnch_seq)
+and lap.crnt_rec_flg=1 and trunc(dhdr.DSBMT_DT) between to_date(:fromdt,'dd-MM-YYYY') and to_date(:todt,'dd-MM-YYYY')
+and lap.prd_seq<>29
+)
+
+
+
+select a.name_1,a.name_2,b.total_clnts_disb,
+--"OWNED",round(("OWNED"/b.total_clnts_disb)*100,3) "OWNED_%",
+RENTED,nvl(round((RENTED/b.total_clnts_disb)*100,2),0) "RENTED_%"
+from (
+SELECT name_1,
+name_2,
+NVL (SUM (OWNED), 0) OWNED,
+NVL (SUM (RENTED), 0) RENTED
+FROM ( SELECT CASE WHEN :AREA_SEQ <>-1 THEN AREA ELSE region END AS name_1,
+CASE WHEN :AREA_SEQ <>-1 THEN branch ELSE AREA END AS name_2,
+(CASE WHEN res = 43 THEN COUNT (clnt) END) OWNED,
+(CASE WHEN res = 44 THEN COUNT (clnt) END) RENTED
+FROM QRY
+GROUP BY CASE WHEN :AREA_SEQ <>-1 THEN AREA ELSE region END,
+CASE WHEN :AREA_SEQ <>-1 THEN branch ELSE AREA END,
+RES)
+GROUP BY name_1,
+name_2) A
+JOIN
+(
+SELECT CASE WHEN :AREA_SEQ <>-1 THEN AREA ELSE region END AS name_1,
+CASE WHEN :AREA_SEQ <>-1 THEN branch ELSE AREA END AS name_2,
+COUNT (clnt1) total_clnts_disb
+FROM qry
+GROUP BY CASE WHEN :AREA_SEQ <>-1 THEN AREA ELSE region END,
+CASE WHEN :AREA_SEQ <>-1 THEN branch ELSE AREA END) B ON
+A.name_2=B.name_2 

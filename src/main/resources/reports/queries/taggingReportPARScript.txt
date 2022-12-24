@@ -1,0 +1,56 @@
+with qry as
+    (
+    select /*+ materialize */ emp.EMP_NM,
+    ap.loan_app_seq loan_cnt,  
+    ap.APRVD_LOAN_AMT APRVD_LOAN_AMT, 
+    loan_app_ost(ap.loan_app_seq,to_date(:todt, 'dd-MM-yyyy'),'psc') ost_amt,
+    GET_OD_INFO(ap.loan_app_seq,to_date(:todt, 'dd-MM-yyyy'),'psc') od_amt, 
+    GET_OD_INFO(ap.loan_app_seq,to_date(:todt, 'dd-MM-yyyy'),'d') od_dys
+    from mw_loan_app ap
+    join mw_clnt cl on cl.clnt_seq=ap.clnt_seq and cl.crnt_rec_flg=1
+    join mw_prd prd on ap.PRD_SEQ = prd.PRD_SEQ and prd.CRNT_REC_FLG = 1 
+    join mw_prd_grp grp on grp.PRD_GRP_SEQ = prd.PRD_GRP_SEQ and grp.CRNT_REC_FLG = 1
+    join mw_port prt on prt.port_seq=ap.port_seq and prt.crnt_rec_flg=1 --and prt.brnch_seq = :brnchSeq
+    join mw_port_emp_rel erl on erl.port_seq=prt.port_seq and erl.crnt_rec_flg=1 
+    join mw_emp emp on emp.emp_seq=erl.emp_seq,
+    mw_dsbmt_vchr_hdr dvh
+    where ( (ap.loan_app_sts=703 and trunc(ap.loan_app_sts_dt) <= to_date(:todt, 'dd-MM-yyyy') and ap.crnt_rec_flg=1) 
+    or (ap.loan_app_sts=704 and trunc(ap.loan_app_sts_dt) > to_date(:todt, 'dd-MM-yyyy') and trunc(dvh.dsbmt_dt) <= to_date(:todt, 'dd-MM-yyyy')
+    and ap.crnt_rec_flg=1) 
+    or (ap.loan_app_sts=1245 and trunc(ap.loan_app_sts_dt) > to_date(:todt, 'dd-MM-yyyy'))) and dvh.loan_app_seq = ap.loan_app_seq 
+    and dvh.crnt_rec_flg = 1
+    and loan_app_ost(ap.loan_app_seq,to_date(:todt, 'dd-MM-yyyy'),'psc') > 0
+    and ap.PRD_SEQ not in (2,5)
+    and not exists (select distinct ctl.loan_app_seq from mw_clnt_tag_list ctl where ctl.loan_app_seq = ap.loan_app_seq 
+    and trunc(ctl.eff_start_dt) <= to_date(:todt, 'dd-MM-yyyy') and ctl.tags_seq = 4 and ctl.crnt_rec_flg=1) 
+    )
+    select EMP_NM, sum(ost_amt) ost_amt,
+    sum(case when od_amt > 0 then ost_amt end) par_1_dy_amt,
+    
+    count(case when od_dys between 3.5 and 28.5 then loan_cnt end) par_1_30_day_cnt,
+    sum(case when od_dys between 3.5 and 28.5 then od_amt end) par_1_30_day_od_amt,
+    sum(case when od_dys between 3.5 and 28.5 then ost_amt end) par_1_30_day_amt,
+    
+    count(case when od_dys between 28.6 and 58.5 then loan_cnt end) par_31_60_day_cnt,
+    sum(case when od_dys between 28.6 and 58.5 then od_amt end) par_31_60_day_od_amt,
+    sum(case when od_dys between 28.6 and 58.5 then ost_amt end) par_31_60_day_amt,
+    
+    count(case when od_dys between 58.6 and 88.5 then loan_cnt end) par_61_90_day_cnt,
+    sum(case when od_dys between 58.6 and 88.5 then od_amt end) par_61_90_day_od_amt,
+    sum(case when od_dys between 58.6 and 88.5 then ost_amt end) par_61_90_day_amt,
+    
+    count(case when od_dys between 88.6 and 178.5 then loan_cnt end) par_91_180_day_cnt,
+    sum(case when od_dys between 88.6 and 178.5 then od_amt end) par_91_180_day_od_amt,
+    sum(case when od_dys between 88.6 and 178.5 then ost_amt end) par_91_180_day_amt,
+    
+    count(case when od_dys between 178.6 and 363.5 then loan_cnt end) par_181_365_day_cnt,
+    sum(case when od_dys between 178.6 and 363.5 then od_amt end) par_181_365_day_od_amt,
+    sum(case when od_dys between 178.6 and 363.5 then ost_amt end) par_181_365_day_amt,
+    
+    count(case when od_dys > 363.6 then loan_cnt end) par_over_365_day_cnt,
+    sum(case when od_dys > 363.6 then od_amt end) par_over_365_day_od_amt,
+    sum(case when od_dys > 363.6 then ost_amt end) par_over_365_amt 
+    
+    from qry q
+    group by q.EMP_NM
+    order by 1

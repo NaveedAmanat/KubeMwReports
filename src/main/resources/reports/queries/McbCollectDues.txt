@@ -1,0 +1,73 @@
+SELECT /* FileName: McbCollectionDues.txt
+		* Writted by: Yousaf Ali
+		* Review By: Ali Khubaib
+		* Date: 12-Dec-2022
+		* Reason: Email - New branches ADCs dues not showing */
+	   NULL TRANSACTION_NUMBER,
+       CLNT_ID CLIENT_PARTY_ID,
+       CLNT_NAME NAME,
+       '0' SPOUSE_NAME,
+       BRNCH_CD CNIC_NO,
+       BRNCH_NM KASHF_BRANCH_NAME,
+       SUM(NEXT_DUE) RECOVERY_AMOUNT,
+       0 SAVING_AMOUNT,
+       SUM(NEXT_DUE) TOTAL_AMOUNT,
+       NULL TRANSACTION_DATE,
+       NULL MCB_CODE,
+       NULL MCB_BRANCH_NAME
+  FROM (SELECT LOAN_DISB.LOAN_APP_SEQ,
+               LOAN_DISB.DSBMT_DT,
+               CLNT_ID,
+               LOAN_DISB.CLNT_NAME,
+               LOAN_DISB.SPZ_NAME,
+               LOAN_DISB.BRNCH_NM,
+               LOAN_DISB.BRNCH_CD,
+               NVL(TOTAL, 0) AS NEXT_DUE
+          FROM (SELECT MB.BRNCH_NM,
+                       MB.BRNCH_CD,
+                       AP.LOAN_APP_SEQ,
+                       MC.FRST_NM || ' ' || MC.LAST_NM AS CLNT_NAME,
+                       (MC.SPZ_FRST_NM || ' ' || MC.SPZ_LAST_NM) AS SPZ_NAME,
+                       TRUNC(AP.LOAN_APP_STS_DT) DSBMT_DT,
+                       CASE
+                         WHEN LENGTH(CLNT_ID) < 12 THEN
+                          LPAD(CLNT_ID, 12, '0')
+                         ELSE
+                          CLNT_ID
+                       END CLNT_ID,
+                       PSHH.TOTAL
+                  FROM MW_LOAN_APP AP
+                  JOIN MW_CLNT MC
+                    ON AP.CLNT_SEQ = MC.CLNT_SEQ
+                   AND AP.CRNT_REC_FLG = 1
+                  JOIN MW_BRNCH MB
+                    ON MB.BRNCH_SEQ = AP.BRNCH_SEQ
+                   AND MB.CRNT_REC_FLG = 1,
+                 (SELECT PSH.LOAN_APP_SEQ,
+                               NVL(PSD.PPAL_AMT_DUE, 0) +
+                               NVL(PSD.TOT_CHRG_DUE, 0) +
+                               NVL((SELECT SUM(AMT)
+                                     FROM MW_PYMT_SCHED_CHRG PSC
+                                    WHERE PSC.PYMT_SCHED_DTL_SEQ =
+                                          PSD.PYMT_SCHED_DTL_SEQ
+                                      AND CRNT_REC_FLG = 1),
+                                   0) TOTAL
+                          FROM MW_PYMT_SCHED_HDR PSH
+                          JOIN MW_PYMT_SCHED_DTL PSD
+                            ON PSH.PYMT_SCHED_HDR_SEQ = PSD.PYMT_SCHED_HDR_SEQ
+                         WHERE PSH.CRNT_REC_FLG = 1
+                           AND PSD.CRNT_REC_FLG = 1
+                           AND PSD.PYMT_SCHED_DTL_SEQ =
+                               (SELECT MIN(INNPSD.PYMT_SCHED_DTL_SEQ)
+                                  FROM MW_PYMT_SCHED_DTL INNPSD
+                                 WHERE INNPSD.PYMT_SCHED_HDR_SEQ =
+                                       PSH.PYMT_SCHED_HDR_SEQ
+                                   AND INNPSD.CRNT_REC_FLG = 1
+                                   AND INNPSD.PYMT_STS_KEY = 945)) PSHH
+                 WHERE AP.LOAN_APP_STS = 703
+                   AND PSHH.LOAN_APP_SEQ = AP.LOAN_APP_SEQ
+                   AND TRUNC(AP.LOAN_APP_STS_DT) <= SYSDATE - 1
+                --AND ap.BRNCH_SEQ = 1
+                ) LOAN_DISB)
+ WHERE NEXT_DUE > 0
+ GROUP BY CLNT_NAME, CLNT_ID, BRNCH_CD, BRNCH_NM

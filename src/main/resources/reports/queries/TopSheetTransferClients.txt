@@ -1,0 +1,327 @@
+select nvl(emp.emp_nm,' ')||'/'||prt.port_nm BDO, prdg.prd_grp_nm,
+                   sum(trf_in.CLNTS) as PFIN_CLNT, sum(trf_in.PR) PFIN_AMT_PR, sum(trf_in.SC) as PFIN_AMT_SC,
+                   sum(KSZB_in.AMT) KSZB_in, sum(KST_in.AMT) KST_in, sum(KC_in.AMT) KC_in, sum(DF_in.AMT) DOCUMENTATION_FEE_in,
+                   sum(LIP_in.AMT) LIFE_INSURANCE_PREMIUM_in,sum(TC_in.AMT) TAKAFUL_CONRTIBUTION_in,
+                   sum(TRC_in.AMT) TRAINING_CHARGES_in, sum(IPLS_in.AMT) INSURANCE_PREMIUM_LIVE_STOCK_in,
+                   sum(EXCESS_in.AMT) EXCESS_RCVRY_in, sum(CLAIMS_in.AMT) INS_CLAIMS_in,
+
+                   sum(trf_out.CLNTS) as PFOUT_CLNT, sum(trf_out.PR) PFOUT_AMT_PR, sum(trf_out.SC) as PFOUT_AMT_SC,
+                   sum(KSZB.AMT) KSZB_OUT, sum(KST.AMT) KST_OUT, sum(KC.AMT) KC_OUT, sum(DF.AMT) DOCUMENTATION_FEE_OUT,
+                   sum(LIP.AMT) LIFE_INSURANCE_PREMIUM_OUT,sum(TC.AMT) TAKAFUL_CONRTIBUTION_OUT,
+                   sum(TRC.AMT) TRAINING_CHARGES_OUT, sum(IPLS.AMT) INSURANCE_PREMIUM_LIVE_STOCK_OUT,
+                   sum(EXCESS.AMT) EXCESS_RCVRY_OUT, sum(CLAIMS.AMT) INS_CLAIMS_OUT
+                   from mw_brnch brnch
+            join mw_port prt on prt.brnch_seq=brnch.brnch_seq and prt.crnt_rec_flg=1
+            left outer join (select erl.port_seq,emp.emp_nm
+                    from mw_port_emp_rel erl
+                    join mw_emp emp on emp.emp_seq=erl.emp_seq
+                    where erl.crnt_rec_flg=1) emp on emp.port_seq=prt.port_seq
+            join mw_brnch_prd_rel prl on prl.brnch_seq=brnch.brnch_seq  and prl.crnt_rec_flg=1
+            join mw_prd prd on prd.prd_seq=prl.prd_seq and prd.crnt_rec_flg=1
+            join mw_prd_grp prdg on prdg.prd_grp_seq=prd.prd_grp_seq and prdg.crnt_rec_flg=1
+            left outer join  (
+            SELECT AP.PRD_SEQ, TRNS.TO_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+                SUM(NVL(CASE WHEN TRF.REMARKS = 'LOAN' THEN TRF.AMT END,0)) PR,
+                SUM(NVL(CASE WHEN TRF.REMARKS = 'SC' THEN TRF.AMT END,0)) SC
+                FROM RPTB_PORT_TRF_DETAIL TRF
+                JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+                JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+                JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+                WHERE TRF.TO_BRANCH = :brnch
+                AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+                GROUP BY AP.PRD_SEQ, TRNS.TO_PORT
+            ) trf_in on trf_in.prd_seq=prd.prd_seq and trf_in.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.TO_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.TO_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404709.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.TO_PORT
+            ) KSZB_in on KSZB_in.prd_seq=prd.prd_seq and KSZB_in.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.TO_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.TO_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.201118.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.TO_PORT
+            ) KST_in on KST_in.prd_seq=prd.prd_seq and KST_in.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.TO_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.TO_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404721.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.TO_PORT
+            ) KC_in on KC_in.prd_seq=prd.prd_seq and KC_in.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.TO_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.TO_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404713.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.TO_PORT
+            ) DF_in on DF_in.prd_seq=prd.prd_seq and DF_in.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.TO_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.TO_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404714.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.TO_PORT
+            ) LIP_in on LIP_in.prd_seq=prd.prd_seq and LIP_in.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.TO_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.TO_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404716.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.TO_PORT
+            ) TC_in on TC_in.prd_seq=prd.prd_seq and TC_in.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.TO_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.TO_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404715.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.TO_PORT
+            ) TRC_in on TRC_in.prd_seq=prd.prd_seq and TRC_in.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.TO_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.TO_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404717.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.TO_PORT
+            ) IPLS_in on IPLS_in.prd_seq=prd.prd_seq and IPLS_in.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.TO_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.TO_BRANCH = :brnch
+            AND TRF.REMARKS = 'EXCESS'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.TO_PORT
+            ) EXCESS_in on EXCESS_in.prd_seq=prd.prd_seq and EXCESS_in.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.TO_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.TO_BRANCH = :brnch
+            AND TRF.REMARKS = 'CLAIMS'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.TO_PORT
+            ) CLAIMS_in on CLAIMS_in.prd_seq=prd.prd_seq and CLAIMS_in.port_seq=prt.port_seq
+            left outer join  (
+            SELECT AP.PRD_SEQ, TRNS.FROM_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+           SUM(NVL(CASE WHEN TRF.REMARKS = 'LOAN' THEN TRF.AMT END,0)) PR,
+            SUM(NVL(CASE WHEN TRF.REMARKS = 'SC' THEN TRF.AMT END,0)) SC
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.FROM_BRANCH = :brnch
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.FROM_PORT
+            ) trf_out on trf_out.prd_seq=prd.prd_seq and trf_out.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.FROM_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.FROM_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404709.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.FROM_PORT
+            ) KSZB on KSZB.prd_seq=prd.prd_seq and KSZB.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.FROM_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.FROM_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.201118.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.FROM_PORT
+            ) KST on KST.prd_seq=prd.prd_seq and KST.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.FROM_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.FROM_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404721.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.FROM_PORT
+            ) KC on KC.prd_seq=prd.prd_seq and KC.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.FROM_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.FROM_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404713.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.FROM_PORT
+            ) DF on DF.prd_seq=prd.prd_seq and DF.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.FROM_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.FROM_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404714.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.FROM_PORT
+            ) LIP on LIP.prd_seq=prd.prd_seq and LIP.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.FROM_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.FROM_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404716.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.FROM_PORT
+            ) TC on TC.prd_seq=prd.prd_seq and TC.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.FROM_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.FROM_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404715.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.FROM_PORT
+            ) TRC on TRC.prd_seq=prd.prd_seq and TRC.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.FROM_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.FROM_BRANCH = :brnch
+            AND TRF.REMARKS = 'CHARGES'
+            AND TRF.GL_ACCT_NUM = '000.000.404717.00000'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.FROM_PORT
+            ) IPLS on IPLS.prd_seq=prd.prd_seq and IPLS.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.FROM_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1 --AND PRD.PRD_GRP_SEQ = :prdseq
+            WHERE TRF.FROM_BRANCH = :brnch
+            AND TRF.REMARKS = 'EXCESS'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.FROM_PORT
+            ) EXCESS on EXCESS.prd_seq=prd.prd_seq and EXCESS.port_seq=prt.port_seq
+            left outer join(
+            SELECT AP.PRD_SEQ, TRNS.FROM_PORT PORT_SEQ,
+            count(distinct trf.loan_app_seq) clnts,
+            sum(NVL(TRF.AMT,0)) AMT
+            FROM RPTB_PORT_TRF_DETAIL TRF
+            JOIN MW_LOAN_APP_TRNS TRNS ON TRNS.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND TRUNC(TRNS.TRNS_DT) = TRUNC(TRF.TRF_DT)
+            JOIN MW_LOAN_APP AP ON AP.LOAN_APP_SEQ = TRF.LOAN_APP_SEQ AND AP.CRNT_REC_FLG = 1
+            JOIN MW_PRD PRD ON PRD.PRD_SEQ = AP.PRD_SEQ AND PRD.CRNT_REC_FLG = 1
+            WHERE TRF.FROM_BRANCH = :brnch
+            AND TRF.REMARKS = 'CLAIMS'
+            AND TRUNC(TRF.TRF_DT) BETWEEN to_date(:frmdt, 'dd-MM-yyyy') AND to_date(:todt, 'dd-MM-yyyy')
+            GROUP BY AP.PRD_SEQ, TRNS.FROM_PORT
+            ) CLAIMS on CLAIMS.prd_seq=prd.prd_seq and CLAIMS.port_seq=prt.port_seq
+            where brnch.brnch_seq=:brnch
+            group by prdg.prd_grp_nm,nvl(emp.emp_nm,' ')||'/'||prt.port_nm,prdg.PRD_GRP_SEQ
+            having (sum(trf_in.CLNTS) > 0 or sum(trf_out.CLNTS) > 0)
+            order by prdg.PRD_GRP_SEQ,1

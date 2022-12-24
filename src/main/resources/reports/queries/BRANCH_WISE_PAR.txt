@@ -1,0 +1,264 @@
+SELECT /* FileName: BRANCH_WISE_PAR
+     * Writted by: Aisha Khan
+     * Review By: Ali Khubaib
+     * Date: 24-Nov-2022
+     * Reason: Finance Report (Portfolio) */
+mb.brnch_nm,
+       loc.DISTRICT_NAME
+           AS dist_nm,
+       loc.TEHSIL_NAME
+           AS thsl_nm,
+       loc.BRANCH_TYPE_DESC
+           B_TYPE,
+       (SELECT prov.ST_NM
+          FROM mw_st prov, mw_dist dst
+         WHERE     dst.st_seq = prov.st_seq
+               AND dst.DIST_NM = loc.DISTRICT_NAME
+               AND ROWNUM = 1)
+           AS prov_nm,
+       p_0.P_0_CLIENTS,
+       p_0.P_0_AMOUNT,
+       p_1.p_1_CLIENTS,
+       p_1.p_1_AMOUNT,
+       p_29.p_29_CLIENTS,
+       p_29.p_29_AMOUNT,
+       p_59.p_59_CLIENTS,
+       p_59.p_59_AMOUNT,
+       p_89.p_89_CLIENTS,
+       p_89.p_89_AMOUNT,
+       p_179.p_179_CLIENTS,
+       p_179.p_179_AMOUNT,
+       p_365.p_365_CLIENTS,
+       p_365.p_365_AMOUNT,
+       p_365abv.p_365abv_CLIENTS,
+       p_365abv.p_365abv_AMOUNT,
+       p_29abv.p_29abv_CLIENTS,
+       p_29abv.p_29abv_AMOUNT
+  FROM mw_brnch                mb,
+       kashf_reporting.br_loc  loc,
+       (  SELECT BRANCH,
+                 SUM (REGULAR_OD_CLIENTS)     p_0_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)     p_0_AMOUNT
+            FROM (  SELECT cpm1.BRANCH,
+                           CASE
+                               WHEN CPM1.PRODUCT_ID <> 19
+                               THEN
+                                   COUNT (LOAN_CYCLE_ID)
+                           END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                     (OVERDUE_AMOUNT = 0 AND OVERDUE_AMOUNT_SC = 0)
+                               cpm1.OVERDUE_DAYS = 0
+                           AND CPM1.PRODUCT_ID NOT IN (8)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY cpm1.BRANCH, CPM1.PRODUCT_ID)
+        GROUP BY BRANCH) p_0,
+       (  SELECT branch,
+                 SUM (REGULAR_OD_CLIENTS)     p_1_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)     p_1_AMOUNT
+            FROM (  SELECT cpm1.BRANCH,
+                           CASE
+                               WHEN CPM1.PRODUCT_ID <> 19
+                               THEN
+                                   COUNT (LOAN_CYCLE_ID)
+                           END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE     --(OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                               cpm1.OVERDUE_DAYS > 0
+                           AND CPM1.PRODUCT_ID NOT IN (8)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY cpm1.BRANCH, CPM1.PRODUCT_ID)
+        GROUP BY BRANCH) p_1,
+       (  SELECT BRANCH,
+                 SUM (REGULAR_OD_CLIENTS)     p_29_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)     p_29_AMOUNT
+            FROM (  SELECT cpm1.BRANCH,
+                           CASE
+                               WHEN CPM1.PRODUCT_ID <> 19
+                               THEN
+                                   COUNT (LOAN_CYCLE_ID)
+                           END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                               OVERDUE_DAYS BETWEEN 1 AND 29
+                           AND CPM1.PRODUCT_ID NOT IN (8)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY cpm1.BRANCH, CPM1.PRODUCT_ID)
+        GROUP BY BRANCH) p_29,
+       (  SELECT BRANCH,
+                 SUM (REGULAR_OD_CLIENTS)     p_59_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)     p_59_AMOUNT
+            FROM (  SELECT cpm1.BRANCH,
+                           CASE
+                               WHEN CPM1.PRODUCT_ID <> 19
+                               THEN
+                                   COUNT (LOAN_CYCLE_ID)
+                           END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                      (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                               OVERDUE_DAYS BETWEEN 30 AND 59
+                           AND CPM1.PRODUCT_ID NOT IN (8)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY cpm1.BRANCH, CPM1.PRODUCT_ID)
+        GROUP BY BRANCH) p_59,
+       (  SELECT BRANCH,
+                 SUM (REGULAR_OD_CLIENTS)     p_89_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)     p_89_AMOUNT
+            FROM (  SELECT cpm1.BRANCH,
+                           CASE
+                               WHEN CPM1.PRODUCT_ID <> 19
+                               THEN
+                                   COUNT (LOAN_CYCLE_ID)
+                           END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                      (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                               OVERDUE_DAYS BETWEEN 60 AND 89
+                           AND CPM1.PRODUCT_ID NOT IN (8)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY cpm1.BRANCH, CPM1.PRODUCT_ID)
+        GROUP BY BRANCH) p_89,
+       (  SELECT BRANCH,
+                 SUM (REGULAR_OD_CLIENTS)     p_179_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)     p_179_AMOUNT
+            FROM (  SELECT cpm1.BRANCH,
+                           CASE
+                               WHEN CPM1.PRODUCT_ID <> 19
+                               THEN
+                                   COUNT (LOAN_CYCLE_ID)
+                           END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                      (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                               OVERDUE_DAYS BETWEEN 90 AND 179
+                           AND CPM1.PRODUCT_ID NOT IN (8)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY cpm1.BRANCH, CPM1.PRODUCT_ID)
+        GROUP BY BRANCH) p_179,
+       (  SELECT BRANCH,
+                 SUM (REGULAR_OD_CLIENTS)     p_365_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)     p_365_AMOUNT
+            FROM (  SELECT cpm1.BRANCH,
+                           CASE
+                               WHEN CPM1.PRODUCT_ID <> 19
+                               THEN
+                                   COUNT (LOAN_CYCLE_ID)
+                           END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                      (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                               OVERDUE_DAYS BETWEEN 180 AND 365
+                           AND CPM1.PRODUCT_ID NOT IN (8)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY cpm1.BRANCH, CPM1.PRODUCT_ID)
+        GROUP BY BRANCH) p_365,
+       (  SELECT BRANCH,
+                 SUM (REGULAR_OD_CLIENTS)     p_365abv_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)     p_365abv_AMOUNT
+            FROM (  SELECT cpm1.BRANCH,
+                           CASE
+                               WHEN CPM1.PRODUCT_ID <> 19
+                               THEN
+                                   COUNT (LOAN_CYCLE_ID)
+                           END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                               OVERDUE_DAYS > 365
+                           AND CPM1.PRODUCT_ID NOT IN (8)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY cpm1.BRANCH, CPM1.PRODUCT_ID)
+        GROUP BY BRANCH) p_365abv,
+       (  SELECT BRANCH,
+                 SUM (REGULAR_OD_CLIENTS)     p_29abv_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)     p_29abv_AMOUNT
+            FROM (  SELECT cpm1.BRANCH,
+                           CASE
+                               WHEN CPM1.PRODUCT_ID <> 19
+                               THEN
+                                   COUNT (LOAN_CYCLE_ID)
+                           END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE     OVERDUE_DAYS > 29
+                           --                           AND (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                           AND CPM1.PRODUCT_ID NOT IN (8)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY cpm1.BRANCH, CPM1.PRODUCT_ID)
+        GROUP BY BRANCH) p_29abv
+ WHERE     mb.crnt_rec_flg = 1
+       AND mb.brnch_seq <> -1
+       AND mb.BRNCH_cd = TO_NUMBER(loc.BRANCH_CD(+))
+       AND mb.brnch_nm = UPPER (p_0.BRANCH(+))
+       AND mb.brnch_nm = UPPER (p_1.BRANCH(+))
+       AND mb.brnch_nm = UPPER (p_29.BRANCH(+))
+       AND mb.brnch_nm = UPPER (p_59.BRANCH(+))
+       AND mb.brnch_nm = UPPER (p_89.BRANCH(+))
+       AND mb.brnch_nm = UPPER (p_179.BRANCH(+))
+       AND mb.brnch_nm = UPPER (p_365.BRANCH(+))
+       AND mb.brnch_nm = UPPER (p_365abv.BRANCH(+))
+       AND mb.brnch_nm = UPPER (p_29abv.BRANCH(+))
+  ORDER BY 5,2,3,1

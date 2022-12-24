@@ -1,0 +1,2823 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="Management_Dashboard" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="817"
+              leftMargin="15" rightMargin="10" topMargin="10" bottomMargin="10"
+              uuid="7d2badf9-8800-46f2-87c8-6e1ca0395ebe">
+    <property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+    <property name="com.jaspersoft.studio.data.defaultdataadapter" value="STAGING NEW"/>
+    <property name="com.jaspersoft.studio.unit." value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+    <property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+    <style name="Crosstab_CH" mode="Opaque" backcolor="#96171F">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+            <topPen lineWidth="0.5" lineColor="#000000"/>
+            <leftPen lineWidth="0.5" lineColor="#000000"/>
+            <bottomPen lineWidth="0.5" lineColor="#000000"/>
+            <rightPen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="Crosstab_CG" mode="Opaque" backcolor="#BFE1FF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+            <topPen lineWidth="0.5" lineColor="#000000"/>
+            <leftPen lineWidth="0.5" lineColor="#000000"/>
+            <bottomPen lineWidth="0.5" lineColor="#000000"/>
+            <rightPen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="Crosstab_CT" mode="Opaque" backcolor="#005FB3">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+            <topPen lineWidth="0.5" lineColor="#000000"/>
+            <leftPen lineWidth="0.5" lineColor="#000000"/>
+            <bottomPen lineWidth="0.5" lineColor="#000000"/>
+            <rightPen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <style name="Crosstab_CD" mode="Opaque" backcolor="#FFFFFF">
+        <box>
+            <pen lineWidth="0.5" lineColor="#000000"/>
+            <topPen lineWidth="0.5" lineColor="#000000"/>
+            <leftPen lineWidth="0.5" lineColor="#000000"/>
+            <bottomPen lineWidth="0.5" lineColor="#000000"/>
+            <rightPen lineWidth="0.5" lineColor="#000000"/>
+        </box>
+    </style>
+    <parameter name="curr_user" class="java.lang.String"/>
+    <parameter name="LOGO_IMG" class="java.lang.String"/>
+    <queryString language="SQL">
+        <![CDATA[SELECT DISTINCT
+    cp.reg_nm,
+    outs.loans,
+    outs_unrech.loans       clnts_unrech,
+    outs_rech.loans         clnts_rech,
+    outs_new.loans          clnts_new,
+    outs_new.dsb_amt        dsb_amt_new,
+    outs.outs_crnt,
+    outs_unrech.outs_crnt   outs_unrech,
+    outs_rech.outs_crnt     outs_rech,
+    outs_new.outs_crnt      outs_new,
+    ( CASE
+        WHEN p_1.outs_p1 > 0 THEN round(nvl(p_1.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) par_p1_perc,
+    ( CASE
+        WHEN p_1_unrech.outs_p1 > 0 THEN round(nvl(p_1_unrech.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) par_p1_perc_unrech,
+    ( CASE
+        WHEN p_1_rech.outs_p1 > 0 THEN round(nvl(p_1_rech.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) par_p1_perc_rech,
+    ( CASE
+        WHEN p_1_new.outs_p1 > 0 THEN round(nvl(p_1_new.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) par_p1_perc_new,
+    ( CASE
+        WHEN p_3.outs_p1 > 0 THEN round(nvl(p_3.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) par_p3_perc,
+    ( CASE
+        WHEN p_3_unrech.outs_p1 > 0 THEN round(nvl(p_3_unrech.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) par_p3_perc_unrech,
+    ( CASE
+        WHEN p_3_rech.outs_p1 > 0 THEN round(nvl(p_3_rech.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) par_p3_perc_rech,
+    ( CASE
+        WHEN p_3_new.outs_p1 > 0 THEN round(nvl(p_3_new.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) par_p3_perc_new,
+    outs_rech_grc1.loans    outs_rech_grc1,
+    outs_rech_grc2.loans    outs_rech_grc2,
+    outs_rech_grc3.loans    outs_rech_grc3,
+    outs_rech_grc4.loans    outs_rech_grc4,
+    ( CASE
+        WHEN p_1_rech_grc1.outs_p1 > 0 THEN round(nvl(p_1_rech_grc1.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) p_1_rech_grc1,
+    ( CASE
+        WHEN p_1_rech_grc2.outs_p1 > 0 THEN round(nvl(p_1_rech_grc2.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) p_1_rech_grc2,
+    ( CASE
+        WHEN p_1_rech_grc3.outs_p1 > 0 THEN round(nvl(p_1_rech_grc3.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) p_1_rech_grc3,
+    ( CASE
+        WHEN p_1_rech_grc4.outs_p1 > 0 THEN round(nvl(p_1_rech_grc4.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) p_1_rech_grc4,
+    ( CASE
+        WHEN p_3_rech_grc1.outs_p1 > 0 THEN round(nvl(p_3_rech_grc1.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) p_3_rech_grc1,
+    ( CASE
+        WHEN p_3_rech_grc2.outs_p1 > 0 THEN round(nvl(p_3_rech_grc2.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) p_3_rech_grc2,
+    ( CASE
+        WHEN p_3_rech_grc3.outs_p1 > 0 THEN round(nvl(p_3_rech_grc3.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) p_3_rech_grc3,
+    ( CASE
+        WHEN p_3_rech_grc4.outs_p1 > 0 THEN round(nvl(p_3_rech_grc4.outs_p1, 1) / nvl(outs.outs_crnt, 1) * 100, 2)
+        ELSE 0
+    END ) p_3_rech_grc4
+FROM
+    pre_covid_apr20_outs_info1 cp,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans,
+            round(SUM(nvl(cp.dsb_amt, 0))) dsb_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_crnt
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            round((nvl(cp.outs_prn_crnt, 0))) + round((nvl(cp.outs_sc_crnt, 0))) > 0
+        GROUP BY
+            cp.reg_nm
+    ) outs,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans,
+            round(SUM(nvl(cp.dsb_amt, 0))) dsb_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_crnt
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            round((nvl(cp.outs_prn_crnt, 0))) + round((nvl(cp.outs_sc_crnt, 0))) > 0
+            AND cp.grace_perd IS NULL
+            AND cp.dsbmt_dt <= '30-apr-2020'
+        GROUP BY
+            cp.reg_nm
+    ) outs_unrech,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans,
+            round(SUM(nvl(cp.dsb_amt, 0))) dsb_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_crnt
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            round((nvl(cp.outs_prn_crnt, 0))) + round((nvl(cp.outs_sc_crnt, 0))) > 0
+            AND cp.grace_perd IS NOT NULL
+            AND cp.dsbmt_dt <= '30-apr-2020'
+        GROUP BY
+            cp.reg_nm
+    ) outs_rech,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans,
+            round(SUM(nvl(cp.dsb_amt, 0))) dsb_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_crnt
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            round((nvl(cp.outs_prn_crnt, 0))) + round((nvl(cp.outs_sc_crnt, 0))) > 0
+            AND cp.grace_perd IS NULL
+            AND cp.dsbmt_dt > '30-apr-2020'
+        GROUP BY
+            cp.reg_nm
+    ) outs_new,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            ( cp.od_amt_prn_crnt > 0
+              OR cp.od_amt_sc_crnt > 0 )
+        GROUP BY
+            cp.reg_nm
+    ) p_1,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd IS NULL
+            AND cp.dsbmt_dt <= '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+        GROUP BY
+            cp.reg_nm
+    ) p_1_unrech,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd IS NOT NULL
+            AND cp.dsbmt_dt <= '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+        GROUP BY
+            cp.reg_nm
+    ) p_1_rech,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd IS NULL
+            AND cp.dsbmt_dt > '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+            AND cp.od_dys_crnt > 29.50
+        GROUP BY
+            cp.reg_nm
+    ) p_1_new,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            ( cp.od_amt_prn_crnt > 0
+              OR cp.od_amt_sc_crnt > 0 )
+            AND cp.od_dys_crnt > 29.50
+        GROUP BY
+            cp.reg_nm
+    ) p_3,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd IS NULL
+            AND cp.dsbmt_dt <= '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+            AND cp.od_dys_crnt > 29.50
+        GROUP BY
+            cp.reg_nm
+    ) p_3_unrech,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd IS NOT NULL
+            AND cp.dsbmt_dt <= '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+            AND cp.od_dys_crnt > 29.50
+        GROUP BY
+            cp.reg_nm
+    ) p_3_rech,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd IS NULL
+            AND cp.dsbmt_dt > '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+            AND cp.od_dys_crnt > 29.50
+        GROUP BY
+            cp.reg_nm
+    ) p_3_new,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans,
+            round(SUM(nvl(cp.dsb_amt, 0))) dsb_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_crnt
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            round((nvl(cp.outs_prn_crnt, 0))) + round((nvl(cp.outs_sc_crnt, 0))) > 0
+            AND cp.grace_perd = 1
+            AND cp.dsbmt_dt <= '30-apr-2020'
+        GROUP BY
+            cp.reg_nm
+    ) outs_rech_grc1,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans,
+            round(SUM(nvl(cp.dsb_amt, 0))) dsb_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_crnt
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            round((nvl(cp.outs_prn_crnt, 0))) + round((nvl(cp.outs_sc_crnt, 0))) > 0
+            AND cp.grace_perd = 2
+            AND cp.dsbmt_dt <= '30-apr-2020'
+        GROUP BY
+            cp.reg_nm
+    ) outs_rech_grc2,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans,
+            round(SUM(nvl(cp.dsb_amt, 0))) dsb_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_crnt
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            round((nvl(cp.outs_prn_crnt, 0))) + round((nvl(cp.outs_sc_crnt, 0))) > 0
+            AND cp.grace_perd = 3
+            AND cp.dsbmt_dt <= '30-apr-2020'
+        GROUP BY
+            cp.reg_nm
+    ) outs_rech_grc3,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans,
+            round(SUM(nvl(cp.dsb_amt, 0))) dsb_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_crnt
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            round((nvl(cp.outs_prn_crnt, 0))) + round((nvl(cp.outs_sc_crnt, 0))) > 0
+            AND cp.grace_perd > 3
+            AND cp.dsbmt_dt <= '30-apr-2020'
+        GROUP BY
+            cp.reg_nm
+    ) outs_rech_grc4,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd = 1
+            AND cp.dsbmt_dt <= '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+        GROUP BY
+            cp.reg_nm
+    ) p_1_rech_grc1,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd = 2
+            AND cp.dsbmt_dt <= '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+        GROUP BY
+            cp.reg_nm
+    ) p_1_rech_grc2,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd = 3
+            AND cp.dsbmt_dt <= '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+        GROUP BY
+            cp.reg_nm
+    ) p_1_rech_grc3,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd > 3
+            AND cp.dsbmt_dt <= '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+        GROUP BY
+            cp.reg_nm
+    ) p_1_rech_grc4,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd = 1
+            AND cp.dsbmt_dt <= '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+            AND cp.od_dys_crnt > 29.50
+        GROUP BY
+            cp.reg_nm
+    ) p_3_rech_grc1,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd = 2
+            AND cp.dsbmt_dt <= '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+            AND cp.od_dys_crnt > 29.50
+        GROUP BY
+            cp.reg_nm
+    ) p_3_rech_grc2,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd = 3
+            AND cp.dsbmt_dt <= '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+            AND cp.od_dys_crnt > 29.50
+        GROUP BY
+            cp.reg_nm
+    ) p_3_rech_grc3,
+    (
+        SELECT
+            cp.reg_nm,
+            COUNT(cp.loan_app_seq) loans_p1,
+            round(SUM(nvl(cp.od_amt_prn_crnt, 0))) + round(SUM(nvl(cp.od_amt_sc_crnt, 0))) od_amt,
+            round(SUM(nvl(cp.outs_prn_crnt, 0))) + round(SUM(nvl(cp.outs_sc_crnt, 0))) outs_p1
+        FROM
+            pre_covid_apr20_outs_info1 cp
+        WHERE
+            cp.grace_perd > 3
+            AND cp.dsbmt_dt <= '30-apr-2020'
+            AND ( cp.od_amt_prn_crnt > 0
+                  OR cp.od_amt_sc_crnt > 0 )
+            AND cp.od_dys_crnt > 29.50
+        GROUP BY
+            cp.reg_nm
+    ) p_3_rech_grc4
+WHERE
+    cp.reg_nm = outs.reg_nm (+)
+    AND cp.reg_nm = outs_unrech.reg_nm (+)
+    AND cp.reg_nm = outs_rech.reg_nm (+)
+    AND cp.reg_nm = outs_new.reg_nm (+)
+    AND cp.reg_nm = p_1.reg_nm (+)
+    AND cp.reg_nm = p_1_unrech.reg_nm (+)
+    AND cp.reg_nm = p_1_rech.reg_nm (+)
+    AND cp.reg_nm = p_1_new.reg_nm (+)
+    AND cp.reg_nm = p_3.reg_nm (+)
+    AND cp.reg_nm = p_3_unrech.reg_nm (+)
+    AND cp.reg_nm = p_3_rech.reg_nm (+)
+    AND cp.reg_nm = p_3_new.reg_nm (+)
+    AND cp.reg_nm = outs_rech_grc1.reg_nm (+)
+    AND cp.reg_nm = outs_rech_grc2.reg_nm (+)
+    AND cp.reg_nm = outs_rech_grc3.reg_nm (+)
+    AND cp.reg_nm = outs_rech_grc4.reg_nm (+)
+    AND cp.reg_nm = p_1_rech_grc1.reg_nm (+)
+    AND cp.reg_nm = p_1_rech_grc2.reg_nm (+)
+    AND cp.reg_nm = p_1_rech_grc3.reg_nm (+)
+    AND cp.reg_nm = p_1_rech_grc4.reg_nm (+)
+    AND cp.reg_nm = p_3_rech_grc1.reg_nm (+)
+    AND cp.reg_nm = p_3_rech_grc2.reg_nm (+)
+    AND cp.reg_nm = p_3_rech_grc3.reg_nm (+)
+    AND cp.reg_nm = p_3_rech_grc4.reg_nm (+)]]>
+    </queryString>
+    <field name="REG_NM" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="REG_NM"/>
+    </field>
+    <field name="LOANS" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="LOANS"/>
+    </field>
+    <field name="CLNTS_UNRECH" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="CLNTS_UNRECH"/>
+    </field>
+    <field name="CLNTS_RECH" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="CLNTS_RECH"/>
+    </field>
+    <field name="CLNTS_NEW" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="CLNTS_NEW"/>
+    </field>
+    <field name="DSB_AMT_NEW" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="DSB_AMT_NEW"/>
+    </field>
+    <field name="OUTS_CRNT" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="OUTS_CRNT"/>
+    </field>
+    <field name="OUTS_UNRECH" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="OUTS_UNRECH"/>
+    </field>
+    <field name="OUTS_RECH" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="OUTS_RECH"/>
+    </field>
+    <field name="OUTS_NEW" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="OUTS_NEW"/>
+    </field>
+    <field name="PAR_P1_PERC" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="PAR_P1_PERC"/>
+    </field>
+    <field name="PAR_P1_PERC_UNRECH" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="PAR_P1_PERC_UNRECH"/>
+    </field>
+    <field name="PAR_P1_PERC_RECH" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="PAR_P1_PERC_RECH"/>
+    </field>
+    <field name="PAR_P1_PERC_NEW" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="PAR_P1_PERC_NEW"/>
+    </field>
+    <field name="PAR_P3_PERC" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="PAR_P3_PERC"/>
+    </field>
+    <field name="PAR_P3_PERC_UNRECH" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="PAR_P3_PERC_UNRECH"/>
+    </field>
+    <field name="PAR_P3_PERC_RECH" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="PAR_P3_PERC_RECH"/>
+    </field>
+    <field name="PAR_P3_PERC_NEW" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="PAR_P3_PERC_NEW"/>
+    </field>
+    <field name="OUTS_RECH_GRC1" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="OUTS_RECH_GRC1"/>
+    </field>
+    <field name="OUTS_RECH_GRC2" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="OUTS_RECH_GRC2"/>
+    </field>
+    <field name="OUTS_RECH_GRC3" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="OUTS_RECH_GRC3"/>
+    </field>
+    <field name="OUTS_RECH_GRC4" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="OUTS_RECH_GRC4"/>
+    </field>
+    <field name="P_1_RECH_GRC1" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="P_1_RECH_GRC1"/>
+    </field>
+    <field name="P_1_RECH_GRC2" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="P_1_RECH_GRC2"/>
+    </field>
+    <field name="P_1_RECH_GRC3" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="P_1_RECH_GRC3"/>
+    </field>
+    <field name="P_1_RECH_GRC4" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="P_1_RECH_GRC4"/>
+    </field>
+    <field name="P_3_RECH_GRC1" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="P_3_RECH_GRC1"/>
+    </field>
+    <field name="P_3_RECH_GRC2" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="P_3_RECH_GRC2"/>
+    </field>
+    <field name="P_3_RECH_GRC3" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="P_3_RECH_GRC3"/>
+    </field>
+    <field name="P_3_RECH_GRC4" class="java.math.BigDecimal">
+        <property name="com.jaspersoft.studio.field.label" value="P_3_RECH_GRC4"/>
+    </field>
+    <variable name="rg" class="java.lang.Integer" incrementType="Column">
+        <initialValueExpression><![CDATA[1]]></initialValueExpression>
+    </variable>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="80">
+            <staticText>
+                <reportElement positionType="Float" x="47" y="4" width="127" height="20"
+                               uuid="00939a16-60aa-47f5-9a3c-0609d1a56717"/>
+                <textElement>
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Kashf Foundation]]></text>
+            </staticText>
+            <staticText>
+                <reportElement positionType="Float" x="650" y="8" width="36" height="12"
+                               uuid="062933c6-d7b5-4d7a-ad5a-f30f978cdf83"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <text><![CDATA[User:]]></text>
+            </staticText>
+            <staticText>
+                <reportElement positionType="Float" x="650" y="20" width="60" height="12"
+                               uuid="3ea6ac89-dc67-4b84-95ba-d9aa5e1bedbd"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <text><![CDATA[Printing Date:]]></text>
+            </staticText>
+            <textField>
+                <reportElement positionType="Float" x="710" y="8" width="90" height="12"
+                               uuid="2e1e44fa-eb1e-4b02-a42e-8caa3eedaaa3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{curr_user}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" x="710" y="20" width="90" height="12"
+                               uuid="9c64f36b-1898-4522-aeae-71cbd543fd2b"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression>
+                    <![CDATA[new SimpleDateFormat("dd-MM-yy h:mm a").format(new Date())]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="211" y="25" width="400" height="30" uuid="f5474537-8575-43b9-a1f7-2f01c4439ecd"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="16" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Management Dashboard]]></text>
+            </staticText>
+        </band>
+    </title>
+    <pageFooter>
+        <band height="12">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+            <textField>
+                <reportElement x="705" y="0" width="52" height="12" uuid="3d3d2809-0a69-4b63-801f-48fe1fad0696"/>
+                <textElement textAlignment="Right">
+                    <font fontName="SansSerif" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="757" y="0" width="45" height="12" uuid="5a1208c8-bcd3-4fd2-9412-5612e76e4d2c"/>
+                <textElement textAlignment="Left">
+                    <font fontName="SansSerif" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[" of " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+    <summary>
+        <band height="420" splitType="Stretch">
+            <crosstab columnBreakOffset="100">
+                <reportElement style="Crosstab_CD" x="0" y="0" width="820" height="420"
+                               uuid="7468160b-6164-462e-a5b1-6d73d9e00fba">
+                    <property name="com.jaspersoft.studio.layout"
+                              value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+                    <property name="com.jaspersoft.studio.crosstab.style.header" value="Crosstab_CH"/>
+                    <property name="com.jaspersoft.studio.crosstab.style.group" value="Crosstab_CG"/>
+                    <property name="com.jaspersoft.studio.crosstab.style.total" value="Crosstab_CT"/>
+                    <property name="com.jaspersoft.studio.crosstab.style.detail" value="Crosstab_CD"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <crosstabHeaderCell>
+                    <cellContents mode="Opaque" style="Crosstab_CD">
+                        <property name="com.jaspersoft.studio.layout"
+                                  value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                        <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                        <staticText>
+                            <reportElement mode="Opaque" x="0" y="0" width="160" height="29" forecolor="#F5EC89"
+                                           backcolor="#96171F" uuid="6e5feb5f-4d86-4f12-b836-2a5714e5e316">
+                                <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Left" verticalAlignment="Middle">
+                                <font size="10" isBold="true"/>
+                                <paragraph leftIndent="2"/>
+                            </textElement>
+                            <text><![CDATA[Dashboard]]></text>
+                        </staticText>
+                    </cellContents>
+                </crosstabHeaderCell>
+                <rowGroup name="PAGE_NUMBER" width="160" totalPosition="End">
+                    <bucket class="java.lang.Integer">
+                        <bucketExpression><![CDATA[$V{PAGE_NUMBER}]]></bucketExpression>
+                    </bucket>
+                    <crosstabRowHeader>
+                        <cellContents mode="Transparent" style="Crosstab_CH">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <staticText>
+                                <reportElement x="0" y="0" width="160" height="10"
+                                               uuid="067f8612-f8f6-444a-864c-8cad5d7033e6">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[Active Clients - Consilidated]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="10" width="160" height="10"
+                                               uuid="6a78d93a-937c-4cca-a054-ff5a08c3608f">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[Active Clients - Unscheduled]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="20" width="160" height="10"
+                                               uuid="67997a8f-d709-4939-b7ae-4dd14ea99086">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[Active clients  - Rescheduled]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="150" width="160" height="10"
+                                               uuid="c2f46f63-7267-4137-b835-bdb5f6d78b08">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[PAR 30 day - New]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="140" width="160" height="10"
+                                               uuid="c6afcf9b-4fab-4e11-8959-8e9393ae839a">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[PAR 1 day - Rescheduled]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="130" width="160" height="10"
+                                               uuid="7f1f832f-25bd-449f-919d-1a64964bb3e6">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[PAR 1 day - Unscheduled]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="120" width="160" height="10"
+                                               uuid="12d4c54d-c7ec-4eb6-a34e-9f6ebd7f8bea">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[PAR 1 day - Consolidated]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="100" width="160" height="10"
+                                               uuid="b9b06319-1994-4fa5-a94d-2c2abaa14932">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[Outstanding - New]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="90" width="160" height="10"
+                                               uuid="12f7d82d-96f8-4a80-b11d-3405fb8ed051">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[Outstanding  - Rescheduled]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="80" width="160" height="10"
+                                               uuid="efbbb644-3d4a-460e-9333-78f268b21a8f">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[Outstanding - Unscheduled]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="70" width="160" height="10"
+                                               uuid="b57ae939-318b-43c3-8d0c-81324750e527">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[Outstanding - Consolidated]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="50" width="160" height="10"
+                                               uuid="ab5b467f-a745-4f36-9353-bcf0fccd8698">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[Amount Disbursed  - New ]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="30" width="160" height="10"
+                                               uuid="8fb8bfba-57f9-402e-9ec7-3e1367431da3">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[Active clients  - New]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="110" width="160" height="10"
+                                               uuid="8877c825-5d47-4afa-b5f1-5927aa8e365c">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="170" width="160" height="10"
+                                               uuid="87b07d6d-64f7-4af1-9e28-896c00cac674">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[PAR 30 day - Consolidated]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="180" width="160" height="10"
+                                               uuid="a5b328fb-8a64-448b-b4ee-547c0fe040fe">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[PAR 30 day - Unscheduled]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="190" width="160" height="10"
+                                               uuid="e3eb5815-ee72-4ad4-92b3-1009fe04efc5">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[PAR 30 day - Rescheduled]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="300" width="160" height="10"
+                                               uuid="b34576a7-614c-4a2d-b803-73992196eb27">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[1 day PAR of rescheduled clients with 90 day Plus grace period
+]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="290" width="160" height="10"
+                                               uuid="cdd8dc02-cca3-42d5-9696-b37e5ce652ee">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[1 day PAR of rescheduled clients with 90 day grace period
+]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="280" width="160" height="10"
+                                               uuid="d5739ad0-0267-43a4-a933-ac1744bfd488">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[1 day PAR of rescheduled clients with 60 day grace period
+]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="270" width="160" height="10"
+                                               uuid="8d53b408-55a0-4f2b-8f55-c9fb86936fd6">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[1 day PAR of rescheduled clients with 30 day grace period
+]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="250" width="160" height="10"
+                                               uuid="a2c949c0-e3bc-4264-b9a9-ba8bc1bf92ec">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[# of rescheduled clients with 90 days+ grace period
+]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="240" width="160" height="10"
+                                               uuid="65d2e9fb-3e07-4bc9-8124-b94e5efd8351">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[# of rescheduled clients with 90 day grace period
+]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="230" width="160" height="10"
+                                               uuid="138c6942-09f7-4f24-adb1-b7fc96b41216">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[# of rescheduled clients with 60 day grace period
+]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="220" width="160" height="10"
+                                               uuid="b47b187b-cbe0-4dea-af9d-21aeccc29ebd">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[# of rescheduled clients with 30 day grace period
+]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="210" width="160" height="10"
+                                               uuid="b98dcb75-2da0-476a-9e4a-5a1199fb338f">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="200" width="160" height="10"
+                                               uuid="76789ff5-c714-4d26-a603-d74976bbc106">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[Active clients  - New]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="260" width="160" height="10"
+                                               uuid="cae6e9b2-203f-4210-a3e9-d5dff08bccbc">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="160" width="160" height="10"
+                                               uuid="27ddbab7-4cb3-4eb1-a100-90d613a009c8">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="350" width="160" height="10"
+                                               uuid="9b834d4d-06d8-49be-bd6d-56f0b7275db1">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[30 day PAR of rescheduled clients with 90 day Plus grace period
+]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="340" width="160" height="10"
+                                               uuid="882d275f-2474-4ad2-b62d-388944367fa1">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[30 day PAR of rescheduled clients with 90 day grace period
+]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="330" width="160" height="10"
+                                               uuid="eaf382a2-fe9b-4b78-b299-575694a1e374">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[30 day PAR of rescheduled clients with 60 day grace period
+]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="320" width="160" height="10"
+                                               uuid="15f21906-6e7f-42af-aee0-46ea0b362456">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[30 day PAR of rescheduled clients with 30 day grace period
+]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement x="0" y="310" width="160" height="10"
+                                               uuid="a1e10b3d-abea-4a59-b554-3b95aca47c82">
+                                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                    <font size="6"/>
+                                    <paragraph leftIndent="2"/>
+                                </textElement>
+                                <text><![CDATA[]]></text>
+                            </staticText>
+                        </cellContents>
+                    </crosstabRowHeader>
+                    <crosstabTotalRowHeader>
+                        <cellContents mode="Opaque" style="Crosstab_CT">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                        </cellContents>
+                    </crosstabTotalRowHeader>
+                </rowGroup>
+                <columnGroup name="REG_NM" height="30" totalPosition="End">
+                    <bucket class="java.lang.String">
+                        <bucketExpression><![CDATA[$F{REG_NM}]]></bucketExpression>
+                    </bucket>
+                    <crosstabColumnHeader>
+                        <cellContents mode="Opaque" style="Crosstab_CH">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textField>
+                                <reportElement mode="Opaque" x="0" y="15" width="57" height="15" forecolor="#96171F"
+                                               backcolor="#F5EC89" uuid="12c43270-933f-4d2b-9a67-3bdf658a079c">
+                                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+                                    <font size="7" isBold="true"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$V{REG_NM}]]></textFieldExpression>
+                            </textField>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="0" width="57" height="15" forecolor="#F5EC89"
+                                               backcolor="#96171F" uuid="4c51b871-d064-4d9b-a37d-79da56e5a184">
+                                    <printWhenExpression>
+                                        <![CDATA[$V{REG_NM}.equals( "BAHAWALPUR REGION")]]></printWhenExpression>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="10" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Regions]]></text>
+                            </staticText>
+                        </cellContents>
+                    </crosstabColumnHeader>
+                    <crosstabTotalColumnHeader>
+                        <cellContents mode="Transparent" style="Crosstab_CT">
+                            <property name="com.jaspersoft.studio.layout"
+                                      value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                            <staticText>
+                                <reportElement mode="Opaque" x="0" y="15" width="70" height="15" forecolor="#96171F"
+                                               backcolor="#F5EC89" uuid="2c0f1e4e-d159-49aa-9012-4495a800704e">
+                                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                                </reportElement>
+                                <box>
+                                    <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#96171F"/>
+                                    <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#96171F"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle" markup="styled">
+                                    <font size="9" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Overall]]></text>
+                            </staticText>
+                            <staticText>
+                                <reportElement style="Crosstab_CH" mode="Opaque" x="0" y="0" width="70" height="15"
+                                               forecolor="#F5EC89" backcolor="#96171F"
+                                               uuid="1897289c-de1e-4bd1-833d-b39a4bac67de"/>
+                                <box>
+                                    <topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                    <rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+                                </box>
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
+                                    <font size="10" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[]]></text>
+                            </staticText>
+                        </cellContents>
+                    </crosstabTotalColumnHeader>
+                </columnGroup>
+                <measure name="LOANS_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{LOANS}]]></measureExpression>
+                </measure>
+                <measure name="CLNTS_UNRECH_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{CLNTS_UNRECH}]]></measureExpression>
+                </measure>
+                <measure name="CLNTS_RECH_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{CLNTS_RECH}]]></measureExpression>
+                </measure>
+                <measure name="CLNTS_NEW_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{CLNTS_NEW}]]></measureExpression>
+                </measure>
+                <measure name="DSB_AMT_NEW_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{DSB_AMT_NEW}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_CRNT_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{OUTS_CRNT}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_UNRECH_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{OUTS_UNRECH}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_RECH_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{OUTS_RECH}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_NEW_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{OUTS_NEW}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P1_PERC_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{PAR_P1_PERC}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P1_PERC_UNRECH_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{PAR_P1_PERC_UNRECH}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P1_PERC_RECH_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{PAR_P1_PERC_RECH}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P1_PERC_NEW_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{PAR_P1_PERC_NEW}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P3_PERC_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{PAR_P3_PERC}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P3_PERC_UNRECH_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{PAR_P3_PERC_UNRECH}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P3_PERC_RECH_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{PAR_P3_PERC_RECH}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P3_PERC_NEW_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{PAR_P3_PERC_NEW}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_RECH_GRC1_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{OUTS_RECH_GRC1}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_RECH_GRC2_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{OUTS_RECH_GRC2}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_RECH_GRC3_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{OUTS_RECH_GRC3}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_RECH_GRC4_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{OUTS_RECH_GRC4}]]></measureExpression>
+                </measure>
+                <measure name="P_1_RECH_GRC1_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{P_1_RECH_GRC1}]]></measureExpression>
+                </measure>
+                <measure name="P_1_RECH_GRC2_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{P_1_RECH_GRC2}]]></measureExpression>
+                </measure>
+                <measure name="P_1_RECH_GRC3_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{P_1_RECH_GRC3}]]></measureExpression>
+                </measure>
+                <measure name="P_1_RECH_GRC4_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{P_1_RECH_GRC4}]]></measureExpression>
+                </measure>
+                <measure name="P_3_RECH_GRC1_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{P_3_RECH_GRC1}]]></measureExpression>
+                </measure>
+                <measure name="P_3_RECH_GRC2_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{P_3_RECH_GRC2}]]></measureExpression>
+                </measure>
+                <measure name="P_3_RECH_GRC3_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{P_3_RECH_GRC3}]]></measureExpression>
+                </measure>
+                <measure name="P_3_RECH_GRC4_MEASURE" class="java.math.BigDecimal">
+                    <measureExpression><![CDATA[$F{P_3_RECH_GRC4}]]></measureExpression>
+                </measure>
+                <measure name="LOANS_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{LOANS}]]></measureExpression>
+                </measure>
+                <measure name="CLNTS_UNRECH_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{CLNTS_UNRECH}]]></measureExpression>
+                </measure>
+                <measure name="CLNTS_RECH_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{CLNTS_RECH}]]></measureExpression>
+                </measure>
+                <measure name="CLNTS_NEW_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{CLNTS_NEW}]]></measureExpression>
+                </measure>
+                <measure name="DSB_AMT_NEW_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{DSB_AMT_NEW}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_CRNT_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{OUTS_CRNT}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_UNRECH_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{OUTS_UNRECH}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_RECH_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{OUTS_RECH}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_NEW_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{OUTS_NEW}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P1_PERC_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{PAR_P1_PERC}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P1_PERC_UNRECH_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{PAR_P1_PERC_UNRECH}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P1_PERC_RECH_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{PAR_P1_PERC_RECH}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P1_PERC_NEW_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{PAR_P1_PERC_NEW}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P3_PERC_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{PAR_P3_PERC}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P3_PERC_UNRECH_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{PAR_P3_PERC_UNRECH}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P3_PERC_RECH_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{PAR_P3_PERC_RECH}]]></measureExpression>
+                </measure>
+                <measure name="PAR_P3_PERC_NEW_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{PAR_P3_PERC_NEW}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_RECH_GRC1_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{OUTS_RECH_GRC1}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_RECH_GRC2_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{OUTS_RECH_GRC2}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_RECH_GRC3_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{OUTS_RECH_GRC3}]]></measureExpression>
+                </measure>
+                <measure name="OUTS_RECH_GRC4_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{OUTS_RECH_GRC4}]]></measureExpression>
+                </measure>
+                <measure name="P_1_RECH_GRC1_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{P_1_RECH_GRC1}]]></measureExpression>
+                </measure>
+                <measure name="P_1_RECH_GRC2_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{P_1_RECH_GRC2}]]></measureExpression>
+                </measure>
+                <measure name="P_1_RECH_GRC3_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{P_1_RECH_GRC3}]]></measureExpression>
+                </measure>
+                <measure name="P_1_RECH_GRC4_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{P_1_RECH_GRC4}]]></measureExpression>
+                </measure>
+                <measure name="P_3_RECH_GRC1_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{P_3_RECH_GRC1}]]></measureExpression>
+                </measure>
+                <measure name="P_3_RECH_GRC2_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{P_3_RECH_GRC2}]]></measureExpression>
+                </measure>
+                <measure name="P_3_RECH_GRC3_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{P_3_RECH_GRC3}]]></measureExpression>
+                </measure>
+                <measure name="P_3_RECH_GRC4_SUM" class="java.math.BigDecimal" calculation="Sum">
+                    <measureExpression><![CDATA[$F{P_3_RECH_GRC4}]]></measureExpression>
+                </measure>
+                <crosstabCell width="57" height="360">
+                    <cellContents mode="Opaque" style="Crosstab_CD">
+                        <property name="com.jaspersoft.studio.layout"
+                                  value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                        <textField>
+                            <reportElement x="0" y="0" width="57" height="10"
+                                           uuid="657784a9-d92a-413f-aae5-9211b7bdaf05">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[$V{LOANS_MEASURE}==null ? 0 : new java.text.DecimalFormat("#,##0").format($V{LOANS_MEASURE})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="10" width="57" height="10"
+                                           uuid="8a018b1d-0cd0-4799-825e-7c1e68e167e7">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{CLNTS_UNRECH_MEASURE})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="20" width="57" height="10"
+                                           uuid="b64e9ba2-caf8-42b5-a263-9407580316ca">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{CLNTS_RECH_MEASURE})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="30" width="57" height="10"
+                                           uuid="2c75d168-1a6d-4882-8f80-34848a4e9e6b">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[$V{CLNTS_NEW_MEASURE}==null ? 0 : new java.text.DecimalFormat("#,##0").format($V{CLNTS_NEW_MEASURE})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="50" width="57" height="10"
+                                           uuid="80571685-b3c7-4a6a-a87b-d1d38412e503">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[$V{DSB_AMT_NEW_MEASURE}==null ? 0 : new java.text.DecimalFormat("#,##0").format($V{DSB_AMT_NEW_MEASURE})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="70" width="57" height="10"
+                                           uuid="33ef6486-1b0a-4613-903f-82863a894e47">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_CRNT_MEASURE})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="80" width="57" height="10"
+                                           uuid="32f382eb-f5a4-40c1-b08a-4658f2755fba">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_UNRECH_MEASURE})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="90" width="57" height="10"
+                                           uuid="76fa987e-8c11-46b5-9c64-8c4eb11c668a">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_RECH_MEASURE})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="100" width="57" height="10"
+                                           uuid="0dc9c0bf-aade-4d37-8f90-d3948b1acaea">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[$V{OUTS_NEW_MEASURE}==null?0:new java.text.DecimalFormat("#,##0").format($V{OUTS_NEW_MEASURE})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="120" width="57" height="10"
+                                           uuid="a740cda5-5104-410b-a192-e7fdaede7c4e">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P1_PERC_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="130" width="57" height="10"
+                                           uuid="daaf360d-c882-41a4-83b8-37625b2410d5">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P1_PERC_UNRECH_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="140" width="57" height="10"
+                                           uuid="90bb18c5-aa50-494e-ae4a-228a621a78b8">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P1_PERC_RECH_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="150" width="57" height="10"
+                                           uuid="ceae4e40-6135-4912-9eb9-ed81c7c298a7">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P1_PERC_NEW_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="170" width="57" height="10"
+                                           uuid="e69d7e2b-16e4-4509-b388-d329a311314e">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P3_PERC_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="180" width="57" height="10"
+                                           uuid="1f928999-77cf-41bb-bd21-9da64dc1646c">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P3_PERC_UNRECH_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="190" width="57" height="10"
+                                           uuid="a6569896-dddf-4cbf-9289-660ef1bd35df">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P3_PERC_RECH_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="200" width="57" height="10"
+                                           uuid="ccaab4e2-caf1-4554-a7a3-a079a6b5fa8a">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P3_PERC_NEW_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="220" width="57" height="10"
+                                           uuid="45efaef6-1d98-4a38-b4b9-24311bc58f26">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_RECH_GRC1_MEASURE})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="230" width="57" height="10"
+                                           uuid="f48c1cce-8cb7-4af6-b759-6edb72170b08">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_RECH_GRC2_MEASURE})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="240" width="57" height="10"
+                                           uuid="97f5b948-f543-4833-95bf-d26825032b0a">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_RECH_GRC3_MEASURE})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="250" width="57" height="10"
+                                           uuid="da81b5c4-7eda-4efd-bd1d-d6af875af655">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_RECH_GRC4_MEASURE} == null ? 0 : $V{OUTS_RECH_GRC4_MEASURE})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="270" width="57" height="10"
+                                           uuid="0078887b-7fad-4b8b-8bc8-9d51a8c94a32">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_1_RECH_GRC1_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="280" width="57" height="10"
+                                           uuid="4596e930-56bb-47ef-868f-faf2a3760d29">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_1_RECH_GRC2_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="290" width="57" height="10"
+                                           uuid="88d3a3ad-2821-4dfd-8b25-7332f5732cc9">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_1_RECH_GRC3_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="300" width="57" height="10"
+                                           uuid="a12b2a0a-fc94-4960-af4b-6e6d43dd8832">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_1_RECH_GRC4_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="320" width="57" height="10"
+                                           uuid="a1187cad-1adb-4def-8bcc-0a1a8e052aac">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_3_RECH_GRC1_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="330" width="57" height="10"
+                                           uuid="19067b3e-cc89-4cb0-895f-3af7042019f7">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_3_RECH_GRC2_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="340" width="57" height="10"
+                                           uuid="aec047b0-0def-4365-aa27-908e586a6765">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_3_RECH_GRC3_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement x="0" y="350" width="57" height="10"
+                                           uuid="0a5107de-bf6a-4863-b46d-fe0088002c7c">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_3_RECH_GRC4_MEASURE}]]></textFieldExpression>
+                        </textField>
+                        <staticText>
+                            <reportElement x="0" y="110" width="57" height="10"
+                                           uuid="d86a3b39-f3a5-44e7-b0cc-16eb16ac5617">
+                                <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                <font size="6"/>
+                                <paragraph leftIndent="2"/>
+                            </textElement>
+                            <text><![CDATA[]]></text>
+                        </staticText>
+                        <staticText>
+                            <reportElement x="0" y="210" width="57" height="10"
+                                           uuid="9198c784-9814-4ae9-bc92-8006a2a26cc9">
+                                <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                <font size="6"/>
+                                <paragraph leftIndent="2"/>
+                            </textElement>
+                            <text><![CDATA[]]></text>
+                        </staticText>
+                        <staticText>
+                            <reportElement x="0" y="260" width="57" height="10"
+                                           uuid="8d84be6b-1994-458a-a23c-48b6ac429742">
+                                <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                <font size="6"/>
+                                <paragraph leftIndent="2"/>
+                            </textElement>
+                            <text><![CDATA[]]></text>
+                        </staticText>
+                        <staticText>
+                            <reportElement x="0" y="310" width="57" height="10"
+                                           uuid="9440a8cf-9c51-4a47-ae8f-4a65a16b5b08">
+                                <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                <font size="6"/>
+                                <paragraph leftIndent="2"/>
+                            </textElement>
+                            <text><![CDATA[]]></text>
+                        </staticText>
+                    </cellContents>
+                </crosstabCell>
+                <crosstabCell width="70" height="360" columnTotalGroup="REG_NM">
+                    <cellContents mode="Transparent" style="Crosstab_CT">
+                        <property name="com.jaspersoft.studio.layout"
+                                  value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                        <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="0" width="70" height="10" forecolor="#000000"
+                                           uuid="e37438e8-af47-403c-b6de-2a6190c74424">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{LOANS_SUM})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="10" width="70" height="10" forecolor="#000000"
+                                           uuid="85cfcd72-5244-49f6-a2dd-c7e968ac9a54">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{CLNTS_UNRECH_SUM})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="20" width="70" height="10" forecolor="#000000"
+                                           uuid="879f9d0e-e1b0-40b8-828d-69a39d50cb6b">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{CLNTS_RECH_SUM})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="30" width="70" height="10" forecolor="#000000"
+                                           uuid="163fdc76-2dec-4fa4-b5c8-9c54d506892d">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{CLNTS_NEW_SUM})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="50" width="70" height="10" forecolor="#000000"
+                                           uuid="c9d7c51e-a8bc-41a7-83c5-aa5f53e07f7d">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{DSB_AMT_NEW_SUM})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="70" width="70" height="10" forecolor="#000000"
+                                           uuid="df76ae45-1218-4518-aca0-ec3afe55b2f1">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_CRNT_SUM})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="80" width="70" height="10" forecolor="#000000"
+                                           uuid="2924efbe-27e7-4632-be77-81fd232e1404">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_UNRECH_SUM})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="90" width="70" height="10" forecolor="#000000"
+                                           uuid="a1542279-bfbf-4be2-84d4-31ff3e5c9c53">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_RECH_SUM})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="100" width="70" height="10" forecolor="#000000"
+                                           uuid="5e136ff4-7ab6-47c6-af43-f0bf64ed354c">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_NEW_SUM})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="120" width="70" height="10" forecolor="#000000"
+                                           uuid="06326aa4-df29-4fe3-b4b4-1bb54bc110e2">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P1_PERC_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="130" width="70" height="10" forecolor="#000000"
+                                           uuid="cb30371c-3696-4bb8-a172-62080c93d45f">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P1_PERC_UNRECH_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="140" width="70" height="10" forecolor="#000000"
+                                           uuid="d6169724-4282-4251-8266-842fcb9e7702">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P1_PERC_RECH_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="150" width="70" height="10" forecolor="#000000"
+                                           uuid="a1b98e1b-f67c-4efc-bbc7-0ceb2faf0fc4">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P1_PERC_NEW_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="170" width="70" height="10" forecolor="#000000"
+                                           uuid="edda13aa-fb74-4e45-a1fc-0653272073b8">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P3_PERC_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="180" width="70" height="10" forecolor="#000000"
+                                           uuid="988be26a-bd3a-42e6-a3c4-4a3e3dfd5285">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P3_PERC_UNRECH_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="190" width="70" height="10" forecolor="#000000"
+                                           uuid="61716b8c-ec2a-45b4-8146-fa4921a9a87a">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P3_PERC_RECH_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="200" width="70" height="10" forecolor="#000000"
+                                           uuid="1a5b7d0a-4d2c-47e6-b0b9-9bdf13e377e3">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{PAR_P3_PERC_NEW_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="220" width="70" height="10" forecolor="#000000"
+                                           uuid="c85abea2-16f1-453c-9f02-faca13391a1f">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_RECH_GRC1_SUM})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="230" width="70" height="10" forecolor="#000000"
+                                           uuid="c82bee67-5ef8-4847-b6a4-60b8bcacc1e1">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_RECH_GRC2_SUM})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="240" width="70" height="10" forecolor="#000000"
+                                           uuid="ba28a46e-793d-4768-8ab5-395ca1cbe123">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_RECH_GRC3_SUM})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="250" width="70" height="10" forecolor="#000000"
+                                           uuid="ba8d31ec-91d0-4582-b752-887cddbd6a38">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression>
+                                <![CDATA[new java.text.DecimalFormat("#,##0").format($V{OUTS_RECH_GRC4_SUM} == null ? 0 : $V{OUTS_RECH_GRC4_SUM})]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="270" width="70" height="10" forecolor="#000000"
+                                           uuid="d7b76e97-5f77-4648-8f3d-eb78a1f3a43a">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_1_RECH_GRC1_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="280" width="70" height="10" forecolor="#000000"
+                                           uuid="9318c38f-9af8-4f7c-a2d9-f0f57c00cdf4">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_1_RECH_GRC2_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="290" width="70" height="10" forecolor="#000000"
+                                           uuid="9da54368-5d1b-4142-8c46-46fb21c6059e">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_1_RECH_GRC3_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="300" width="70" height="10" forecolor="#000000"
+                                           uuid="76b70861-4dc9-4536-896c-f7a54d4aeeed">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_1_RECH_GRC4_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="320" width="70" height="10" forecolor="#000000"
+                                           uuid="aa433dac-2d9f-4707-97cc-861112a0e553">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_3_RECH_GRC1_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="330" width="70" height="10" forecolor="#000000"
+                                           uuid="ea96a817-d785-47ad-b9cf-45861ddc22c2">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_3_RECH_GRC2_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="340" width="70" height="10" forecolor="#000000"
+                                           uuid="037b61ac-2667-4555-95dd-0214e575bc26">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_3_RECH_GRC3_SUM}]]></textFieldExpression>
+                        </textField>
+                        <textField>
+                            <reportElement mode="Opaque" x="0" y="350" width="70" height="10" forecolor="#000000"
+                                           uuid="3b4aa343-b90c-4e6e-ab22-8e43422a690a">
+                                <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Right" verticalAlignment="Middle">
+                                <font size="6" isBold="true"/>
+                                <paragraph rightIndent="2"/>
+                            </textElement>
+                            <textFieldExpression><![CDATA[$V{P_3_RECH_GRC4_SUM}]]></textFieldExpression>
+                        </textField>
+                        <staticText>
+                            <reportElement x="0" y="210" width="70" height="10"
+                                           uuid="1fc5b1d8-92fb-4c9c-ae16-6e8b046b810b">
+                                <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                <font size="6"/>
+                                <paragraph leftIndent="2"/>
+                            </textElement>
+                            <text><![CDATA[]]></text>
+                        </staticText>
+                        <staticText>
+                            <reportElement x="0" y="260" width="70" height="10"
+                                           uuid="d8b99e3a-491a-45dd-9a22-f7baad04a74a">
+                                <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                <font size="6"/>
+                                <paragraph leftIndent="2"/>
+                            </textElement>
+                            <text><![CDATA[]]></text>
+                        </staticText>
+                        <staticText>
+                            <reportElement x="0" y="310" width="70" height="10"
+                                           uuid="cd0c808a-d54c-4651-867d-f99161f7ce77">
+                                <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                <font size="6"/>
+                                <paragraph leftIndent="2"/>
+                            </textElement>
+                            <text><![CDATA[]]></text>
+                        </staticText>
+                        <staticText>
+                            <reportElement x="0" y="110" width="70" height="10"
+                                           uuid="073adc36-f3ac-4e54-ba84-1e282fad3fa5">
+                                <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                                <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                            </reportElement>
+                            <box>
+                                <topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                                <rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+                            </box>
+                            <textElement textAlignment="Left" verticalAlignment="Middle" markup="none">
+                                <font size="6"/>
+                                <paragraph leftIndent="2"/>
+                            </textElement>
+                            <text><![CDATA[]]></text>
+                        </staticText>
+                    </cellContents>
+                </crosstabCell>
+                <crosstabCell width="57" height="0" rowTotalGroup="PAGE_NUMBER">
+                    <cellContents mode="Opaque" style="Crosstab_CT">
+                        <property name="com.jaspersoft.studio.layout"
+                                  value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                    </cellContents>
+                </crosstabCell>
+                <crosstabCell width="70" height="0" rowTotalGroup="PAGE_NUMBER" columnTotalGroup="REG_NM">
+                    <cellContents mode="Opaque" style="Crosstab_CT">
+                        <property name="com.jaspersoft.studio.layout"
+                                  value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+                    </cellContents>
+                </crosstabCell>
+            </crosstab>
+        </band>
+    </summary>
+</jasperReport>

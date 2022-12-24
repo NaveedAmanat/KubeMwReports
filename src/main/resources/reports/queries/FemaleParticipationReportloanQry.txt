@@ -1,0 +1,103 @@
+
+                                           
+                                           
+SELECT SUM(CASE WHEN outstanding_amount > 0 and loan_cycle_num = 'Repeat' AND bus_runner = 'MALE' THEN 1 ELSE 0 END)
+           male_rep,
+       SUM(CASE WHEN outstanding_amount > 0 and loan_cycle_num = 'Repeat' AND bus_runner = 'FEMALE' THEN 1 ELSE 0 END)
+           female_rep,
+       SUM(CASE WHEN outstanding_amount > 0 and loan_cycle_num = 'Repeat' AND bus_runner = 'JOINT USER' THEN 1 ELSE 0 END)
+           joint_user_rep,
+       SUM(CASE WHEN outstanding_amount > 0 and loan_cycle_num = 'New' AND bus_runner = 'MALE' THEN 1 ELSE 0 END)
+           male_new,
+       SUM(CASE WHEN outstanding_amount > 0 and loan_cycle_num = 'New' AND bus_runner = 'FEMALE' THEN 1 ELSE 0 END) 
+           female_new,
+       SUM(CASE WHEN outstanding_amount > 0 and loan_cycle_num = 'New' AND bus_runner = 'JOINT USER' THEN 1 ELSE 0 END) 
+           joint_user_new
+  FROM (SELECT CASE WHEN ap.LOAN_CYCL_NUM = 1 THEN 'New' ELSE 'Repeat' END
+                   loan_cycle_num,
+               CASE
+                   WHEN vl.ref_cd_Seq IN (190,
+                                          1058,
+                                          1056,
+                                          1057,
+                                          1059,
+                                          191,
+                                          1055)
+                   THEN
+                       'FEMALE'
+                   WHEN vl.ref_cd_Seq IN (193)
+                   THEN
+                       'JOINT USER'
+                   ELSE
+                       'MALE'
+               END
+                   bus_runner,
+                               NVL (
+                    (SELECT   NVL (
+                                  SUM (
+                                        NVL (PPAL_AMT_DUE, 0)
+                                      + NVL (TOT_CHRG_DUE, 0)
+                                      + NVL (
+                                            (SELECT SUM (NVL (psc.AMT, 0))
+                                               FROM mw_pymt_sched_chrg psc
+                                              WHERE     psc.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                    AND psc.crnt_rec_flg = 1),
+                                            0)),
+                                  0)
+                            - NVL (
+                                  SUM (
+                                      (SELECT SUM (NVL (rdtl.pymt_amt, 0))
+                                         FROM mw_rcvry_dtl  rdtl
+                                              INNER JOIN mw_rcvry_trx rht
+                                                  ON rht.RCVRY_TRX_SEQ = rdtl.RCVRY_TRX_SEQ
+                                        WHERE     rdtl.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                              AND rdtl.crnt_rec_flg = 1
+                                              AND rht.crnt_rec_flg = 1
+                                              AND TRUNC (rht.PYMT_DT) <= TRUNC(TO_DATE(:todt, 'dd-MM-yyyy')))),
+                                  0)
+                       FROM mw_loan_app  inap
+                            JOIN mw_pymt_sched_hdr psh
+                                ON psh.loan_app_seq = inap.loan_app_seq AND psh.crnt_rec_flg = 1
+                            JOIN mw_pymt_sched_dtl psd
+                                ON psd.pymt_sched_hdr_seq = psh.pymt_sched_hdr_seq AND psd.crnt_rec_flg = 1
+                      WHERE inap.LOAN_APP_SEQ = ap.LOAN_APP_SEQ AND inap.crnt_rec_flg = 1),
+                    0)
+                   outstanding_amount,
+               (ap.loan_app_seq)
+                   ost_clnt
+          FROM mw_loan_app        ap
+               JOIN mw_prd prd ON ap.PRD_SEQ = prd.PRD_SEQ AND prd.CRNT_REC_FLG = 1
+               JOIN mw_port prt
+                   ON prt.port_seq = ap.port_seq AND prt.crnt_rec_flg = 1
+                   AND prt.brnch_seq = (CASE WHEN :brnchSeq = -1 THEN prt.brnch_seq ELSE :brnchSeq END)
+                   AND exists (SELECT port_seq
+                                            FROM mw_acl acl
+                                           WHERE acl.user_id = :p_user
+                                           and acl.port_seq = prt.PORT_SEQ
+                                           )
+               JOIN mw_port_emp_rel erl ON erl.port_seq = prt.port_seq AND erl.crnt_rec_flg = 1
+               JOIN mw_emp emp ON emp.emp_seq = erl.emp_seq,
+               mw_dsbmt_vchr_hdr  dvh,
+               mw_biz_aprsl       apr,
+               MW_REF_CD_VAL      vl
+         WHERE     ap.LOAN_APP_SEQ = apr.LOAN_APP_SEQ
+               AND apr.CRNT_REC_FLG = 1
+               AND apr.PRSN_RUN_THE_BIZ = vl.REF_CD_SEQ
+               AND vl.CRNT_REC_FLG = 1
+               AND vl.REF_CD_GRP_KEY = 14
+			   AND ap.PRD_SEQ NOT IN (13, 14, 22)
+               AND (   (ap.loan_app_sts = 703 AND TRUNC (ap.loan_app_sts_dt) <= TO_DATE ( :todt, 'dd-MM-yyyy'))
+                    OR (    ap.loan_app_sts = 704
+                        AND TRUNC (ap.loan_app_sts_dt) > TO_DATE ( :todt, 'dd-MM-yyyy')
+                        AND TRUNC (dvh.dsbmt_dt) <= TO_DATE ( :todt, 'dd-MM-yyyy'))
+                    OR (ap.loan_app_sts = 1245 AND TRUNC (ap.loan_app_sts_dt) > TO_DATE ( :todt, 'dd-MM-yyyy')))
+               AND dvh.loan_app_seq = ap.loan_app_seq
+               AND dvh.crnt_rec_flg = 1
+               AND ap.crnt_rec_flg = 1
+               AND NOT EXISTS
+                       (SELECT ctl.loan_app_seq
+                          FROM mw_clnt_tag_list ctl
+                         WHERE     ctl.loan_app_seq = ap.loan_app_seq
+                               AND TRUNC (ctl.eff_start_dt) <= TO_DATE ( :todt, 'dd-MM-yyyy')
+                               AND ctl.tags_seq = 4
+                               AND ctl.crnt_rec_flg = 1))

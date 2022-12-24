@@ -1,0 +1,565 @@
+SELECT
+/* FileName: SECTOR_WISE_PORTFOLIO_AND_PAR
+         * Writted by: Aisha Khan
+         * Review By: Ali Khubaib
+         * Date: 24-Nov-2022
+         * Reason: Finance Report (Portfolio) */
+OST.biz_sect_nm,
+       dsb.dsb_clnts,
+       dsb.dsb_amt,
+       ost.OST_LOANS,
+       ost.OST_CLIENTS,
+       ost.OST_AMOUNT,
+       p_0.P_0_CLIENTS,
+       p_0.P_0_AMOUNT,
+       p_1.p_1_CLIENTS,
+       p_1.p_1_AMOUNT,
+       p_29.p_29_CLIENTS,
+       p_29.p_29_AMOUNT,
+       p_59.p_59_CLIENTS,
+       p_59.p_59_AMOUNT,
+       p_89.p_89_CLIENTS,
+       p_89.p_89_AMOUNT,
+       p_179.p_179_CLIENTS,
+       p_179.p_179_AMOUNT,
+       p_365.p_365_CLIENTS,
+       p_365.p_365_AMOUNT,
+       p_365abv.p_365abv_CLIENTS,
+       p_365abv.p_365abv_AMOUNT,
+       p_29abv.p_29abv_CLIENTS,
+       p_29abv.p_29abv_AMOUNT
+  FROM (  SELECT bs.biz_sect_nm,
+                 COUNT (OST_CLIENTS)     OST_CLIENTS,
+                 COUNT (OST_LOANS)       OST_LOANS,
+                 SUM (OST_AMOUNT)        OST_AMOUNT
+            FROM (  SELECT CASE
+                               WHEN CPM1.PRODUCT_ID <> 19 THEN (LOAN_CYCLE_ID)
+                           END
+                               OST_CLIENTS,
+                           (LOAN_CYCLE_ID)
+                               OST_LOANS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               OST_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE     CPM1.PRODUCT_ID NOT IN (8, 9)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                + NVL (OUTSTANDING_SC, 0)) >
+                               0
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY CPM1.PRODUCT_ID, LOAN_CYCLE_ID) ost_all
+                 LEFT OUTER JOIN mw_biz_aprsl ba
+                     ON     ost_all.ost_clients = ba.loan_app_seq
+                        AND ba.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_acty biza
+                     ON     ba.acty_key = biza.biz_acty_seq
+                        AND biza.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_sect bs
+                     ON     biza.biz_sect_seq = bs.biz_sect_seq
+                        AND bs.crnt_rec_flg = 1
+        GROUP BY bs.biz_sect_nm) ost,
+       (  SELECT bs.biz_sect_nm,
+                 COUNT (dsb_clnts)     dsb_clnts,
+                 COUNT (dsb_LOANS)     dsb_LOANS,
+                 SUM (dsb_AMOUNT)      dsb_amt
+            FROM (  SELECT CASE
+                               WHEN CPM1.PRODUCT_ID <> 19 THEN (LOAN_CYCLE_ID)
+                           END
+                               dsb_clnts,
+                           (LOAN_CYCLE_ID)
+                               dsb_LOANS,
+                           ROUND (SUM (NVL (cpm1.DISBURSED_AMOUNT, 0)))
+                               dsb_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE     CPM1.PRODUCT_ID NOT IN (8, 9)
+                           --                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                + NVL (OUTSTANDING_SC, 0)) >
+                               0
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                           AND cpm1.DISBURSED_DATE BETWEEN TRUNC (
+                                                               TRUNC (
+                                                                   TO_DATE (
+                                                                       :to_dt,
+                                                                       'dd-mm-RRRR'),
+                                                                   'month'),
+                                                               'month')
+                                                       AND TRUNC (
+                                                               TO_DATE (
+                                                                   :to_dt,
+                                                                   'dd-mm-RRRR'))
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                  GROUP BY CPM1.PRODUCT_ID, LOAN_CYCLE_ID) dsb_all
+                 LEFT OUTER JOIN mw_biz_aprsl ba
+                     ON     dsb_all.dsb_clnts = ba.loan_app_seq
+                        AND ba.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_acty biza
+                     ON     ba.acty_key = biza.biz_acty_seq
+                        AND biza.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_sect bs
+                     ON     biza.biz_sect_seq = bs.biz_sect_seq
+                        AND bs.crnt_rec_flg = 1
+        GROUP BY bs.biz_sect_nm) dsb,
+       (  SELECT bs.biz_sect_nm,
+                 COUNT (REGULAR_OD_CLIENTS)     P_0_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)       P_0_AMOUNT
+            FROM (  SELECT CASE WHEN CPM1.PRODUCT_ID <> 19 THEN LOAN_CYCLE_ID END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                     (OVERDUE_AMOUNT = 0 AND OVERDUE_AMOUNT_SC = 0)
+                                              --                           AND
+                               CPM1.PRODUCT_ID NOT IN (8, 9)
+                           AND cpm1.OVERDUE_DAYS = 0
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY CPM1.PRODUCT_ID, LOAN_CYCLE_ID) p_0_all
+                 LEFT OUTER JOIN mw_biz_aprsl ba
+                     ON     p_0_all.REGULAR_OD_CLIENTS = ba.loan_app_seq
+                        AND ba.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_acty biza
+                     ON     ba.acty_key = biza.biz_acty_seq
+                        AND biza.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_sect bs
+                     ON     biza.biz_sect_seq = bs.biz_sect_seq
+                        AND bs.crnt_rec_flg = 1
+        GROUP BY bs.biz_sect_nm) p_0,
+       (  SELECT bs.biz_sect_nm,
+                 COUNT (REGULAR_OD_CLIENTS)     P_1_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)       P_1_AMOUNT
+            FROM (  SELECT CASE WHEN CPM1.PRODUCT_ID <> 19 THEN LOAN_CYCLE_ID END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                           AND CPM1.PRODUCT_ID NOT IN (8, 9)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY CPM1.PRODUCT_ID, LOAN_CYCLE_ID) p_1_all
+                 LEFT OUTER JOIN mw_biz_aprsl ba
+                     ON     p_1_all.REGULAR_OD_CLIENTS = ba.loan_app_seq
+                        AND ba.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_acty biza
+                     ON     ba.acty_key = biza.biz_acty_seq
+                        AND biza.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_sect bs
+                     ON     biza.biz_sect_seq = bs.biz_sect_seq
+                        AND bs.crnt_rec_flg = 1
+        GROUP BY bs.biz_sect_nm) p_1,
+       (  SELECT bs.biz_sect_nm,
+                 COUNT (REGULAR_OD_CLIENTS)     P_29_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)       P_29_AMOUNT
+            FROM (  SELECT CASE WHEN CPM1.PRODUCT_ID <> 19 THEN LOAN_CYCLE_ID END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                               OVERDUE_DAYS BETWEEN 1 AND 29
+                           AND CPM1.PRODUCT_ID NOT IN (8, 9)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY CPM1.PRODUCT_ID, LOAN_CYCLE_ID) p_29_all
+                 LEFT OUTER JOIN mw_biz_aprsl ba
+                     ON     p_29_all.REGULAR_OD_CLIENTS = ba.loan_app_seq
+                        AND ba.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_acty biza
+                     ON     ba.acty_key = biza.biz_acty_seq
+                        AND biza.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_sect bs
+                     ON     biza.biz_sect_seq = bs.biz_sect_seq
+                        AND bs.crnt_rec_flg = 1
+        GROUP BY bs.biz_sect_nm) p_29,
+       (  SELECT bs.biz_sect_nm,
+                 COUNT (REGULAR_OD_CLIENTS)     P_59_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)       P_59_AMOUNT
+            FROM (  SELECT CASE WHEN CPM1.PRODUCT_ID <> 19 THEN LOAN_CYCLE_ID END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                               OVERDUE_DAYS BETWEEN 30 AND 59
+                           AND CPM1.PRODUCT_ID NOT IN (8, 9)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY CPM1.PRODUCT_ID, LOAN_CYCLE_ID) p_59_all
+                 LEFT OUTER JOIN mw_biz_aprsl ba
+                     ON     p_59_all.REGULAR_OD_CLIENTS = ba.loan_app_seq
+                        AND ba.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_acty biza
+                     ON     ba.acty_key = biza.biz_acty_seq
+                        AND biza.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_sect bs
+                     ON     biza.biz_sect_seq = bs.biz_sect_seq
+                        AND bs.crnt_rec_flg = 1
+        GROUP BY bs.biz_sect_nm) p_59,
+       (  SELECT bs.biz_sect_nm,
+                 COUNT (REGULAR_OD_CLIENTS)     P_89_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)       P_89_AMOUNT
+            FROM (  SELECT CASE WHEN CPM1.PRODUCT_ID <> 19 THEN LOAN_CYCLE_ID END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                               OVERDUE_DAYS BETWEEN 60 AND 89
+                           AND CPM1.PRODUCT_ID NOT IN (8, 9)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY CPM1.PRODUCT_ID, LOAN_CYCLE_ID) p_89_all
+                 LEFT OUTER JOIN mw_biz_aprsl ba
+                     ON     p_89_all.REGULAR_OD_CLIENTS = ba.loan_app_seq
+                        AND ba.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_acty biza
+                     ON     ba.acty_key = biza.biz_acty_seq
+                        AND biza.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_sect bs
+                     ON     biza.biz_sect_seq = bs.biz_sect_seq
+                        AND bs.crnt_rec_flg = 1
+        GROUP BY bs.biz_sect_nm) p_89,
+       (  SELECT bs.biz_sect_nm,
+                 COUNT (REGULAR_OD_CLIENTS)     P_179_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)       P_179_AMOUNT
+            FROM (  SELECT CASE WHEN CPM1.PRODUCT_ID <> 19 THEN LOAN_CYCLE_ID END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                               OVERDUE_DAYS BETWEEN 90 AND 179
+                           AND CPM1.PRODUCT_ID NOT IN (8, 9)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY CPM1.PRODUCT_ID, LOAN_CYCLE_ID) p_179_all
+                 LEFT OUTER JOIN mw_biz_aprsl ba
+                     ON     p_179_all.REGULAR_OD_CLIENTS = ba.loan_app_seq
+                        AND ba.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_acty biza
+                     ON     ba.acty_key = biza.biz_acty_seq
+                        AND biza.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_sect bs
+                     ON     biza.biz_sect_seq = bs.biz_sect_seq
+                        AND bs.crnt_rec_flg = 1
+        GROUP BY bs.biz_sect_nm) p_179,
+       (  SELECT bs.biz_sect_nm,
+                 COUNT (REGULAR_OD_CLIENTS)     P_365_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)       P_365_AMOUNT
+            FROM (  SELECT CASE WHEN CPM1.PRODUCT_ID <> 19 THEN LOAN_CYCLE_ID END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                               OVERDUE_DAYS BETWEEN 180 AND 365
+                           AND CPM1.PRODUCT_ID NOT IN (8, 9)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY CPM1.PRODUCT_ID, LOAN_CYCLE_ID) p_365_all
+                 LEFT OUTER JOIN mw_biz_aprsl ba
+                     ON     p_365_all.REGULAR_OD_CLIENTS = ba.loan_app_seq
+                        AND ba.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_acty biza
+                     ON     ba.acty_key = biza.biz_acty_seq
+                        AND biza.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_sect bs
+                     ON     biza.biz_sect_seq = bs.biz_sect_seq
+                        AND bs.crnt_rec_flg = 1
+        GROUP BY bs.biz_sect_nm) p_365,
+       (  SELECT bs.biz_sect_nm,
+                 COUNT (REGULAR_OD_CLIENTS)     p_365abv_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)       p_365abv_AMOUNT
+            FROM (  SELECT CASE WHEN CPM1.PRODUCT_ID <> 19 THEN LOAN_CYCLE_ID END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE --                      (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                               OVERDUE_DAYS > 365
+                           AND CPM1.PRODUCT_ID NOT IN (8, 9)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY CPM1.PRODUCT_ID, LOAN_CYCLE_ID) p_365abv_all
+                 LEFT OUTER JOIN mw_biz_aprsl ba
+                     ON     p_365abv_all.REGULAR_OD_CLIENTS = ba.loan_app_seq
+                        AND ba.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_acty biza
+                     ON     ba.acty_key = biza.biz_acty_seq
+                        AND biza.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_sect bs
+                     ON     biza.biz_sect_seq = bs.biz_sect_seq
+                        AND bs.crnt_rec_flg = 1
+        GROUP BY bs.biz_sect_nm) p_365abv,
+       (  SELECT bs.biz_sect_nm,
+                 COUNT (REGULAR_OD_CLIENTS)     p_29abv_CLIENTS,
+                 SUM (REGULAR_PAR_AMOUNT)       p_29abv_AMOUNT
+            FROM (  SELECT CASE WHEN CPM1.PRODUCT_ID <> 19 THEN LOAN_CYCLE_ID END
+                               REGULAR_OD_CLIENTS,
+                           ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                               --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                               REGULAR_PAR_AMOUNT
+                      FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+                     WHERE     OVERDUE_DAYS > 29
+                           --                           AND (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                           AND CPM1.PRODUCT_ID NOT IN (8, 9)
+                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                           AND (   LOAN_COMPLETION_DATE IS NULL
+                                OR LOAN_COMPLETION_DATE >
+                                   TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                  GROUP BY CPM1.PRODUCT_ID, LOAN_CYCLE_ID) p_29abv_all
+                 LEFT OUTER JOIN mw_biz_aprsl ba
+                     ON     p_29abv_all.REGULAR_OD_CLIENTS = ba.loan_app_seq
+                        AND ba.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_acty biza
+                     ON     ba.acty_key = biza.biz_acty_seq
+                        AND biza.crnt_rec_flg = 1
+                 LEFT OUTER JOIN mw_biz_sect bs
+                     ON     biza.biz_sect_seq = bs.biz_sect_seq
+                        AND bs.crnt_rec_flg = 1
+        GROUP BY bs.biz_sect_nm) p_29abv
+ WHERE     (   ost.biz_sect_nm = dsb.biz_sect_nm
+            OR (ost.biz_sect_nm IS NULL AND dsb.biz_sect_nm IS NULL))
+       AND (   ost.biz_sect_nm = p_0.biz_sect_nm
+            OR (ost.biz_sect_nm IS NULL AND p_0.biz_sect_nm IS NULL))
+       AND (   ost.biz_sect_nm = p_1.biz_sect_nm
+            OR (ost.biz_sect_nm IS NULL AND p_1.biz_sect_nm IS NULL))
+       AND (   ost.biz_sect_nm = p_29.biz_sect_nm
+            OR (ost.biz_sect_nm IS NULL AND p_29.biz_sect_nm IS NULL))
+       AND (   ost.biz_sect_nm = p_59.biz_sect_nm
+            OR (ost.biz_sect_nm IS NULL AND p_59.biz_sect_nm IS NULL))
+       AND (   ost.biz_sect_nm = p_89.biz_sect_nm
+            OR (ost.biz_sect_nm IS NULL AND p_89.biz_sect_nm IS NULL))
+       AND (   ost.biz_sect_nm = p_179.biz_sect_nm
+            OR (ost.biz_sect_nm IS NULL AND p_179.biz_sect_nm IS NULL))
+       AND (   ost.biz_sect_nm = p_365.biz_sect_nm
+            OR (ost.biz_sect_nm IS NULL AND p_365.biz_sect_nm IS NULL))
+       AND (   ost.biz_sect_nm = p_365abv.biz_sect_nm
+            OR (ost.biz_sect_nm IS NULL AND p_365abv.biz_sect_nm IS NULL))
+       AND (   ost.biz_sect_nm = p_29abv.biz_sect_nm
+            OR (ost.biz_sect_nm IS NULL AND p_29abv.biz_sect_nm IS NULL))
+UNION ALL
+SELECT OST.biz_sect_nm,
+       dsb.dsb_clnts,
+       dsb.dsb_amt,
+       ost.OST_LOANS,
+       ost.OST_CLIENTS,
+       ost.OST_AMOUNT,
+       p_0.P_0_CLIENTS,
+       p_0.P_0_AMOUNT,
+       p_1.p_1_CLIENTS,
+       p_1.p_1_AMOUNT,
+       p_29.p_29_CLIENTS,
+       p_29.p_29_AMOUNT,
+       p_59.p_59_CLIENTS,
+       p_59.p_59_AMOUNT,
+       p_89.p_89_CLIENTS,
+       p_89.p_89_AMOUNT,
+       p_179.p_179_CLIENTS,
+       p_179.p_179_AMOUNT,
+       p_365.p_365_CLIENTS,
+       p_365.p_365_AMOUNT,
+       p_365abv.p_365abv_CLIENTS,
+       p_365abv.p_365abv_AMOUNT,
+       p_29abv.p_29abv_CLIENTS,
+       p_29abv.p_29abv_AMOUNT
+  FROM (  SELECT 'SCHOOL'                                         biz_sect_nm,
+                 COUNT (LOAN_CYCLE_ID)                            OST_CLIENTS,
+                 COUNT (LOAN_CYCLE_ID)                            OST_LOANS,
+                 ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))     OST_AMOUNT
+            FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+           WHERE     CPM1.PRODUCT_ID IN (9)
+                 AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                 AND (NVL (OUTSTANDING_PRINCIPAL, 0) + NVL (OUTSTANDING_SC, 0)) >
+                     0
+                 AND (   LOAN_COMPLETION_DATE IS NULL
+                      OR LOAN_COMPLETION_DATE > TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+        GROUP BY 'SCHOOL') ost,
+       (  SELECT 'SCHOOL'                                         biz_sect_nm,
+                 COUNT (LOAN_CYCLE_ID)                            dsb_clnts,
+                 COUNT (LOAN_CYCLE_ID)                            dsb_LOANS,
+                 ROUND (SUM (NVL (cpm1.DISBURSED_AMOUNT, 0)))     dsb_amt
+            FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+           WHERE     CPM1.PRODUCT_ID IN (9)
+                 --                           AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                 AND (NVL (OUTSTANDING_PRINCIPAL, 0) + NVL (OUTSTANDING_SC, 0)) >
+                     0
+                 AND (   LOAN_COMPLETION_DATE IS NULL
+                      OR LOAN_COMPLETION_DATE > TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+                 AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                 AND cpm1.DISBURSED_DATE BETWEEN TRUNC (
+                                                     TRUNC (
+                                                         TO_DATE ( :to_dt,
+                                                                  'dd-mm-RRRR'),
+                                                         'month'),
+                                                     'month')
+                                             AND TRUNC (
+                                                     TO_DATE ( :to_dt,
+                                                              'dd-mm-RRRR'))
+        GROUP BY 'SCHOOL') dsb,
+       (  SELECT 'SCHOOL'                                         biz_sect_nm,
+                 COUNT (LOAN_CYCLE_ID)                            P_0_CLIENTS,
+                 ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0))) --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                                                                  P_0_AMOUNT
+            FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+           WHERE --                     (OVERDUE_AMOUNT = 0 AND OVERDUE_AMOUNT_SC = 0)
+                                              --                           AND
+                     CPM1.PRODUCT_ID IN (9)
+                 AND cpm1.OVERDUE_DAYS = 0
+                 AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                 AND (   LOAN_COMPLETION_DATE IS NULL
+                      OR LOAN_COMPLETION_DATE > TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+        GROUP BY 'SCHOOL') p_0,
+       (  SELECT 'SCHOOL'                                         biz_sect_nm,
+                 COUNT (LOAN_CYCLE_ID)                            p_1_CLIENTS,
+                 ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0))) --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                                                                  p_1_AMOUNT
+            FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+           WHERE     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                 AND CPM1.PRODUCT_ID IN (9)
+                 AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                 AND (   LOAN_COMPLETION_DATE IS NULL
+                      OR LOAN_COMPLETION_DATE > TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+        GROUP BY 'SCHOOL') p_1,
+       (  SELECT 'SCHOOL'                                         biz_sect_nm,
+                 COUNT (LOAN_CYCLE_ID)                            p_29_CLIENTS,
+                 ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0))) --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                                                                  p_29_AMOUNT
+            FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+           WHERE --                     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                     OVERDUE_DAYS BETWEEN 1 AND 29
+                 AND CPM1.PRODUCT_ID IN (9)
+                 AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                 AND (   LOAN_COMPLETION_DATE IS NULL
+                      OR LOAN_COMPLETION_DATE > TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+        GROUP BY 'SCHOOL') p_29,
+       (  SELECT 'SCHOOL'                                         biz_sect_nm,
+                 COUNT (LOAN_CYCLE_ID)                            p_59_CLIENTS,
+                 ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0))) --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                                                                  p_59_AMOUNT
+            FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+           WHERE --                     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                     OVERDUE_DAYS BETWEEN 30 AND 59
+                 AND CPM1.PRODUCT_ID IN (9)
+                 AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                 AND (   LOAN_COMPLETION_DATE IS NULL
+                      OR LOAN_COMPLETION_DATE > TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+        GROUP BY 'SCHOOL') p_59,
+       (  SELECT 'SCHOOL'                                         biz_sect_nm,
+                 COUNT (LOAN_CYCLE_ID)                            p_89_CLIENTS,
+                 ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0))) --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                                                                  p_89_AMOUNT
+            FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+           WHERE --                     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                     OVERDUE_DAYS BETWEEN 60 AND 89
+                 AND CPM1.PRODUCT_ID IN (9)
+                 AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                 AND (   LOAN_COMPLETION_DATE IS NULL
+                      OR LOAN_COMPLETION_DATE > TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+        GROUP BY 'SCHOOL') p_89,
+       (  SELECT 'SCHOOL'                                         biz_sect_nm,
+                 COUNT (LOAN_CYCLE_ID)                            p_179_CLIENTS,
+                 ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0))) --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                                                                  p_179_AMOUNT
+            FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+           WHERE --                     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                     OVERDUE_DAYS BETWEEN 90 AND 179
+                 AND CPM1.PRODUCT_ID IN (9)
+                 AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                 AND (   LOAN_COMPLETION_DATE IS NULL
+                      OR LOAN_COMPLETION_DATE > TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+        GROUP BY 'SCHOOL') p_179,
+       (  SELECT 'SCHOOL'                                         biz_sect_nm,
+                 COUNT (LOAN_CYCLE_ID)                            p_365_CLIENTS,
+                 ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0))) --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                                                                  p_365_AMOUNT
+            FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+           WHERE --                     (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                     OVERDUE_DAYS BETWEEN 180 AND 365
+                 AND CPM1.PRODUCT_ID IN (9)
+                 AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                 AND (   LOAN_COMPLETION_DATE IS NULL
+                      OR LOAN_COMPLETION_DATE > TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+        GROUP BY 'SCHOOL') p_365,
+       (  SELECT 'SCHOOL'
+                     biz_sect_nm,
+                 COUNT (LOAN_CYCLE_ID)
+                     p_365abv_CLIENTS,
+                 ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                     --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                     p_365abv_AMOUNT
+            FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+           WHERE --                      (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                                              --                           AND
+                     OVERDUE_DAYS > 365
+                 AND CPM1.PRODUCT_ID IN (9)
+                 AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                 AND (   LOAN_COMPLETION_DATE IS NULL
+                      OR LOAN_COMPLETION_DATE > TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+        GROUP BY 'SCHOOL') p_365abv,
+       (  SELECT 'SCHOOL'
+                     biz_sect_nm,
+                 COUNT (LOAN_CYCLE_ID)
+                     p_29abv_CLIENTS,
+                 ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                     --                           + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                     p_29abv_AMOUNT
+            FROM KASHF_REPORTING.CON_MON_FMTO_TMP cpm1
+           WHERE     OVERDUE_DAYS > 29
+                 --                           AND (OVERDUE_AMOUNT > 0 OR OVERDUE_AMOUNT_SC > 0)
+                 AND CPM1.PRODUCT_ID IN (9)
+                 AND cpm1.trn_date = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                 AND (   LOAN_COMPLETION_DATE IS NULL
+                      OR LOAN_COMPLETION_DATE > TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+        GROUP BY 'SCHOOL') p_29abv
+ WHERE     ost.biz_sect_nm = dsb.biz_sect_nm(+)
+       AND ost.biz_sect_nm = p_0.biz_sect_nm(+)
+       AND ost.biz_sect_nm = p_1.biz_sect_nm(+)
+       AND ost.biz_sect_nm = p_29.biz_sect_nm(+)
+       AND ost.biz_sect_nm = p_59.biz_sect_nm(+)
+       AND ost.biz_sect_nm = p_89.biz_sect_nm(+)
+       AND ost.biz_sect_nm = p_179.biz_sect_nm(+)
+       AND ost.biz_sect_nm = p_365.biz_sect_nm(+)
+       AND ost.biz_sect_nm = p_365abv.biz_sect_nm(+)
+       AND ost.biz_sect_nm = p_29abv.biz_sect_nm(+)
+       ORDER BY 1

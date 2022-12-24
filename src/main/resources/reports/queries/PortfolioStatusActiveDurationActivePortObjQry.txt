@@ -1,0 +1,52 @@
+select pg.prd_grp_nm,    
+       count(distinct app.clnt_seq) tot_clnt,
+       sum(app.aprvd_loan_amt) tot_clnt_amt,
+       count(distinct case when app.loan_cycl_num =1 then app.clnt_seq else null end) new_clnt, 
+       sum(case when app.loan_cycl_num = 1 then app.aprvd_loan_amt else 0 end) new_clnt_amt, 
+       count(distinct case when app.loan_cycl_num > 1 then app.clnt_seq else null end) rpt_clnt, 
+       sum(case when app.loan_cycl_num > 1 then app.aprvd_loan_amt else 0 end) rpt_clnt_amt, 
+       max((select count(distinct app.clnt_seq)  from mw_loan_app app 
+            join mw_acl acl on acl.port_seq=app.port_seq and acl.user_id=:user_id 
+            where app.crnt_rec_flg=1  and loan_app_sts=703  and app.prd_seq=prd.prd_seq 
+            and to_date(loan_app_sts_dt) between to_date(:frm_dt,'dd-mm-yyyy') and to_date(:to_dt,'dd-mm-yyyy') 
+            and to_char(lst_loan_cmpltn_dt(app.loan_app_seq),'YYYYMM')=TO_CHAR(to_date(:to_dt,'dd-mm-yyyy'),'YYYYMM') 
+        )) rnw_clnt_month,        max((select count(distinct app.clnt_seq)  from mw_loan_app app 
+            join mw_acl acl on acl.port_seq=app.port_seq and acl.user_id=:user_id 
+            where app.crnt_rec_flg=1  and app.prd_seq=prd.prd_seq  and loan_app_sts=704 
+            and to_date(loan_app_sts_dt) between to_date(:frm_dt,'dd-mm-yyyy') and to_date(:to_dt,'dd-mm-yyyy')  )) cmpltd_mnth, 
+        max((select count(distinct app.clnt_seq)  from mw_loan_app app 
+               join mw_acl acl on acl.port_seq=app.port_seq and acl.user_id=:user_id 
+                 where app.crnt_rec_flg=1  and app.prd_seq=prd.prd_seq  and loan_app_sts=703 
+                 and to_date(loan_app_sts_dt) between to_date(:frm_dt,'dd-mm-yyyy') and to_date(:to_dt,'dd-mm-yyyy') )) dsbmt_mnth,
+        max((select count(distinct app.clnt_seq)  from mw_loan_app app 
+            join mw_acl acl on acl.port_seq=app.port_seq and acl.user_id=:user_id 
+            where app.crnt_rec_flg=1  and loan_app_sts=703  and app.prd_seq=prd.prd_seq 
+            and to_date(loan_app_sts_dt) between to_date(:frm_dt,'dd-mm-yyyy') and to_date(:to_dt,'dd-mm-yyyy') 
+            and to_char(lst_loan_cmpltn_dt(app.loan_app_seq),'YYYYMM')=TO_CHAR(to_date(:to_dt,'dd-mm-yyyy'),'YYYYMM') 
+            and loan_app_sts_dt-lst_loan_cmpltn_dt(app.loan_app_seq) <=15
+        )) ror_month,
+        max((select count(distinct app.clnt_seq)  from mw_loan_app app 
+            join mw_acl acl on acl.port_seq=app.port_seq and acl.user_id=:user_id 
+            join mw_biz_aprsl aprsl on aprsl.loan_app_seq=app.loan_app_seq and aprsl.crnt_rec_flg=1  
+            join mw_ref_cd_val wp on wp.ref_cd_seq=aprsl.prsn_run_the_biz and wp.crnt_rec_flg=1
+            where app.crnt_rec_flg=1  and loan_app_sts=703  and app.prd_seq=prd.prd_seq 
+            and to_date(loan_app_sts_dt) between to_date(:frm_dt,'dd-mm-yyyy') and to_date(:to_dt,'dd-mm-yyyy') 
+            and to_char(lst_loan_cmpltn_dt(app.loan_app_seq),'YYYYMM')=TO_CHAR(to_date(:to_dt,'dd-mm-yyyy'),'YYYYMM') 
+            and wp.ref_cd_dscr='SELF'
+        )) FM_PCT                 
+from mw_loan_app app 
+    join mw_prd prd on prd.prd_seq=app.prd_seq and prd.crnt_rec_flg=1 
+    join mw_prd_grp pg on pg.prd_grp_seq=prd.prd_grp_seq and pg.crnt_rec_flg=1 
+    join mw_acl acl on acl.port_seq=app.port_seq and acl.user_id=:user_id 
+    join mw_port prt on prt.port_seq=app.port_seq and prt.crnt_rec_flg=1
+    join mw_brnch brnch on brnch.brnch_seq=prt.brnch_seq and brnch.crnt_rec_flg=1
+    join mw_area ar on ar.area_seq=brnch.area_seq and ar.crnt_rec_flg=1
+where app.crnt_rec_flg=1 
+and loan_app_sts=703 
+    and nvl(:rpt_flg,0)=nvl(:rpt_flg,0)
+    and brnch.brnch_seq=case when to_number(:brnchSeq)=0 then brnch.brnch_seq else to_number(:brnchSeq) end
+    and ar.area_seq=case when to_number(:areaSeq)=0 then brnch.Area_seq else to_number(:areaSeq) end
+    and ar.reg_seq=case when to_number(:regSeq)=0 then ar.reg_seq else to_number(:regSeq) end                  
+    and loan_app_sts=703 
+    and to_date(loan_app_sts_dt) between to_date(:frm_dt,'dd-mm-yyyy') and to_date(:to_dt,'dd-mm-yyyy')    
+group by pg.prd_grp_nm

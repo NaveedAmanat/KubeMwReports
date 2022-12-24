@@ -1,0 +1,62 @@
+SELECT reg_nm, area_nm, brnch_nm,emp_nm, PRD_GRP_NM, CLNT_SEQ, loan_app_seq, clnt_nm, DSBMT_DT, CNIC_EXPRY_DT, Identification, PH_NUM, DYS, EXPIRED   FROM 
+(
+select mr.reg_nm, ma.area_nm, mb.brnch_nm,
+                nvl((select me.EMP_nm from mw_emp me, mw_port_emp_rel mer 
+                where me.EMP_SEQ = mer.EMP_SEQ and mer.CRNT_REC_FLG = 1 
+                and mer.PORT_SEQ = mp.port_seq), mp.port_nm) emp_nm,
+                mpg.PRD_GRP_NM, mc.CLNT_SEQ, ap.loan_app_seq, mc.FRST_NM||' '||mc.LAST_NM clnt_nm,
+                to_date(dsh.DSBMT_DT) DSBMT_DT, mc.CNIC_EXPRY_DT, 'Client' Identification,
+                mc.PH_NUM,
+                mc.CNIC_EXPRY_DT - to_date(sysdate+60) DYS,
+                CASE 
+                    WHEN (mc.CNIC_EXPRY_DT - to_date(sysdate+60)) BETWEEN -15 AND 0 Then 'EXPIRED_60'
+                    WHEN (mc.CNIC_EXPRY_DT - to_date(sysdate+60)) BETWEEN -30 AND -16 Then 'EXPIRED_45'
+                    WHEN (mc.CNIC_EXPRY_DT - to_date(sysdate+60)) BETWEEN -60 AND -31 Then 'EXPIRED_30' 
+                    ELSE 'EXPIRED' END EXPIRED
+                from mw_clnt mc, mw_loan_app ap, mw_port mp, MW_DSBMT_VCHR_HDR dsh,
+                mw_prd mpd, mw_prd_grp mpg, mw_brnch mb, mw_area ma, mw_reg mr
+                where mc.CLNT_SEQ = ap.CLNT_SEQ and mc.CRNT_REC_FLG = 1
+                and ap.LOAN_APP_STS = 703 and ap.CRNT_REC_FLG = 1
+                and trunc(dsh.DSBMT_DT) > '30-apr-2005'
+                and mp.brnch_seq = mb.brnch_seq and mb.CRNT_REC_FLG = 1 --and mb.BRNCH_SEQ = 1
+                and ap.PORT_SEQ = mp.PORT_SEQ and mp.CRNT_REC_FLG = 1                
+                and ap.LOAN_APP_SEQ = dsh.LOAN_APP_SEQ and dsh.CRNT_REC_FLG = 1
+                and ap.PRD_SEQ = mpd.PRD_SEQ and mpd.CRNT_REC_FLG = 1
+                and mpd.PRD_GRP_SEQ = mpg.PRD_GRP_SEQ and mpg.CRNT_REC_FLG = 1
+                and ma.area_seq = mb.area_seq and ma.crnt_rec_flg = 1
+                and mr.reg_seq = ma.reg_seq and mr.crnt_rec_flg = 1
+                and mc.CNIC_EXPRY_DT <= to_date(sysdate+60)
+                union
+                select mr.reg_nm, ma.area_nm, mb.brnch_nm,
+                nvl((select me.EMP_nm from mw_emp me, mw_port_emp_rel mer 
+                where me.EMP_SEQ = mer.EMP_SEQ and mer.CRNT_REC_FLG = 1 
+                and mer.PORT_SEQ = mp.port_seq), mp.port_nm) emp_nm,
+                mpg.PRD_GRP_NM, ap.CLNT_SEQ, ap.loan_app_seq, mc.FRST_NM||' '||mc.LAST_NM clnt_nm,
+                to_date(dsh.DSBMT_DT) DSBMT_DT, mc.CNIC_EXPRY_DT, 
+                case when REL_TYP_FLG = 1 then 'Nominee'
+                when REL_TYP_FLG = 2 then 'Next of Kin'
+				when REL_TYP_FLG = 3 then 'Co-borrower'                
+                else 'Relative'
+                end Identification,
+                mc.PH_NUM,
+                  mc.CNIC_EXPRY_DT - to_date(sysdate+60) DYS,
+                CASE 
+                    WHEN (mc.CNIC_EXPRY_DT - to_date(sysdate+60)) BETWEEN -15 AND 0 Then 'EXPIRED_60'
+                    WHEN (mc.CNIC_EXPRY_DT - to_date(sysdate+60)) BETWEEN -30 AND -16 Then 'EXPIRED_45'
+                    WHEN (mc.CNIC_EXPRY_DT - to_date(sysdate+60)) BETWEEN -60 AND -31 Then 'EXPIRED_30' 
+                    ELSE 'EXPIRED' END EXPIRED
+                from mw_clnt_rel mc, mw_loan_app ap, mw_port mp, MW_DSBMT_VCHR_HDR dsh,
+                mw_prd mpd, mw_prd_grp mpg,mw_brnch mb, mw_area ma, mw_reg mr
+                where mc.LOAN_APP_SEQ = ap.LOAN_APP_SEQ and mc.CRNT_REC_FLG = 1
+                and ap.LOAN_APP_STS = 703 and ap.CRNT_REC_FLG = 1
+                and trunc(dsh.DSBMT_DT) > '30-apr-2005'
+                and mp.brnch_seq = mb.brnch_seq and mb.CRNT_REC_FLG = 1 -- and mb.BRNCH_SEQ = 1
+                and ap.PORT_SEQ = mp.PORT_SEQ and mp.CRNT_REC_FLG = 1                
+                and ap.LOAN_APP_SEQ = dsh.LOAN_APP_SEQ and dsh.CRNT_REC_FLG = 1
+                and ap.PRD_SEQ = mpd.PRD_SEQ and mpd.CRNT_REC_FLG = 1
+                and mpd.PRD_GRP_SEQ = mpg.PRD_GRP_SEQ and mpg.CRNT_REC_FLG = 1
+                and ma.area_seq = mb.area_seq and ma.crnt_rec_flg = 1
+                and mr.reg_seq = ma.reg_seq and mr.crnt_rec_flg = 1
+                and mc.CNIC_EXPRY_DT <= to_date(sysdate+60)
+                )
+                order by reg_nm, area_nm, brnch_nm, EXPIRED, emp_nm, PRD_GRP_NM, DYS

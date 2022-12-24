@@ -1,0 +1,80 @@
+SELECT ME.EMP_NM,
+       TO_CHAR (TRUNC (dvh.dsbmt_dt), 'dd-MM-yyyy')     dsbmt_dt,
+       ap.clnt_Seq,
+       mc.FRST_NM || ' ' || mc.LAST_NM                  clnt_nm,
+       ap.loan_App_Seq,
+       mc.CNIC_num                                      clnt_cnic,
+       DVD.INSTR_NUM                                    remitance_acc_#,
+       DVD.AMT,
+       TYP.TYP_STR                                      remittance_typ,
+       TO_CHAR (SYSDATE, 'dd-MM-yyyy')                  DT,
+       mb.BRNCH_NM,
+       (SELECT REF_CD_DSCR FROM MW_REF_CD_VAL VL WHERE VL.REF_CD_SEQ = ap.loan_app_sts AND VL.CRNT_REC_FLG = 1) loan_app_sts
+  FROM MW_LOAN_APP  AP
+       JOIN MW_CLNT MC ON MC.CLNT_SEQ = AP.CLNT_SEQ AND MC.CRNT_REC_FLG = 1
+       JOIN MW_BRNCH BRNCH
+           ON BRNCH.BRNCH_SEQ = AP.BRNCH_SEQ AND BRNCH.CRNT_REC_FLG = 1
+       JOIN MW_PORT_EMP_REL MRL
+           ON MRL.PORT_SEQ = AP.PORT_SEQ AND MRL.CRNT_REC_FLG = 1
+       JOIN MW_EMP ME ON ME.EMP_SEQ = MRL.EMP_SEQ
+       JOIN MW_DSBMT_VCHR_HDR DVH
+           ON DVH.LOAN_APP_SEQ = AP.LOAN_APP_SEQ AND DVH.CRNT_REC_FLG = 1
+       JOIN MW_DSBMT_VCHR_DTL DVD
+           ON DVH.DSBMT_HDR_SEQ = DVD.DSBMT_HDR_SEQ AND DVD.CRNT_REC_FLG = 1
+       JOIN MW_TYPS TYP
+           ON TYP.TYP_SEQ = DVD.PYMT_TYPS_SEQ AND TYP.CRNT_REC_FLG = 1
+       JOIN MW_PRD PRD
+           ON     PRD.PRD_SEQ = AP.PRD_SEQ
+              AND PRD.CRNT_REC_FLG = 1
+              AND PRD.PRD_GRP_SEQ NOT IN (6)
+       JOIN MW_BRNCH MB
+           ON MB.BRNCH_SEQ = AP.BRNCH_SEQ AND MB.CRNT_REC_FLG = 1
+ WHERE     AP.CRNT_REC_FLG = 1
+       AND TYP.TYP_ID =
+           (  SELECT TYPS.TYP_ID
+                FROM MW_TYPS TYPS
+               WHERE TYPS.TYP_SEQ = TYP.TYP_SEQ AND TYPS.BRNCH_SEQ <> -1
+            GROUP BY TYPS.TYP_ID)
+       AND UPPER (TYP.TYP_STR) LIKE '%MOBILE WALLET%'
+       AND TRUNC (DVH.DSBMT_DT) BETWEEN to_date(:frmdt,'dd-MM-yyyy') and to_date(:todt,'dd-MM-yyyy')
+UNION
+-- SALE-01
+SELECT ME.EMP_NM,
+       TO_CHAR (TRUNC (EP.EFF_START_DT), 'dd-MM-yyyy')     dsbmt_dt,
+       ap.clnt_Seq,
+       mc.FRST_NM || ' ' || mc.LAST_NM                     clnt_nm,
+       ap.loan_App_Seq,
+       mc.CNIC_num                                         clnt_cnic,
+       EP.INSTR_NUM                                        remitance_acc_#,
+       EP.EXPNS_AMT                                        AMT,
+       TYP.TYP_STR                                         remittance_typ,
+       TO_CHAR (SYSDATE, 'dd-MM-yyyy')                     DT,
+       mb.BRNCH_NM,
+       (SELECT REF_CD_DSCR FROM MW_REF_CD_VAL VL WHERE VL.REF_CD_SEQ = ap.loan_app_sts AND VL.CRNT_REC_FLG = 1) loan_app_sts
+  FROM MW_LOAN_APP  AP
+       JOIN MW_CLNT MC ON MC.CLNT_SEQ = AP.CLNT_SEQ AND MC.CRNT_REC_FLG = 1
+       JOIN MW_BRNCH BRNCH
+           ON BRNCH.BRNCH_SEQ = AP.BRNCH_SEQ AND BRNCH.CRNT_REC_FLG = 1
+       JOIN MW_PORT_EMP_REL MRL
+           ON MRL.PORT_SEQ = AP.PORT_SEQ AND MRL.CRNT_REC_FLG = 1
+       JOIN MW_EMP ME ON ME.EMP_SEQ = MRL.EMP_SEQ
+       JOIN MW_PRD PRD
+           ON     PRD.PRD_SEQ = AP.PRD_SEQ
+              AND PRD.CRNT_REC_FLG = 1
+              AND PRD.PRD_GRP_SEQ IN (6)
+       JOIN MW_EXP EP
+           ON     EP.EXP_REF = AP.LOAN_APP_SEQ
+              AND EP.POST_FLG = 1
+              AND EP.CRNT_REC_FLG = 1
+              AND EP.DEL_FLG = 0
+       JOIN MW_TYPS TYP
+           ON TYP.TYP_SEQ = EP.PYMT_TYP_SEQ AND TYP.CRNT_REC_FLG = 1
+       JOIN MW_BRNCH MB
+           ON MB.BRNCH_SEQ = AP.BRNCH_SEQ AND MB.CRNT_REC_FLG = 1
+ WHERE TYP.TYP_ID =
+           (  SELECT TYPS.TYP_id
+                FROM MW_TYPS TYPS
+               WHERE TYPS.TYP_SEQ = TYP.TYP_SEQ AND TYPS.BRNCH_SEQ <> -1
+            GROUP BY TYPS.TYP_id)
+       AND UPPER (TYP.TYP_STR) LIKE '%MOBILE WALLET%'
+       AND TRUNC (EP.EFF_START_DT) BETWEEN to_date(:frmdt,'dd-MM-yyyy') and to_date(:todt,'dd-MM-yyyy')

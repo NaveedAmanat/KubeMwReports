@@ -1,0 +1,1212 @@
+
+  SELECT DISTINCT
+         mr.REG_DSCR,
+         OUTS.clnts
+             active_clnts,
+         OUTS.loans
+             active_loans,
+         OUTS.DSB_AMT
+             dsb_amt,
+         OUTS.OUTS_CRNT,
+         OUTS.OUTS_PR_CRNT,
+         OUTS.OUTS_SC_CRNT,
+         BRNCHS.brnch_count,
+         BRNCHS.port_count,
+         (CASE
+              WHEN P_1.OUTS_p1 > 0
+              THEN
+                  ROUND (NVL (p_1.OUTS_p1, 1) / NVL (OUTS.OUTS_CRNT, 1) * 100,
+                         2)
+              ELSE
+                  0
+          END)
+             par_p1_perc,
+         p_1.loans_p1
+             p_1_outs,
+         p1_BRNCH_abv_2
+             AS p1_brnchs_abv_2,
+         PORT_PAR_COUNT.p1_ports_abv_25
+             p1_ports_abv_25,
+         (CASE
+              WHEN P_3.OUTS_p1 > 0
+              THEN
+                  ROUND (NVL (p_3.OUTS_p1, 1) / NVL (OUTS.OUTS_CRNT, 1) * 100,
+                         2)
+              ELSE
+                  0
+          END)
+             par_p3_perc,
+         P_3.loans_p1
+             P_3_outs,
+         p30_BRNCH_abv_1
+             AS p3_brnchs_abv_1,
+         PORT_PAR_COUNT.P30_PORTS_ABV_15
+             AS p3_ports_abv_15,
+         OUTS_PRO_NO_MFI.LOANS_MFI_0,
+         OUTS_PRO_MFI.LOANS_MFI_1,
+         OUTS_PRO_MFI.LOANS_MFI_2,
+         OUTS_PRO_MFI.LOANS_MFI_3_ABV,
+         EARLY_MAT.EARLY_MAT_60
+             AS adv_60_days,
+         EARLY_MAT.early_mat_60_re
+             AS abv_60_days_re,
+         --         ROUND (NVL (OUTS_PRO.DSB_AMT_new, 0) / NVL (OUTS_PRO.loans_new, 1), 0)
+         --             AS ADS_new_con,
+         --         ROUND (
+         --               NVL (OUTS_PRO.DSB_AMT_new_KKK, 0)
+         --             / NVL (OUTS_PRO.loans_new_KKK, 1),
+         --             0)
+         --             AS ADS_new_KKK,
+
+         lz_1,
+         lz_2,
+         lz_3,
+         lz_4,
+         lz_5,
+         lz_6,
+         lz_7,
+         lz_8,
+         ---lz_1/OUTS.clnts active_clnts *100 = %loan_sizeBIFURCATION
+         --         ROUND (
+         --               NVL (OUTS_FP.F_CLNTS, 0)
+         --             / NVL (NVL (OUTS_PRO.loans_new_fp, 0) + NVL (OUTS_PRO.loans_rep_fp, 0),
+         --                    1)*100,
+         --             2)
+         --             AS Fp,
+         --         ROUND (
+         --             NVL (OUTS_ROR.loans_rep_ror, 0) / NVL (OUTS_ROR.loans_cur_ror, 1)*100,
+         --             2)
+         --             ror,
+         P_1.OUTS_P1
+             P_1_OUTS_P1,
+         P_3.OUTS_P1
+             P_3_OUTS_P1,
+         OUTS_PRO.DSB_AMT_NEW,
+         OUTS_PRO.LOANS_NEW,
+         OUTS_PRO.DSB_AMT_NEW_KKK,
+         OUTS_PRO.LOANS_NEW_KKK,
+         OUTS_PRO.DSB_AMT_NEW_KM,
+         OUTS_PRO.LOANS_NEW_KM,
+         OUTS_PRO.DSB_AMT_NEW_KMWK,
+         OUTS_PRO.LOANS_NEW_KMWK,
+         OUTS_PRO.DSB_AMT_NEW_KSS,
+         OUTS_PRO.LOANS_NEW_KSS,
+         OUTS_PRO.DSB_AMT_NEW_KEL,
+         OUTS_PRO.LOANS_NEW_KEL,
+         OUTS_PRO.DSB_AMT_REP,
+         OUTS_PRO.LOANS_REP,
+         OUTS_PRO.DSB_AMT_REP_KKK,
+         OUTS_PRO.LOANS_REP_KKK,
+         OUTS_PRO.DSB_AMT_REP_KM,
+         OUTS_PRO.LOANS_REP_KM,
+         OUTS_PRO.DSB_AMT_REP_KMWK,
+         OUTS_PRO.LOANS_REP_KMWK,
+         OUTS_PRO.DSB_AMT_REP_KSS,
+         OUTS_PRO.LOANS_REP_KSS,
+         OUTS_PRO.DSB_AMT_REP_KEL,
+         OUTS_PRO.LOANS_REP_KEL,
+         OUTS_FP.F_CLNTS
+             F_CLNTS,
+         OUTS_ROR.LOANS_REP_ROR,
+         OUTS_ROR.LOANS_CUR_ROR,
+         OUTS_PRO.DSB_AMT_NEW_KBK,
+         OUTS_PRO.LOANS_NEW_KBK,
+         OUTS_PRO.DSB_AMT_REP_KBK,
+         OUTS_PRO.LOANS_REP_KBK,
+         OUTS_PRO.loans_new_fp,
+         OUTS_PRO.loans_rep_fp
+    FROM KASHF_REPORTING.con_mon_asofdate_rschd cp,
+         mw_brnch                              mb,
+         mw_area                               ma,
+         mw_reg                                mr,
+         mw_port                               mp,
+         (  SELECT reg_nm,
+                   SUM (loans)            loans,
+                   SUM (clnts)            clnts,
+                   SUM (dsb_amt)          dsb_amt,
+                   SUM (outs_crnt)        outs_crnt,
+                   SUM (outs_pr_crnt)     outs_pr_crnt,
+                   SUM (outs_sc_crnt)     outs_sc_crnt
+              FROM (  SELECT mr.reg_nm,
+                             COUNT (DISTINCT cp.loan_cycle_id)
+                                 loans,
+                             CASE
+                                 WHEN product_id <> 19
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 clnts,
+                             ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                                 DSB_AMT,
+                               ROUND (SUM (NVL (cp.OUTSTANDING_PRINCIPAL, 0)))
+                             + ROUND (SUM (NVL (cp.OUTSTANDING_SC, 0)))
+                                 outs_crnt,
+                             ROUND (SUM (NVL (cp.OUTSTANDING_PRINCIPAL, 0)))
+                                 outs_pr_crnt,
+                             ROUND (SUM (NVL (cp.OUTSTANDING_SC, 0)))
+                                 outs_sc_crnt
+                        FROM KASHF_REPORTING.con_mon_asofdate_rschd cp,
+                             mw_brnch                          mb,
+                             mw_area                           ma,
+                             mw_reg                            mr
+                       WHERE     cp.branch_ID = mb.brnch_seq
+                             AND mb.crnt_rec_flg = 1
+                             AND mb.area_seq = ma.area_seq
+                             AND ma.crnt_rec_flg = 1
+                             AND ma.reg_seq = mr.reg_seq
+                             AND mr.crnt_rec_flg = 1
+                             AND (   CP.LOAN_COMPLETION_DATE IS NULL
+                                  OR CP.LOAN_COMPLETION_DATE >
+                                     TO_DATE ( :asOfDate, 'dd-MM-RRRR'))
+                             AND disbursed_date BETWEEN TO_DATE ('01-may-2005')
+                                                    AND TO_DATE ( :asOfDate,
+                                                                 'dd-MM-RRRR')
+                             AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                  + NVL (OUTSTANDING_SC, 0)) >
+                                 0
+                             AND cp.TRN_DATE = TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                             AND product_id <> 8
+                    GROUP BY mr.reg_nm, product_id)
+          GROUP BY reg_nm) OUTS,
+         (  SELECT reg_nm,
+                   SUM (NVL (early_mat_60, 0))        early_mat_60,
+                   SUM (NVL (early_mat_60_re, 0))     early_mat_60_re
+              FROM (  SELECT reg_nm,
+                             COUNT (loan)
+                                 early_mat_60,
+                             CASE
+                                 WHEN max_loan_cycle > loan_cycle THEN COUNT (loan)
+                             END
+                                 early_mat_60_re
+                        FROM (  SELECT mr.reg_nm,
+                                       MAX (ap.loan_app_seq)
+                                           loan,
+                                       ap.clnt_seq
+                                           clnt,
+                                       MAX (ap.LOAN_CYCL_NUM)
+                                           loan_cycle,
+                                       (SELECT MAX (LOAN_CYCL_NUM)     max_loan_cycle
+                                          FROM mw_loan_app app, mw_dsbmt_vchr_hdr dvh
+                                         WHERE     app.crnt_rec_flg = 1
+                                               AND app.loan_app_seq =
+                                                   dvh.loan_app_seq
+                                               AND dvh.CRNT_REC_FLG = 1
+                                               AND app.clnt_seq = ap.clnt_seq)
+                                           max_loan_cycle
+                                  FROM mw_loan_app ap,
+                                       mw_pymt_sched_hdr psh,
+                                       mw_dsbmt_vchr_hdr dvh,
+                                       mw_area    ma,
+                                       mw_reg     mr,
+                                       mw_brnch   mb
+                                 WHERE     ap.loan_app_seq = dvh.loan_app_seq
+                                       AND ap.crnt_rec_flg = 1
+                                       AND ap.brnch_seq = mb.brnch_seq
+                                       AND mb.crnt_rec_flg = 1
+                                       AND mb.area_seq = ma.area_seq
+                                       AND ma.crnt_rec_flg = 1
+                                       AND ma.reg_seq = mr.reg_seq
+                                       AND mr.crnt_rec_flg = 1
+                                       AND dvh.CRNT_REC_FLG = 1
+                                       AND ap.loan_app_seq = psh.loan_app_seq
+                                       AND psh.crnt_rec_flg = 1
+                                       AND ap.loan_app_sts = 704
+                                       AND TRUNC (dvh.dsbmt_dt) BETWEEN TO_DATE (
+                                                                            '01-may-2005')
+                                                                    AND TO_DATE (
+                                                                            :asOfDate,
+                                                                            'dd-MM-RRRR')
+                                       AND   (SELECT MAX (DUE_DT)
+                                                FROM mw_pymt_sched_dtl inn
+                                               WHERE     inn.pymt_sched_hdr_seq =
+                                                         psh.pymt_sched_hdr_seq
+                                                     AND inn.crnt_rec_Flg = 1)
+                                           - TRUNC (ap.loan_app_sts_dt) >
+                                           59
+                              --                                         and ap.clnt_seq=2800044078
+                              GROUP BY reg_nm, ap.loan_app_seq, ap.clnt_seq)
+                    GROUP BY reg_nm, max_loan_cycle, loan_cycle)
+          GROUP BY reg_nm) EARLY_MAT,
+         (  SELECT reg_nm,
+                   SUM (loans_cur_ror)     loans_cur_ror,
+                   SUM (loans_rep_ror)     loans_rep_ror
+              FROM (  SELECT mr.reg_nm,
+                             COUNT (DISTINCT cp.loan_cycle_id)
+                                 loans_cur_ror,
+                             CASE
+                                 WHEN cycle_no > 1
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_rep_ror
+                        FROM KASHF_REPORTING.con_mon_asofdate_rschd cp,
+                             mw_brnch                          mb,
+                             mw_area                           ma,
+                             mw_reg                            mr
+                       WHERE     cp.branch_ID = mb.brnch_seq
+                             AND mb.crnt_rec_flg = 1
+                             AND mb.area_seq = ma.area_seq
+                             AND ma.crnt_rec_flg = 1
+                             AND ma.reg_seq = mr.reg_seq
+                             AND mr.crnt_rec_flg = 1
+                             AND (   CP.LOAN_COMPLETION_DATE IS NULL
+                                  OR CP.LOAN_COMPLETION_DATE >
+                                     TO_DATE ( :asOfDate, 'dd-MM-RRRR'))
+                             AND disbursed_date BETWEEN TO_DATE ('01-may-2005')
+                                                    AND TO_DATE ( :asOfDate,
+                                                                 'dd-MM-RRRR')
+                             AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                  + NVL (OUTSTANDING_SC, 0)) >
+                                 0
+                             AND cp.TRN_DATE = TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                             AND product_id NOT IN (8, 19)
+                    GROUP BY mr.reg_nm, cycle_no)
+          GROUP BY reg_nm) OUTS_ROR,
+         (  SELECT reg_nm,
+                   SUM (lz_1)     lz_1,
+                   SUM (lz_2)     lz_2,
+                   SUM (lz_3)     lz_3,
+                   SUM (lz_4)     lz_4,
+                   SUM (lz_5)     lz_5,
+                   SUM (lz_6)     lz_6,
+                   SUM (lz_7)     lz_7,
+                   SUM (lz_8)     lz_8
+              FROM (  SELECT mr.reg_nm,
+                             CASE
+                                 WHEN (NVL (cp.DISBURSED_AMOUNT, 0)) < 20000
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 lz_1,
+                             CASE
+                                 WHEN (NVL (cp.DISBURSED_AMOUNT, 0)) BETWEEN 20001
+                                                                         AND 34999
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 lz_2,
+                             CASE
+                                 WHEN (NVL (cp.DISBURSED_AMOUNT, 0)) BETWEEN 35000
+                                                                         AND 49999
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 lz_3,
+                             CASE
+                                 WHEN (NVL (cp.DISBURSED_AMOUNT, 0)) BETWEEN 50000
+                                                                         AND 74999
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 lz_4,
+                             CASE
+                                 WHEN (NVL (cp.DISBURSED_AMOUNT, 0)) BETWEEN 75000
+                                                                         AND 99999
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 lz_5,
+                             CASE
+                                 WHEN (NVL (cp.DISBURSED_AMOUNT, 0)) BETWEEN 100000
+                                                                         AND 124999
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 lz_6,
+                             CASE
+                                 WHEN (NVL (cp.DISBURSED_AMOUNT, 0)) BETWEEN 125000
+                                                                         AND 149999
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 lz_7,
+                             CASE
+                                 WHEN (NVL (cp.DISBURSED_AMOUNT, 0)) > 149999
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 lz_8
+                        FROM KASHF_REPORTING.con_mon_asofdate_rschd cp,
+                             mw_brnch                          mb,
+                             mw_area                           ma,
+                             mw_reg                            mr
+                       WHERE     cp.branch_ID = mb.brnch_seq
+                             AND mb.crnt_rec_flg = 1
+                             AND mb.area_seq = ma.area_seq
+                             AND ma.crnt_rec_flg = 1
+                             AND ma.reg_seq = mr.reg_seq
+                             AND mr.crnt_rec_flg = 1
+                             AND (   CP.LOAN_COMPLETION_DATE IS NULL
+                                  OR CP.LOAN_COMPLETION_DATE >
+                                     TO_DATE ( :asOfDate, 'dd-MM-RRRR'))
+                             AND disbursed_date BETWEEN TO_DATE ('01-may-2005')
+                                                    AND TO_DATE ( :asOfDate,
+                                                                 'dd-MM-RRRR')
+                             AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                  + NVL (OUTSTANDING_SC, 0)) >
+                                 0
+                             AND cp.TRN_DATE = TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                             AND product_id NOT IN (8, 19)
+                    GROUP BY mr.reg_nm, cp.DISBURSED_AMOUNT)
+          GROUP BY reg_nm) OUTS_loan_size,
+         (  SELECT reg_nm,
+                   SUM (loans_mfi_1)         loans_mfi_1,
+                   SUM (loans_mfi_2)         loans_mfi_2,
+                   SUM (loans_mfi_3_abv)     loans_mfi_3_abv
+              FROM (  SELECT mr.reg_nm,
+                             CASE
+                                 WHEN mfi_count = 1
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_mfi_1,
+                             CASE
+                                 WHEN mfi_count = 2
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_mfi_2,
+                             CASE
+                                 WHEN     mfi_count >= 3
+                                      AND (MIN_DT > SYSDATE OR MAX_DT > SYSDATE)
+                                 THEN
+                                     COUNT (cp.loan_cycle_id)
+                             END
+                                 loans_mfi_3_abv
+                        FROM KASHF_REPORTING.con_mon_asofdate_rschd cp,
+                             mw_brnch                          mb,
+                             mw_area                           ma,
+                             mw_reg                            mr,
+                             mw_biz_aprsl                      mba,
+                             (  SELECT loan_app_seq,
+                                       MIN (mfc.CMPL_DT)     MIN_DT,
+                                       MAX (mfc.CMPL_DT)     MAX_DT,
+                                       COUNT (*)             mfi_count
+                                  FROM mw_mfcib_oth_outsd_loan mfc
+                                 WHERE MFC.CRNT_REC_FLG = 1
+                              --                                 AND LOAN_APP_SEQ=33800007803443
+                              GROUP BY mfc.loan_app_seq) mfc
+                       WHERE     cp.branch_ID = mb.brnch_seq
+                             AND mb.crnt_rec_flg = 1
+                             AND cp.loan_cycle_id = mba.loan_app_Seq
+                             AND mba.crnt_rec_flg = 1
+                             AND mb.area_seq = ma.area_seq
+                             AND ma.crnt_rec_flg = 1
+                             AND ma.reg_seq = mr.reg_seq
+                             AND mr.crnt_rec_flg = 1
+                             AND PRODUCT_ID <> 8
+                             AND cp.loan_cycle_id(+) = mfc.loan_app_seq
+                             AND (   CP.LOAN_COMPLETION_DATE IS NULL
+                                  OR CP.LOAN_COMPLETION_DATE >
+                                     TO_DATE ( :asOfDate, 'dd-MM-RRRR'))
+                             AND disbursed_date BETWEEN TO_DATE ('01-may-2005')
+                                                    AND TO_DATE ( :asOfDate,
+                                                                 'dd-MM-RRRR')
+                             AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                  + NVL (OUTSTANDING_SC, 0)) >
+                                 0
+                             AND cp.TRN_DATE = TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                    --                             AND PRODUCT_ID IN (1,
+                    --                                                6,
+                    --                                                9,
+                    --                                                16,
+                    --                                                5305,
+                    --                                                5765,
+                    --                                                21)
+                    GROUP BY mr.reg_nm,
+                             mfi_count,
+                             MIN_DT,
+                             MAX_DT)
+          GROUP BY reg_nm) OUTS_PRO_MFI,
+         (  SELECT mr.reg_nm, COUNT (DISTINCT cp.loan_cycle_id) loans_mfi_0
+              FROM KASHF_REPORTING.con_mon_asofdate_rschd cp,
+                   mw_brnch                            mb,
+                   mw_area                             ma,
+                   mw_reg                              mr,
+                   mw_biz_aprsl                        mba
+             WHERE     cp.branch_ID = mb.brnch_seq
+                   AND mb.crnt_rec_flg = 1
+                   AND cp.loan_cycle_id = mba.loan_app_Seq
+                   AND mba.crnt_rec_flg = 1
+                   AND mb.area_seq = ma.area_seq
+                   AND ma.crnt_rec_flg = 1
+                   AND ma.reg_seq = mr.reg_seq
+                   AND mr.crnt_rec_flg = 1
+                   AND (   CP.LOAN_COMPLETION_DATE IS NULL
+                        OR CP.LOAN_COMPLETION_DATE >
+                           TO_DATE ( :asOfDate, 'dd-MM-RRRR'))
+                   AND disbursed_date BETWEEN TO_DATE ('01-may-2005')
+                                          AND TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                   AND (NVL (OUTSTANDING_PRINCIPAL, 0) + NVL (OUTSTANDING_SC, 0)) >
+                       0
+                   AND cp.TRN_DATE = TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                   AND PRODUCT_ID <> 8
+                   AND NOT EXISTS
+                           (SELECT 1
+                              FROM mw_mfcib_oth_outsd_loan mfc
+                             WHERE     MFC.CRNT_REC_FLG = 1
+                                   AND cp.loan_cycle_id = mfc.loan_app_seq)
+          GROUP BY mr.reg_nm) OUTS_PRO_NO_MFI,
+         (  SELECT mr.reg_nm, COUNT (DISTINCT cp.loan_cycle_id) f_clnts
+              FROM KASHF_REPORTING.con_mon_asofdate_rschd cp,
+                   mw_brnch                            mb,
+                   mw_area                             ma,
+                   mw_reg                              mr,
+                   mw_biz_aprsl                        mba
+             WHERE     cp.branch_ID = mb.brnch_seq
+                   AND mb.crnt_rec_flg = 1
+                   AND cp.loan_cycle_id = mba.loan_app_Seq
+                   AND mba.crnt_rec_flg = 1
+                   AND mb.area_seq = ma.area_seq
+                   AND ma.crnt_rec_flg = 1
+                   AND ma.reg_seq = mr.reg_seq
+                   AND mr.crnt_rec_flg = 1
+                   AND (   CP.LOAN_COMPLETION_DATE IS NULL
+                        OR CP.LOAN_COMPLETION_DATE >
+                           TO_DATE ( :asOfDate, 'dd-MM-RRRR'))
+                   AND disbursed_date BETWEEN TO_DATE ('01-may-2005')
+                                          AND TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                   AND (NVL (OUTSTANDING_PRINCIPAL, 0) + NVL (OUTSTANDING_SC, 0)) >
+                       0
+                   AND cp.TRN_DATE = TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                   --                   AND product_id IN (1,
+                   --                                      6,
+                   --                                      9,
+                   --                                      16,
+                   --                                      5305,
+                   --                                      5765,
+                   --                                      21)
+                   AND mba.PRSN_RUN_THE_BIZ IN (190,
+                                                1058,
+                                                1056,
+                                                1057,
+                                                1059,
+                                                191,
+                                                1055)
+          GROUP BY mr.reg_nm) OUTS_FP,
+         (  SELECT reg_nm,
+                   SUM (loans_new)            loans_new,
+                   SUM (loans_new_fp)         loans_new_fp,
+                   SUM (DSB_AMT_new)          DSB_AMT_new,
+                   SUM (loans_new_KKK)        loans_new_KKK,
+                   SUM (DSB_AMT_new_KKK)      DSB_AMT_new_KKK,
+                   SUM (loans_new_KM)         loans_new_KM,
+                   SUM (DSB_AMT_new_KM)       DSB_AMT_new_KM,
+                   SUM (loans_new_KMWK)       loans_new_KMWK,
+                   SUM (DSB_AMT_new_KMWK)     DSB_AMT_new_KMWK,
+                   SUM (loans_new_KSS)        loans_new_KSS,
+                   SUM (DSB_AMT_new_KSS)      DSB_AMT_new_KSS,
+                   SUM (loans_new_KEL)        loans_new_KEL,
+                   SUM (DSB_AMT_new_KEL)      DSB_AMT_new_KEL,
+                   SUM (loans_new_KBK)        loans_new_KBK,
+                   SUM (DSB_AMT_new_KBK)      DSB_AMT_new_KBK,
+                   SUM (loans_rep)            loans_rep,
+                   SUM (loans_rep_fp)         loans_rep_fp,
+                   SUM (DSB_AMT_rep)          DSB_AMT_rep,
+                   SUM (loans_REP_KKK)        loans_REP_KKK,
+                   SUM (DSB_AMT_REP_KKK)      DSB_AMT_REP_KKK,
+                   SUM (loans_REP_KM)         loans_REP_KM,
+                   SUM (DSB_AMT_REP_KM)       DSB_AMT_REP_KM,
+                   SUM (loans_REP_KMWK)       loans_REP_KMWK,
+                   SUM (DSB_AMT_REP_KMWK)     DSB_AMT_REP_KMWK,
+                   SUM (loans_REP_KSS)        loans_REP_KSS,
+                   SUM (DSB_AMT_REP_KSS)      DSB_AMT_REP_KSS,
+                   SUM (loans_REP_KEL)        loans_REP_KEL,
+                   SUM (DSB_AMT_REP_KEL)      DSB_AMT_REP_KEL,
+                   SUM (loans_REP_KBK)        loans_REP_KBK,
+                   SUM (DSB_AMT_REP_KBK)      DSB_AMT_REP_KBK
+              FROM (  SELECT mr.reg_nm,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID NOT IN (13, 21)
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_new,
+                             CASE
+                                 WHEN cycle_no = 1
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_new_fp,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID NOT IN (13, 21)
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_new,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID = 1
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_new_KKK,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID = 1
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_new_KKK,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID = 9
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_new_KSS,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID = 9
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_new_KSS,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID = 13
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_new_KEL,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID = 13
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_new_KEL,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID IN (16, 5305)
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_new_KMWK,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID IN (16, 5305)
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_new_KMWK,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID = 6
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_new_KM,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID = 6
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_new_KM,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID = 5765
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_new_KBK,
+                             CASE
+                                 WHEN cycle_no = 1 AND PRODUCT_ID = 5765
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_new_KBK,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID NOT IN (13, 21)
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_rep,
+                             CASE
+                                 WHEN cycle_no > 1
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_rep_fp,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID NOT IN (13, 21)
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_rep,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID = 1
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_REP_KKK,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID = 1
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_REP_KKK,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID = 9
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_REP_KSS,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID = 9
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_REP_KSS,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID = 13
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_REP_KEL,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID = 13
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_REP_KEL,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID IN (16, 5305)
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_REP_KMWK,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID IN (16, 5305)
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_REP_KMWK,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID = 6
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_REP_KM,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID = 6
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_REP_KM,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID = 5765
+                                 THEN
+                                     COUNT (DISTINCT cp.loan_cycle_id)
+                             END
+                                 loans_REP_KBK,
+                             CASE
+                                 WHEN cycle_no > 1 AND PRODUCT_ID = 5765
+                                 THEN
+                                     ROUND (SUM (NVL (cp.DISBURSED_AMOUNT, 0)))
+                             END
+                                 DSB_AMT_REP_KBK
+                        FROM KASHF_REPORTING.con_mon_asofdate_rschd cp,
+                             mw_brnch                          mb,
+                             mw_area                           ma,
+                             mw_reg                            mr,
+                             mw_biz_aprsl                      mba
+                       WHERE     cp.branch_ID = mb.brnch_seq
+                             AND mb.crnt_rec_flg = 1
+                             AND cp.loan_cycle_id = mba.loan_app_Seq
+                             AND mba.crnt_rec_flg = 1
+                             --and CP.PRODUCT_ID=PRD.PRD_GRP_SEQ AND PRD.CRNT_REC_FLG=1
+                             AND mb.area_seq = ma.area_seq
+                             AND ma.crnt_rec_flg = 1
+                             AND ma.reg_seq = mr.reg_seq
+                             AND mr.crnt_rec_flg = 1
+                             AND (   CP.LOAN_COMPLETION_DATE IS NULL
+                                  OR CP.LOAN_COMPLETION_DATE >
+                                     TO_DATE ( :asOfDate, 'dd-MM-RRRR'))
+                             AND disbursed_date BETWEEN TO_DATE ('01-may-2005')
+                                                    AND TO_DATE ( :asOfDate,
+                                                                 'dd-MM-RRRR')
+                             AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                  + NVL (OUTSTANDING_SC, 0)) >
+                                 0
+                             AND cp.TRN_DATE = TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                             --                             AND PRODUCT_ID IN (1,
+                             --                                                6,
+                             --                                                9,
+                             --                                                13,
+                             --                                                16,
+                             --                                                5305,
+                             --                                                5765,21)
+                             AND PRODUCT_ID <> 8
+                    GROUP BY mr.reg_nm, cycle_no, PRODUCT_ID)
+          GROUP BY REG_NM) OUTS_PRO,
+         (  SELECT mr.reg_nm,
+                   COUNT (DISTINCT cp.loan_cycle_id)
+                       loans_p1,
+                     ROUND (SUM (NVL (cp.OVERDUE_AMOUNT, 0)))
+                   + ROUND (SUM (NVL (cp.OVERDUE_AMOUNT_SC, 0)))
+                       OD_AMT,
+                     ROUND (SUM (NVL (cp.OUTSTANDING_PRINCIPAL, 0)))
+                   + ROUND (SUM (NVL (cp.OUTSTANDING_sc, 0)))
+                       outs_p1
+              FROM KASHF_REPORTING.con_mon_asofdate_rschd cp,
+                   mw_brnch                            mb,
+                   mw_area                             ma,
+                   mw_reg                              mr
+             WHERE     cp.branch_ID = mb.brnch_seq
+                   AND mb.crnt_rec_flg = 1
+                   AND mb.area_seq = ma.area_seq
+                   AND ma.crnt_rec_flg = 1
+                   AND ma.reg_seq = mr.reg_seq
+                   AND mr.crnt_rec_flg = 1
+                   AND (   CP.LOAN_COMPLETION_DATE IS NULL
+                        OR CP.LOAN_COMPLETION_DATE >
+                           TO_DATE ( :asOfDate, 'dd-MM-RRRR'))
+                   AND disbursed_date BETWEEN TO_DATE ('01-may-2005')
+                                          AND TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                   AND (NVL (OUTSTANDING_PRINCIPAL, 0) + NVL (OUTSTANDING_SC, 0)) >
+                       0
+                   AND (  ROUND ((NVL (cp.OVERDUE_AMOUNT, 0)))
+                        + ROUND ((NVL (cp.OVERDUE_AMOUNT_SC, 0)))) >
+                       0
+                   --and (cp.GRACE_PERD is null)
+                   AND cp.TRN_DATE = TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                   AND product_id <> 8
+          GROUP BY mr.reg_nm) P_1,
+         (  SELECT mr.reg_nm,
+                   COUNT (DISTINCT cp.loan_cycle_id)
+                       loans_p1,
+                     ROUND (SUM (NVL (cp.OVERDUE_AMOUNT, 0)))
+                   + ROUND (SUM (NVL (cp.OVERDUE_AMOUNT_SC, 0)))
+                       OD_AMT,
+                     ROUND (SUM (NVL (cp.OUTSTANDING_PRINCIPAL, 0)))
+                   + ROUND (SUM (NVL (cp.OUTSTANDING_sc, 0)))
+                       outs_p1
+              FROM KASHF_REPORTING.con_mon_asofdate_rschd cp,
+                   mw_brnch                            mb,
+                   mw_area                             ma,
+                   mw_reg                              mr
+             WHERE     cp.branch_ID = mb.brnch_seq
+                   AND mb.crnt_rec_flg = 1
+                   AND mb.area_seq = ma.area_seq
+                   AND ma.crnt_rec_flg = 1
+                   AND ma.reg_seq = mr.reg_seq
+                   AND mr.crnt_rec_flg = 1
+                   AND (   CP.LOAN_COMPLETION_DATE IS NULL
+                        OR CP.LOAN_COMPLETION_DATE >
+                           TO_DATE ( :asOfDate, 'dd-MM-RRRR'))
+                   AND disbursed_date BETWEEN TO_DATE ('01-may-2005')
+                                          AND TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                   AND OUTSTANDING_PRINCIPAL > 0
+                   AND (  ROUND ((NVL (cp.OVERDUE_AMOUNT, 0)))
+                        + ROUND ((NVL (cp.OVERDUE_AMOUNT_SC, 0)))) >
+                       0
+                   AND cp.overdue_days > 28.50
+                   --and (cp.GRACE_PERD is null)
+                   AND cp.TRN_DATE = TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                   AND product_id <> 8
+          GROUP BY mr.reg_nm) P_3,
+         (  SELECT mr.reg_nm,
+                   COUNT (DISTINCT mb.brnch_seq)     brnch_count,
+                   COUNT (DISTINCT p.port_seq)       port_count
+              FROM mw_brnch     mb,
+                   mw_port      p,
+                   MW_PORT_EMP_REL MPER,
+                   mw_area      ma,
+                   mw_reg       mr
+             WHERE     mb.crnt_rec_flg = 1
+                   AND mb.BRNCH_SEQ = p.BRNCH_SEQ
+                   AND p.crnt_rec_flg = 1
+                   AND P.PORT_SEQ = MPER.PORT_SEQ
+                   AND MPER.crnt_rec_flg = 1
+                   AND mb.area_seq = ma.area_seq
+                   AND ma.crnt_rec_flg = 1
+                   AND ma.reg_seq = mr.reg_seq
+                   AND mr.crnt_rec_flg = 1
+                   AND mr.reg_seq <> -1
+          --and cp.TRN_DATE = to_date(:asOfDate, 'dd-MM-RRRR')
+          GROUP BY mr.reg_nm) BRNCHS,
+         (  SELECT reg_nm,
+                   SUM (p1_ports_abv_25)      p1_ports_abv_25,
+                   SUM (p30_ports_abv_15)     p30_ports_abv_15
+              FROM (  SELECT P_1_p.reg_nm,
+                             CASE
+                                 WHEN (CASE
+                                           WHEN P_1_p.OUTS_p1 > 0
+                                           THEN
+                                               ROUND (
+                                                     NVL (p_1_p.OUTS_p1, 1)
+                                                   / NVL (OUTS_p.OUTS_CRNT, 1)
+                                                   * 100,
+                                                   2)
+                                           ELSE
+                                               0
+                                       END) >
+                                      2.5
+                                 THEN
+                                     COUNT (P_1_p.PORT_SEQ)
+                             END
+                                 AS p1_ports_abv_25,
+                             CASE
+                                 WHEN (CASE
+                                           WHEN P_1_p.OUTS_p1 > 0
+                                           THEN
+                                               ROUND (
+                                                     NVL (p_1_p.OUTS_p30, 1)
+                                                   / NVL (OUTS_p.OUTS_CRNT, 1)
+                                                   * 100,
+                                                   2)
+                                           ELSE
+                                               0
+                                       END) >
+                                      1.5
+                                 THEN
+                                     COUNT (P_1_p.PORT_SEQ)
+                             END
+                                 AS p30_ports_abv_15
+                        FROM (  SELECT mp.port_seq,
+                                       mr.reg_nm,
+                                         ROUND (
+                                             SUM (NVL (cp.OUTSTANDING_PRINCIPAL, 0)))
+                                       + ROUND (SUM (NVL (cp.OUTSTANDING_SC, 0)))
+                                           outs_crnt
+                                  FROM KASHF_REPORTING.con_mon_asofdate_rschd cp,
+                                       mw_port                         mp,
+                                       mw_brnch                        mb,
+                                       mw_area                         ma,
+                                       mw_reg                          mr
+                                 WHERE     cp.port_seq = mp.port_seq
+                                       AND mp.crnt_rec_flg = 1
+                                       AND cp.branch_ID = mb.brnch_seq
+                                       AND mb.crnt_rec_flg = 1
+                                       AND mb.area_seq = ma.area_seq
+                                       AND ma.crnt_rec_flg = 1
+                                       AND ma.reg_seq = mr.reg_seq
+                                       AND mr.crnt_rec_flg = 1
+                                       AND (   CP.LOAN_COMPLETION_DATE IS NULL
+                                            OR CP.LOAN_COMPLETION_DATE >
+                                               TO_DATE ( :asOfDate, 'dd-MM-RRRR'))
+                                       AND disbursed_date BETWEEN TO_DATE (
+                                                                      '01-may-2005')
+                                                              AND TO_DATE (
+                                                                      :asOfDate,
+                                                                      'dd-MM-RRRR')
+                                       AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                            + NVL (OUTSTANDING_SC, 0)) >
+                                           0
+                                       AND cp.TRN_DATE =
+                                           TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                                       AND product_id <> 8
+                              GROUP BY mp.port_seq, mr.reg_nm) OUTS_P,
+                             (  SELECT port_seq,
+                                       reg_nm,
+                                       SUM (outs_p1)      outs_p1,
+                                       SUM (outs_p30)     outs_p30
+                                  FROM (  SELECT mp.port_seq,
+                                                 mr.reg_nm,
+                                                   ROUND (
+                                                       SUM (
+                                                           NVL (
+                                                               cp.OUTSTANDING_PRINCIPAL,
+                                                               0)))
+                                                 + ROUND (
+                                                       SUM (NVL (cp.OUTSTANDING_sc, 0)))
+                                                     outs_p1,
+                                                 CASE
+                                                     WHEN cp.overdue_days > 28.50
+                                                     THEN
+                                                           ROUND (
+                                                               SUM (
+                                                                   NVL (
+                                                                       cp.OUTSTANDING_PRINCIPAL,
+                                                                       0)))
+                                                         + ROUND (
+                                                               SUM (
+                                                                   NVL (
+                                                                       cp.OUTSTANDING_SC,
+                                                                       0)))
+                                                 END
+                                                     outs_p30
+                                            FROM KASHF_REPORTING.con_mon_asofdate_rschd
+                                                 cp,
+                                                 mw_port mp,
+                                                 mw_brnch mb,
+                                                 mw_area ma,
+                                                 mw_reg mr
+                                           WHERE     cp.port_seq = mp.port_seq
+                                                 AND mp.crnt_rec_flg = 1
+                                                 AND cp.branch_ID = mb.brnch_seq
+                                                 AND mb.crnt_rec_flg = 1
+                                                 AND mb.area_seq = ma.area_seq
+                                                 AND ma.crnt_rec_flg = 1
+                                                 AND ma.reg_seq = mr.reg_seq
+                                                 AND mr.crnt_rec_flg = 1
+                                                 AND (   CP.LOAN_COMPLETION_DATE
+                                                             IS NULL
+                                                      OR CP.LOAN_COMPLETION_DATE >
+                                                         TO_DATE ( :asOfDate,
+                                                                  'dd-MM-RRRR'))
+                                                 AND disbursed_date BETWEEN TO_DATE (
+                                                                                '01-may-2005')
+                                                                        AND TO_DATE (
+                                                                                :asOfDate,
+                                                                                'dd-MM-RRRR')
+                                                 AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                                      + NVL (OUTSTANDING_SC, 0)) >
+                                                     0
+                                                 AND (  ROUND (
+                                                            (NVL (cp.OVERDUE_AMOUNT, 0)))
+                                                      + ROUND (
+                                                            (NVL (cp.OVERDUE_AMOUNT_SC,
+                                                                  0)))) >
+                                                     0
+                                                 --and (cp.GRACE_PERD is null)
+                                                 AND cp.TRN_DATE =
+                                                     TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                                                 AND product_id <> 8
+                                        GROUP BY mp.port_seq,
+                                                 mr.reg_nm,
+                                                 cp.overdue_days)
+                              GROUP BY port_seq, reg_nm) P_1_p
+                       WHERE     OUTS_P.REG_NM = P_1_p.REG_NM
+                             AND OUTS_P.PORT_SEQ = P_1_p.PORT_SEQ
+                    GROUP BY P_1_p.OUTS_p1,
+                             P_1_p.reg_nm,
+                             OUTS_p.OUTS_CRNT,
+                             p_1_p.OUTS_p30)
+          GROUP BY reg_nm) PORT_PAR_COUNT,
+         (  SELECT reg_nm,
+                   SUM (p1_BRNCH_abv_2)      p1_BRNCH_abv_2,
+                   SUM (p30_BRNCH_abv_1)     p30_BRNCH_abv_1
+              FROM (  SELECT P_1_p.reg_nm,
+                             CASE
+                                 WHEN (CASE
+                                           WHEN P_1_p.OUTS_p1 > 0
+                                           THEN
+                                               ROUND (
+                                                     NVL (p_1_p.OUTS_p1, 1)
+                                                   / NVL (OUTS_p.OUTS_CRNT, 1)
+                                                   * 100,
+                                                   2)
+                                           ELSE
+                                               0
+                                       END) >
+                                      2
+                                 THEN
+                                     COUNT (P_1_p.BRNCH_SEQ)
+                             END
+                                 AS p1_BRNCH_abv_2,
+                             CASE
+                                 WHEN (CASE
+                                           WHEN P_1_p.OUTS_p1 > 0
+                                           THEN
+                                               ROUND (
+                                                     NVL (p_1_p.OUTS_p30, 1)
+                                                   / NVL (OUTS_p.OUTS_CRNT, 1)
+                                                   * 100,
+                                                   2)
+                                           ELSE
+                                               0
+                                       END) >
+                                      1
+                                 THEN
+                                     COUNT (P_1_p.BRNCH_SEQ)
+                             END
+                                 AS p30_BRNCH_abv_1
+                        FROM (  SELECT mb.BRNCH_SEQ,
+                                       mr.reg_nm,
+                                         ROUND (
+                                             SUM (NVL (cp.OUTSTANDING_PRINCIPAL, 0)))
+                                       + ROUND (SUM (NVL (cp.OUTSTANDING_SC, 0)))
+                                           outs_crnt
+                                  FROM KASHF_REPORTING.con_mon_asofdate_rschd cp,
+                                       mw_brnch                        mb,
+                                       mw_area                         ma,
+                                       mw_reg                          mr
+                                 WHERE     cp.branch_ID = mb.brnch_seq
+                                       AND mb.crnt_rec_flg = 1
+                                       AND mb.area_seq = ma.area_seq
+                                       AND ma.crnt_rec_flg = 1
+                                       AND ma.reg_seq = mr.reg_seq
+                                       AND mr.crnt_rec_flg = 1
+                                       AND (   CP.LOAN_COMPLETION_DATE IS NULL
+                                            OR CP.LOAN_COMPLETION_DATE >
+                                               TO_DATE ( :asOfDate, 'dd-MM-RRRR'))
+                                       AND disbursed_date BETWEEN TO_DATE (
+                                                                      '01-may-2005')
+                                                              AND TO_DATE (
+                                                                      :asOfDate,
+                                                                      'dd-MM-RRRR')
+                                       AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                            + NVL (OUTSTANDING_SC, 0)) >
+                                           0
+                                       AND cp.TRN_DATE =
+                                           TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                                       AND product_id <> 8
+                              GROUP BY mb.brnch_seq, mr.reg_nm) OUTS_P,
+                             (  SELECT brnch_seq,
+                                       reg_nm,
+                                       SUM (outs_p1)      outs_p1,
+                                       SUM (outs_p30)     outs_p30
+                                  FROM (  SELECT mb.brnch_seq,
+                                                 mr.reg_nm,
+                                                   ROUND (
+                                                       SUM (
+                                                           NVL (
+                                                               cp.OUTSTANDING_PRINCIPAL,
+                                                               0)))
+                                                 + ROUND (
+                                                       SUM (NVL (cp.OUTSTANDING_sc, 0)))
+                                                     outs_p1,
+                                                 CASE
+                                                     WHEN cp.overdue_days > 28.50
+                                                     THEN
+                                                           ROUND (
+                                                               SUM (
+                                                                   NVL (
+                                                                       cp.OUTSTANDING_PRINCIPAL,
+                                                                       0)))
+                                                         + ROUND (
+                                                               SUM (
+                                                                   NVL (
+                                                                       cp.OUTSTANDING_SC,
+                                                                       0)))
+                                                 END
+                                                     outs_p30
+                                            FROM KASHF_REPORTING.con_mon_asofdate_rschd
+                                                 cp,
+                                                 mw_brnch mb,
+                                                 mw_area ma,
+                                                 mw_reg mr
+                                           WHERE     cp.branch_ID = mb.brnch_seq
+                                                 AND mb.crnt_rec_flg = 1
+                                                 AND mb.area_seq = ma.area_seq
+                                                 AND ma.crnt_rec_flg = 1
+                                                 AND ma.reg_seq = mr.reg_seq
+                                                 AND mr.crnt_rec_flg = 1
+                                                 AND (   CP.LOAN_COMPLETION_DATE
+                                                             IS NULL
+                                                      OR CP.LOAN_COMPLETION_DATE >
+                                                         TO_DATE ( :asOfDate,
+                                                                  'dd-MM-RRRR'))
+                                                 AND disbursed_date BETWEEN TO_DATE (
+                                                                                '01-may-2005')
+                                                                        AND TO_DATE (
+                                                                                :asOfDate,
+                                                                                'dd-MM-RRRR')
+                                                 AND (  NVL (OUTSTANDING_PRINCIPAL, 0)
+                                                      + NVL (OUTSTANDING_SC, 0)) >
+                                                     0
+                                                 AND (  ROUND (
+                                                            (NVL (cp.OVERDUE_AMOUNT, 0)))
+                                                      + ROUND (
+                                                            (NVL (cp.OVERDUE_AMOUNT_SC,
+                                                                  0)))) >
+                                                     0
+                                                 --and (cp.GRACE_PERD is null)
+                                                 AND cp.TRN_DATE =
+                                                     TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+                                                 AND product_id <> 8
+                                        GROUP BY mb.brnch_seq,
+                                                 mr.reg_nm,
+                                                 cp.overdue_days)
+                              GROUP BY brnch_seq, reg_nm) P_1_p
+                       WHERE     OUTS_P.REG_NM = P_1_p.REG_NM
+                             AND OUTS_P.brnch_seq = P_1_p.brnch_seq
+                    GROUP BY P_1_p.OUTS_p1,
+                             P_1_p.reg_nm,
+                             OUTS_p.OUTS_CRNT,
+                             p_1_p.OUTS_p30)
+          GROUP BY reg_nm) BRANCH_PAR_COUNT
+   WHERE     cp.branch_ID = mb.brnch_seq
+         AND mb.crnt_rec_flg = 1
+         AND mb.area_seq = ma.area_seq
+         AND ma.crnt_rec_flg = 1
+         AND mb.BRNCH_SEQ = mp.brnch_seq
+         AND mp.crnt_rec_flg = 1
+         AND ma.reg_seq = mr.reg_seq
+         AND mr.crnt_rec_flg = 1
+         AND cp.TRN_DATE = TO_DATE ( :asOfDate, 'dd-MM-RRRR')
+         AND mr.REG_NM = OUTS.REG_NM(+)
+         AND mr.REG_NM = OUTS_FP.REG_NM(+)
+         AND mr.REG_NM = OUTS_loan_size.REG_NM(+)
+         AND mr.REG_NM = EARLY_MAT.REG_NM(+)
+         AND mr.REG_NM = OUTS_ROR.REG_NM(+)
+         AND mr.REG_NM = OUTS_PRO_MFI.REG_NM(+)
+         AND mr.REG_NM = OUTS_PRO_NO_MFI.REG_NM(+)
+         AND mr.REG_NM = OUTS_PRO.REG_NM(+)
+         AND mr.REG_NM = BRNCHS.REG_NM(+)
+         AND mr.REG_NM = P_1.REG_NM(+)
+         AND mr.REG_NM = P_3.REG_NM(+)
+         AND mr.REG_NM = PORT_PAR_COUNT.REG_NM(+)
+         AND mr.REG_NM = branch_PAR_COUNT.REG_NM(+)
+GROUP BY mr.REG_DSCR,
+         OUTS.clnts,
+         OUTS.loans,
+         OUTS.DSB_AMT,
+         OUTS.OUTS_CRNT,
+         OUTS.OUTS_PR_CRNT,
+         OUTS.OUTS_SC_CRNT,
+         BRNCHS.brnch_count,
+         BRNCHS.port_count,
+         p30_ports_abv_15,
+         p30_BRNCH_abv_1,
+         p1_BRNCH_abv_2,
+         p1_ports_abv_25,
+         OUTS_PRO.loans_new_fp,
+         OUTS_PRO.loans_rep_fp,
+         lz_1,
+         lz_2,
+         lz_3,
+         lz_4,
+         lz_5,
+         lz_6,
+         lz_7,
+         lz_8,
+         CASE
+             WHEN P_1.OUTS_p1 > 0
+             THEN
+                 ROUND (NVL (p_1.OUTS_p1, 1) / NVL (OUTS.OUTS_CRNT, 1) * 100,
+                        2)
+             ELSE
+                 0
+         END,
+         p_1.loans_p1,
+         CASE
+             WHEN P_3.OUTS_p1 > 0
+             THEN
+                 ROUND (NVL (p_3.OUTS_p1, 1) / NVL (OUTS.OUTS_CRNT, 1) * 100,
+                        2)
+             ELSE
+                 0
+         END,
+         P_3.loans_p1,
+         OUTS_PRO_NO_MFI.LOANS_MFI_0,
+         OUTS_PRO_MFI.LOANS_MFI_1,
+         OUTS_PRO_MFI.LOANS_MFI_2,
+         OUTS_PRO_MFI.LOANS_MFI_3_ABV,
+         EARLY_MAT.EARLY_MAT_60,
+         EARLY_MAT.early_mat_60_re,
+         P_1.OUTS_P1,
+         P_3.OUTS_P1,
+         OUTS_PRO.DSB_AMT_NEW,
+         OUTS_PRO.LOANS_NEW,
+         OUTS_PRO.DSB_AMT_NEW_KKK,
+         OUTS_PRO.LOANS_NEW_KKK,
+         OUTS_PRO.DSB_AMT_NEW_KM,
+         OUTS_PRO.LOANS_NEW_KM,
+         OUTS_PRO.DSB_AMT_NEW_KMWK,
+         OUTS_PRO.LOANS_NEW_KMWK,
+         OUTS_PRO.DSB_AMT_NEW_KSS,
+         OUTS_PRO.LOANS_NEW_KSS,
+         OUTS_PRO.DSB_AMT_NEW_KEL,
+         OUTS_PRO.LOANS_NEW_KEL,
+         OUTS_PRO.DSB_AMT_REP,
+         OUTS_PRO.LOANS_REP,
+         OUTS_PRO.DSB_AMT_REP_KKK,
+         OUTS_PRO.LOANS_REP_KKK,
+         OUTS_PRO.DSB_AMT_REP_KM,
+         OUTS_PRO.LOANS_REP_KM,
+         OUTS_PRO.DSB_AMT_REP_KMWK,
+         OUTS_PRO.LOANS_REP_KMWK,
+         OUTS_PRO.DSB_AMT_REP_KSS,
+         OUTS_PRO.LOANS_REP_KSS,
+         OUTS_PRO.DSB_AMT_REP_KEL,
+         OUTS_PRO.LOANS_REP_KEL,
+         OUTS_FP.F_CLNTS,
+         OUTS_ROR.LOANS_REP_ROR,
+         OUTS_ROR.LOANS_CUR_ROR,
+         OUTS_PRO.DSB_AMT_NEW_KBK,
+         OUTS_PRO.LOANS_NEW_KBK,
+         OUTS_PRO.DSB_AMT_REP_KBK,
+         OUTS_PRO.LOANS_REP_KBK

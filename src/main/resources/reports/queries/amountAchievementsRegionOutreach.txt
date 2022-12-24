@@ -1,0 +1,14 @@
+select INITCAP(MR.REG_NM) REGION_NAME_AMT,
+SUM(NVL(TA.ACH,0)) ACHIEVMENT_NO,
+SUM(NVL(TA.ACH_AMT,0)) ACHIEVMENT_AMT
+from KASHF_REPORTING.target_achievements ta, mw_brnch mb, mw_area ma, mw_reg mr
+where ta.BRANCH_CD = mb.brnch_Seq and mb.CRNT_REC_FLG = 1
+and mb.AREA_SEQ = ma.AREA_SEQ and ma.CRNT_REC_FLG = 1
+and ma.REG_SEQ = mr.REG_SEQ and mr.CRNT_REC_FLG = 1
+and ta.PRODUCT_CODE not in (8,19,4,5,11,10)
+and TO_cHAR(ta.PAR_DATE,'YYYY') =TO_cHAR(TO_DATE(:asOfDate, 'dd-MM-yyyy'),'YYYY')
+and TO_cHAR(ta.PAR_DATE,'MM') = TO_cHAR(TO_DATE(:asOfDate, 'dd-MM-yyyy'),'MM')
+GROUP BY INITCAP(mr.REG_NM)
+ORDER BY INITCAP(mr.REG_NM)
+
+

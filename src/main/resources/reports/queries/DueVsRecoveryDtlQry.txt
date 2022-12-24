@@ -1,0 +1,70 @@
+SELECT
+    mpg.prd_grp_nm,
+    mr.reg_nm,
+    ma.area_nm,
+    mb.brnch_nm,
+    outs_apr20.loans loans,
+    outs_apr20.outs_apr20 outs_apr20,
+    SUM(nvl(NVL(RECOVERED_AMOUNT_FMTO_CUM,0)+NVL(RECOVERED_AMOUNT_FMTO_SC_CUM,0), 0)) rec_cum,
+    nvl(outs_apr20.loans,0) - nvl(outs_crnt.loans,0) compl_loans_crnt,
+    nvl(outs_crnt.loans,0) loans_crnt,
+    nvl(outs_crnt.outs,0) outs_crnt,
+    mpg.prd_grp_seq,
+    mr.reg_seq,
+    ma.area_seq,
+    mb.brnch_seq
+    FROM KASHF_REPORTING.con_mon_asofdate_rschd_daily cp, mw_brnch mb, 
+    mw_area ma, mw_reg mr,mw_prd_grp mpg,
+    (      
+    select mb.brnch_seq, apr.PRD_GRP_SEQ, count(apr.LOAN_APP_SEQ) loans, sum(nvl(apr.OUTS_PRN_APR20,0) + nvl(apr.OUTS_SC_APR20,0)) outs_apr20,
+    sum(nvl(apr.OVERDUE_AMOUNT,0) + nvl(apr.OVERDUE_AMOUNT_SC,0)) od_apr20
+        from PRE_COVID_APR20_OUTS_LOAN_APPS apr, mw_brnch mb, 
+        mw_area ma, mw_reg mr
+        where apr.BRNCH_SEQ = mb.BRNCH_SEQ and mb.crnt_rec_flg=1
+        and mb.area_seq=ma.area_seq and ma.crnt_rec_flg=1
+        and ma.reg_seq = mr.reg_seq and mr.crnt_rec_flg=1  
+        and not exists (select * from mw_loan_app ap where ap.loan_app_seq = apr.loan_app_seq and ap.loan_app_sts = 1285
+        and ap.last_upd_dt > '30-apr-2020')      
+        group by mb.brnch_seq , apr.PRD_GRP_SEQ                     
+    ) outs_apr20,
+    (
+        select mb.brnch_seq, cp.PRODUCT_ID prd_grp_seq, 
+        count(loan_cycle_id) loans, sum(NVL(OUTSTANDING_PRINCIPAL,0) + NVL(OUTSTANDING_SC,0)) outs
+        from KASHF_REPORTING.con_mon_asofdate_rschd cp, mw_brnch mb, 
+                mw_area ma, mw_reg mr
+         where cp.branch_ID = mb.brnch_seq and mb.crnt_rec_flg=1
+            and mb.area_seq=ma.area_seq and ma.crnt_rec_flg=1
+            and ma.reg_seq = mr.reg_seq and mr.crnt_rec_flg=1  
+            AND disbursed_date between to_date('01-may-2005') AND '30-apr-2020'
+            AND  (NVL(OUTSTANDING_PRINCIPAL,0) + NVL(OUTSTANDING_SC,0)) > 0            
+            and product_id <> 8
+			and cp.TRN_DATE = to_date(:asOfDate, 'dd-MM-yyyy')
+            and not exists (select 1 from MW_WRT_OF_CLNT wrt where wrt.LOAN_APP_SEQ = to_number(cp.LOAN_CYCLE_ID))
+         group by mb.brnch_seq, cp.PRODUCT_ID
+    ) outs_crnt
+  where cp.branch_ID = mb.brnch_cd and mb.crnt_rec_flg=1
+   and mb.area_seq=ma.area_seq and ma.crnt_rec_flg=1
+    and ma.reg_seq = mr.reg_seq and mr.crnt_rec_flg=1  
+    and cp.PRODUCT_ID = mpg.PRD_GRP_SEQ and mpg.crnt_rec_flg=1
+    and mb.brnch_seq = outs_apr20.brnch_seq
+    and cp.PRODUCT_ID = outs_apr20.PRD_GRP_SEQ
+    and mb.brnch_seq = outs_crnt.brnch_seq(+)
+    and cp.PRODUCT_ID = outs_crnt.PRD_GRP_SEQ(+)
+    AND cp.disbursed_date between to_date('01-may-2005') and '30-apr-2020'
+    and cp.product_id <> 8
+	and cp.TRN_DATE = to_date(:asOfDate, 'dd-MM-yyyy')
+GROUP BY
+    mpg.prd_grp_nm,
+    mpg.prd_grp_seq,
+    mr.reg_nm,
+    mr.reg_seq,
+    ma.area_seq,
+    mb.brnch_seq,
+    ma.area_nm,
+    mb.brnch_nm,
+    outs_apr20.loans,
+    outs_apr20.outs_apr20,
+    outs_crnt.loans,
+    outs_crnt.outs 
+ORDER BY
+    mpg.prd_grp_seq,mr.reg_nm,ma.area_nm,mb.brnch_nm

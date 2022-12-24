@@ -1,0 +1,711 @@
+/* Formatted on 28/03/2022 9:57:34 am (QP5 v5.326) */
+SELECT SEQ,
+       NM,
+       par_1_dy_cnt,
+       par_4_day_cnt,
+       par_30_day_cnt,
+       par_1_dy_amt,
+       par_4_day,
+       par_30_day_amt,
+       OST_AMT,
+       REP,
+       COMPLETED_CLIENTS,
+       EARLY_MATURITY_60_DAYS,
+       NEW_FEMALE,
+       REPEATED_FEMALE,
+       TOTAL_NEW,
+       TOTAL_REPEATED,
+       TOTAL_FEMALE,
+       TOTAL,
+       TAT_7_DAYS,
+       TAT_15_DAYS,
+       TAT_DIVISOR,
+       DSB_TOT
+  FROM (  SELECT OST.SEQ,
+                 OST.NM,
+                 COUNT (TMP.par_1_dy_cnt)            par_1_dy_cnt,
+                 COUNT (TMP.par_4_day_cnt)           par_4_day_cnt,
+                 COUNT (TMP.par_30_day_cnt)          par_30_day_cnt,
+                 --
+                 SUM (NVL (TMP.od_amt, 0))           od_amt,
+                 SUM (NVL (TMP.par_1_dy_amt, 0))     par_1_dy_amt,
+                 SUM (NVL (TMP.par_4_day, 0))        par_4_day,
+                 SUM (NVL (TMP.par_30_day, 0))       par_30_day_amt,
+                 --
+                 OST.ost_AMT,
+                 --
+                 ROR.DSB_TOT,
+                 ROR.REP,
+                 --
+                 REP_CLNTS.REPEATED_CLIENTS,
+                 --
+                 COMP_CLNTS.COMPLETED_CLIENTS,
+                 --
+                 EARLY_MATURE.EARLY_MATURITY_60_DAYS,
+                 --
+                 FM.TOTAL_FEMALE,
+                 FM.NEW_FEMALE,
+                 FM.REPEATED_FEMALE,
+                 FM.TOTAL,
+                 FM.TOTAL_NEW,
+                 FM.TOTAL_REPEATED,
+                 --
+                 TAT.TAT_7_DAYS,
+                 TAT.TAT_15_DAYS,
+                 TAT.TAT_DIVISOR
+            FROM (  SELECT SEQ,
+                           NM,
+                           od_clnt                         par_1_dy_cnt,
+                           par_4_day_cnt                   par_4_day_cnt,
+                           par_30_day_cnt                  par_30_day_cnt,
+                           SUM (NVL (od_amt, 0))           od_amt,
+                           SUM (NVL (par_1_dy_amt, 0))     par_1_dy_amt,
+                           SUM (NVL (par_4_day, 0))        par_4_day,
+                           SUM (NVL (par_30_day, 0))       par_30_day
+                      FROM (SELECT CASE
+                                       WHEN :AREA_SEQ <> -1 THEN BR.BRNCH_SEQ
+                                       ELSE AR.AREA_SEQ
+                                   END
+                                       AS SEQ,
+                                   CASE
+                                       WHEN :AREA_SEQ <> -1 THEN BR.BRNCH_NM
+                                       ELSE AR.AREA_NM
+                                   END
+                                       AS NM,
+                                   ap.loan_app_seq
+                                       od_clnt,
+                                   GET_OD_INFO (ap.loan_app_seq,
+                                                TO_DATE ( :TODATE),
+                                                'ps')
+                                       od_amt,
+                                   loan_app_ost (ap.loan_app_seq,
+                                                 TO_DATE ( :TODATE))
+                                       par_1_dy_amt,
+                                   (CASE
+                                        WHEN GET_OD_INFO (ap.loan_app_seq,
+                                                          TO_DATE ( :TODATE),
+                                                          'd') BETWEEN 4
+                                                                   AND 29
+                                        THEN
+                                            ap.loan_app_seq
+                                    END)
+                                       par_4_day_cnt,
+                                   (CASE
+                                        WHEN GET_OD_INFO (ap.loan_app_seq,
+                                                          TO_DATE ( :TODATE),
+                                                          'd') >
+                                             30
+                                        THEN
+                                            ap.loan_app_seq
+                                    END)
+                                       par_30_day_cnt,
+                                   (CASE
+                                        WHEN GET_OD_INFO (ap.loan_app_seq,
+                                                          TO_DATE ( :TODATE),
+                                                          'd') BETWEEN 4
+                                                                   AND 29
+                                        THEN
+                                            loan_app_ost (ap.loan_app_seq,
+                                                          TO_DATE ( :TODATE))
+                                    END)
+                                       par_4_day,
+                                   (CASE
+                                        WHEN GET_OD_INFO (ap.loan_app_seq,
+                                                          TO_DATE ( :TODATE),
+                                                          'd') >
+                                             30
+                                        THEN
+                                            loan_app_ost (ap.loan_app_seq,
+                                                          TO_DATE ( :TODATE))
+                                    END)
+                                       par_30_day
+                              FROM MW_AREA        AR,
+                                   MW_BRNCH       BR,
+                                   mw_loan_app    ap,
+                                   mw_dsbmt_vchr_hdr dvh
+                             WHERE     AR.AREA_SEQ = BR.AREA_SEQ
+                                   AND BR.BRNCH_SEQ = ap.BRNCH_SEQ
+                                   AND (   (    ap.loan_app_sts = 703
+                                            AND TRUNC (ap.loan_app_sts_dt) <=
+                                                TO_DATE ( :TODATE)
+                                            AND ap.crnt_rec_flg = 1)
+                                        OR (    ap.loan_app_sts = 704
+                                            AND TRUNC (ap.loan_app_sts_dt) >
+                                                TO_DATE ( :TODATE)
+                                            AND TRUNC (dvh.dsbmt_dt) <=
+                                                TO_DATE ( :TODATE))
+                                        OR (    ap.loan_app_sts = 1245
+                                            AND TRUNC (ap.loan_app_sts_dt) >
+                                                TO_DATE ( :TODATE)))
+                                   AND TRUNC (dvh.dsbmt_dt) >=
+                                       TO_DATE ('01-MAY-2020')
+                                   AND dvh.loan_app_seq = ap.loan_app_seq
+                                   AND dvh.crnt_rec_flg = 1
+                                   AND EXISTS
+                                           (SELECT 1
+                                              FROM MW_PRD P
+                                             WHERE     AP.PRD_SEQ = P.PRD_SEQ
+                                                   AND P.PRD_GRP_SEQ <> 8)
+                                   AND NOT EXISTS
+                                           (SELECT 1
+                                              FROM mw_clnt_tag_list ctl
+                                             WHERE     ctl.loan_app_seq =
+                                                       ap.loan_app_seq
+                                                   AND TRUNC (ctl.eff_start_dt) <=
+                                                       TO_DATE ( :TODATE)
+                                                   AND ctl.tags_seq = 4)
+                                   AND AR.REG_SEQ =
+                                       DECODE ( :REG_SEQ, -1, AR.REG_SEQ, :REG_SEQ)
+                                   AND AR.AREA_SEQ =
+                                       DECODE ( :AREA_SEQ,
+                                               -1, AR.AREA_SEQ,
+                                               :AREA_SEQ))
+                  GROUP BY SEQ,
+                           NM,
+                           od_clnt,
+                           par_4_day_cnt,
+                           par_30_day_cnt
+                    HAVING SUM (NVL (od_amt, 0)) > 0) TMP,
+                 (  SELECT SEQ,
+                           SUM (
+                               CASE
+                                   WHEN     outstanding_amount > 0
+                                        AND TOTAL_FEMALES IS NOT NULL
+                                   THEN
+                                       1
+                                   ELSE
+                                       0
+                               END)
+                               AS TOTAL_FEMALE,
+                           SUM (
+                               CASE
+                                   WHEN     outstanding_amount > 0
+                                        AND NEW_FEMALE IS NOT NULL
+                                   THEN
+                                       1
+                                   ELSE
+                                       0
+                               END)
+                               AS NEW_FEMALE,
+                           SUM (
+                               CASE
+                                   WHEN     outstanding_amount > 0
+                                        AND REPEATED_FEMALE IS NOT NULL
+                                   THEN
+                                       1
+                                   ELSE
+                                       0
+                               END)
+                               AS REPEATED_FEMALE,
+                           SUM (
+                               CASE
+                                   WHEN     outstanding_amount > 0
+                                        AND TOTAL IS NOT NULL
+                                   THEN
+                                       1
+                                   ELSE
+                                       0
+                               END)
+                               AS TOTAL,
+                           SUM (
+                               CASE
+                                   WHEN     outstanding_amount > 0
+                                        AND TOTAL_NEW IS NOT NULL
+                                   THEN
+                                       1
+                                   ELSE
+                                       0
+                               END)
+                               AS TOTAL_NEW,
+                           SUM (
+                               CASE
+                                   WHEN     outstanding_amount > 0
+                                        AND TOTAL_REPEATED IS NOT NULL
+                                   THEN
+                                       1
+                                   ELSE
+                                       0
+                               END)
+                               AS TOTAL_REPEATED
+                      FROM (SELECT CASE
+                                       WHEN :AREA_SEQ <> -1 THEN B.BRNCH_SEQ
+                                       ELSE B.AREA_SEQ
+                                   END
+                                       AS SEQ,
+                                   CASE
+                                       WHEN vl.ref_cd_Seq IN (190,
+                                                              1058,
+                                                              1056,
+                                                              1057,
+                                                              1059,
+                                                              191,
+                                                              1055)
+                                       THEN
+                                           ap.loan_app_seq
+                                   END
+                                       TOTAL_FEMALES,
+                                   CASE
+                                       WHEN     vl.ref_cd_Seq IN (190,
+                                                                  1058,
+                                                                  1056,
+                                                                  1057,
+                                                                  1059,
+                                                                  191,
+                                                                  1055)
+                                            AND ap.LOAN_CYCL_NUM = 1
+                                       THEN
+                                           ap.loan_app_seq
+                                   END
+                                       NEW_FEMALE,
+                                   CASE
+                                       WHEN     vl.ref_cd_Seq IN (190,
+                                                                  1058,
+                                                                  1056,
+                                                                  1057,
+                                                                  1059,
+                                                                  191,
+                                                                  1055)
+                                            AND ap.LOAN_CYCL_NUM > 1
+                                       THEN
+                                           ap.loan_app_seq
+                                   END
+                                       REPEATED_FEMALE,
+                                   ap.loan_app_seq
+                                       TOTAL,
+                                   CASE
+                                       WHEN ap.LOAN_CYCL_NUM = 1
+                                       THEN
+                                           ap.loan_app_seq
+                                   END
+                                       TOTAL_NEW,
+                                   CASE
+                                       WHEN ap.LOAN_CYCL_NUM > 1
+                                       THEN
+                                           ap.loan_app_seq
+                                   END
+                                       TOTAL_REPEATED,
+                                   loan_app_ost (
+                                       ap.loan_app_seq,
+                                       TO_DATE ( :TODATE, 'DD-MM-RRRR'),
+                                       'psc')
+                                       AS outstanding_amount
+                              FROM mw_loan_app    ap,
+                                   mw_dsbmt_vchr_hdr dvh,
+                                   mw_biz_aprsl   apr,
+                                   MW_REF_CD_VAL  vl,
+                                   MW_BRNCH       B,
+                                   MW_AREA        AR
+                             WHERE     ap.LOAN_APP_SEQ = apr.LOAN_APP_SEQ
+                                   AND apr.CRNT_REC_FLG = 1
+                                   AND apr.PRSN_RUN_THE_BIZ = vl.REF_CD_SEQ
+                                   AND AP.BRNCH_SEQ = B.BRNCH_SEQ
+                                   AND B.AREA_SEQ = AR.AREA_SEQ
+                                   AND AR.REG_SEQ =
+                                       DECODE ( :REG_SEQ, -1, AR.REG_SEQ, :REG_SEQ)
+                                   AND AR.AREA_SEQ =
+                                       DECODE ( :AREA_SEQ,
+                                               -1, AR.AREA_SEQ,
+                                               :AREA_SEQ)
+                                   AND vl.CRNT_REC_FLG = 1
+                                   AND vl.REF_CD_GRP_KEY = 14
+                                   --  AND ap.PRD_SEQ NOT IN (13, 14, 22)
+                                   AND TRUNC (dvh.dsbmt_dt) BETWEEN TO_DATE (
+                                                                        :FROMDATE,
+                                                                        'DD-MM-RRRR')
+                                                                AND TO_DATE (
+                                                                        :TODATE,
+                                                                        'DD-MM-RRRR')
+                                   AND EXISTS
+                                           (SELECT 1
+                                              FROM MW_PRD P
+                                             WHERE     AP.PRD_SEQ = P.PRD_SEQ
+                                                   AND P.PRD_GRP_SEQ IN (5765,
+                                                                         1,
+                                                                         16,
+                                                                         5305,
+                                                                         6,
+                                                                         9))
+                                   AND dvh.loan_app_seq = ap.loan_app_seq
+                                   AND dvh.crnt_rec_flg = 1
+                                   AND NOT EXISTS
+                                           (SELECT ctl.loan_app_seq
+                                              FROM mw_clnt_tag_list ctl
+                                             WHERE     ctl.loan_app_seq =
+                                                       ap.loan_app_seq
+                                                   AND TRUNC (ctl.eff_start_dt) <=
+                                                       TO_DATE ( :TODATE,
+                                                                'DD-MM-RRRR')
+                                                   AND ctl.tags_seq = 4
+                                                   AND ctl.crnt_rec_flg = 1))
+                  GROUP BY SEQ) FM,
+                 (  SELECT CASE
+                               WHEN :AREA_SEQ <> -1 THEN B.BRNCH_SEQ
+                               ELSE AR.AREA_SEQ
+                           END
+                               AS SEQ,
+                           COUNT (LA.LOAN_APP_SEQ)
+                               AS EARLY_MATURITY_60_DAYS
+                      FROM MW_RCVRY_TRX   RT,
+                           MW_RCVRY_DTL   RD,
+                           MW_PYMT_SCHED_DTL PSD,
+                           MW_PYMT_SCHED_HDR PSC,
+                           MW_LOAN_APP    LA,
+                           MW_PORT        PO,
+                           MW_BRNCH       B,
+                           MW_AREA        AR
+                     WHERE     RT.RCVRY_TRX_SEQ = RD.RCVRY_TRX_SEQ
+                           AND RD.PYMT_SCHED_DTL_SEQ = PSD.PYMT_SCHED_DTL_SEQ
+                           AND PSD.PYMT_SCHED_HDR_SEQ = PSC.PYMT_SCHED_HDR_SEQ
+                           AND PSC.LOAN_APP_SEQ = LA.LOAN_APP_SEQ
+                           AND LA.PORT_SEQ = PO.PORT_SEQ
+                           AND PO.BRNCH_SEQ = B.BRNCH_SEQ
+                           AND B.AREA_SEQ = AR.AREA_SEQ
+                           AND AR.REG_SEQ =
+                               DECODE ( :REG_SEQ, -1, AR.REG_SEQ, :REG_SEQ)
+                           AND AR.AREA_SEQ =
+                               DECODE ( :AREA_SEQ, -1, AR.AREA_SEQ, :AREA_SEQ)
+                           AND (TRUNC (RT.PYMT_DT) - TRUNC (PSD.DUE_DT)) > 59
+                           AND TRUNC (RT.PYMT_DT) BETWEEN TO_DATE ( :FROMDATE)
+                                                      AND TO_DATE ( :TODATE)
+                           AND EXISTS
+                                   (SELECT 1
+                                      FROM MW_PRD P
+                                     WHERE     LA.PRD_SEQ = P.PRD_SEQ
+                                           AND P.PRD_GRP_SEQ <> 8)
+                           AND EXISTS
+                                   (SELECT 1
+                                      FROM MW_LOAN_APP LA2, MW_DSBMT_VCHR_HDR DVH
+                                     WHERE     LA2.CLNT_SEQ = LA.CLNT_SEQ
+                                           AND LA2.LOAN_APP_SEQ =
+                                               DVH.LOAN_APP_SEQ
+                                           AND   TRUNC (RT.PYMT_DT)
+                                               - TRUNC (DVH.DSBMT_DT) <=
+                                               30)
+                           AND RT.CRNT_REC_FLG = 1
+                           AND RD.CRNT_REC_FLG = 1
+                           AND PSD.CRNT_REC_FLG = 1
+                           AND PSC.CRNT_REC_FLG = 1
+                           AND LA.CRNT_REC_FLG = 1
+                           AND PO.CRNT_REC_FLG = 1
+                           AND B.CRNT_REC_FLG = 1
+                  GROUP BY CASE
+                               WHEN :AREA_SEQ <> -1 THEN B.BRNCH_SEQ
+                               ELSE AR.AREA_SEQ
+                           END) EARLY_MATURE,
+                 (  SELECT CASE
+                               WHEN :AREA_SEQ <> -1 THEN B1.BRNCH_SEQ
+                               ELSE AR.AREA_SEQ
+                           END
+                               AS SEQ,
+                           COUNT (AP.LOAN_APP_SEQ)
+                               AS COMPLETED_CLIENTS
+                      FROM mw_loan_app    ap,
+                           mw_dsbmt_vchr_hdr dvh,
+                           MW_BRNCH       B1,
+                           MW_AREA        AR
+                     WHERE     ap.BRNCH_SEQ = b1.BRNCH_sEQ
+                           AND B1.AREA_SEQ = AR.AREA_SEQ
+                           AND AR.REG_SEQ =
+                               DECODE ( :REG_SEQ, -1, AR.REG_SEQ, :REG_SEQ)
+                           AND AR.AREA_SEQ =
+                               DECODE ( :AREA_SEQ, -1, AR.AREA_SEQ, :AREA_SEQ)
+                           AND dvh.LOAN_APP_SEQ = ap.LOAN_APP_SEQ
+                           AND ap.crnt_rec_flg = 1
+                           AND dvh.CRNT_REC_FLG = 1
+                           AND ap.loan_app_sts = 704
+                           AND EXISTS
+                                   (SELECT 1
+                                      FROM MW_PRD P
+                                     WHERE     AP.PRD_SEQ = P.PRD_SEQ
+                                           AND P.PRD_GRP_SEQ <> 8)
+                           AND TO_DATE (ap.loan_app_sts_dt) BETWEEN TO_DATE (
+                                                                        :FROMDATE)
+                                                                AND TO_DATE (
+                                                                        :TODATE)
+                           AND TRUNC (dvh.dsbmt_dt) >= TO_DATE ('01-MAY-2020')
+                  GROUP BY CASE
+                               WHEN :AREA_SEQ <> -1 THEN B1.BRNCH_SEQ
+                               ELSE AR.AREA_SEQ
+                           END) COMP_CLNTS,
+                 (  SELECT CASE
+                               WHEN :AREA_SEQ <> -1 THEN B1.BRNCH_SEQ
+                               ELSE AR.AREA_SEQ
+                           END
+                               AS SEQ,
+                           COUNT (AP.LOAN_APP_SEQ)
+                               AS REPEATED_CLIENTS
+                      FROM mw_loan_app    ap,
+                           mw_dsbmt_vchr_hdr dvh,
+                           MW_BRNCH       B1,
+                           MW_AREA        AR
+                     WHERE     ap.BRNCH_SEQ = b1.BRNCH_sEQ
+                           --                           AND B1.AREA_SEQ = TMP.AREA_SEQ
+                           AND dvh.LOAN_APP_SEQ = ap.LOAN_APP_SEQ
+                           AND ap.crnt_rec_flg = 1
+                           AND dvh.CRNT_REC_FLG = 1
+                           AND ap.loan_app_sts = 703
+                           AND ap.LOAN_CYCL_NUM > 1
+                           AND TO_DATE (ap.loan_app_sts_dt) BETWEEN TO_DATE (
+                                                                        :FROMDATE)
+                                                                AND TO_DATE (
+                                                                        :TODATE)
+                           AND EXISTS
+                                   (SELECT 1
+                                      FROM MW_PRD P
+                                     WHERE     AP.PRD_SEQ = P.PRD_SEQ
+                                           AND P.PRD_GRP_SEQ <> 8)
+                           AND EXISTS
+                                   (SELECT 1
+                                      FROM MW_LOAN_APP LA2, MW_DSBMT_VCHR_HDR DVH
+                                     WHERE     LA2.CLNT_SEQ = AP.CLNT_SEQ
+                                           AND LA2.LOAN_APP_SEQ =
+                                               DVH.LOAN_APP_SEQ)
+                           AND TRUNC (dvh.dsbmt_dt) >= TO_DATE ('01-MAY-2020')
+                  GROUP BY CASE
+                               WHEN :AREA_SEQ <> -1 THEN B1.BRNCH_SEQ
+                               ELSE AR.AREA_SEQ
+                           END) REP_CLNTS,
+                 (  SELECT CASE
+                               WHEN :AREA_SEQ <> -1 THEN B1.BRNCH_SEQ
+                               ELSE AR.AREA_SEQ
+                           END
+                               AS SEQ,
+                           CASE
+                               WHEN :AREA_SEQ <> -1 THEN B1.BRNCH_NM
+                               ELSE AR.AREA_NM
+                           END
+                               AS NM,
+                           SUM (
+                               loan_app_ost (ap.loan_app_seq, TO_DATE ( :TODATE)))
+                               ost_amt
+                      FROM mw_loan_app    ap,
+                           mw_dsbmt_vchr_hdr dvh,
+                           MW_BRNCH       B1,
+                           MW_AREA        AR
+                     WHERE     ap.BRNCH_SEQ = b1.BRNCH_sEQ
+                           AND B1.AREA_SEQ = AR.AREA_SEQ
+                           AND AR.REG_SEQ =
+                               DECODE ( :REG_SEQ, -1, AR.REG_SEQ, :REG_SEQ)
+                           AND AR.AREA_SEQ =
+                               DECODE ( :AREA_SEQ, -1, AR.AREA_SEQ, :AREA_SEQ)
+                           AND (   (    ap.loan_app_sts = 703
+                                    AND TRUNC (ap.loan_app_sts_dt) <=
+                                        TO_DATE ( :TODATE)
+                                    AND ap.crnt_rec_flg = 1)
+                                OR (    ap.loan_app_sts = 704
+                                    AND TRUNC (ap.loan_app_sts_dt) >
+                                        TO_DATE ( :TODATE)
+                                    AND TRUNC (dvh.dsbmt_dt) <=
+                                        TO_DATE ( :TODATE)
+                                    AND ap.crnt_rec_flg = 1)
+                                OR (    ap.loan_app_sts = 1245
+                                    AND TRUNC (ap.loan_app_sts_dt) >
+                                        TO_DATE ( :TODATE)))
+                           AND dvh.loan_app_seq = ap.loan_app_seq
+                           AND dvh.crnt_rec_flg = 1
+                           AND TRUNC (dvh.dsbmt_dt) >= TO_DATE ('01-MAY-2020')
+                           AND loan_app_ost (ap.loan_app_seq, TO_DATE ( :TODATE)) >
+                               0
+                           AND EXISTS
+                                   (SELECT 1
+                                      FROM MW_PRD P
+                                     WHERE     AP.PRD_SEQ = P.PRD_SEQ
+                                           AND P.PRD_GRP_SEQ <> 8)
+                           AND NOT EXISTS
+                                   (SELECT 1
+                                      FROM mw_clnt_tag_list ctl
+                                     WHERE     ctl.loan_app_seq = ap.loan_app_seq
+                                           AND TRUNC (ctl.eff_start_dt) <=
+                                               TO_DATE ( :TODATE)
+                                           AND ctl.tags_seq = 4)
+                  GROUP BY CASE
+                               WHEN :AREA_SEQ <> -1 THEN B1.BRNCH_SEQ
+                               ELSE AR.AREA_SEQ
+                           END,
+                           CASE
+                               WHEN :AREA_SEQ <> -1 THEN B1.BRNCH_NM
+                               ELSE AR.AREA_NM
+                           END) OST,
+                 (  SELECT CASE
+                               WHEN :AREA_SEQ <> -1 THEN BR.BRNCH_SEQ
+                               ELSE BR.AREA_SEQ
+                           END
+                               AS SEQ,
+                           MIN (REP_TOT.CLNTS)
+                               DSB_TOT,
+                           MIN (REP.CLNTS)
+                               REP
+                      FROM MW_BRNCH BR,
+                           (  SELECT CASE
+                                         WHEN :AREA_SEQ <> -1 THEN BR.BRNCH_SEQ
+                                         ELSE BR.AREA_SEQ
+                                     END
+                                         AS SEQ,
+                                     LAST_DAY (TRUNC (DVH1.DSBMT_DT))
+                                         DSB_DT,
+                                     COUNT (DISTINCT AP1.CLNT_SEQ)
+                                         CLNTS
+                                FROM MW_LOAN_APP  AP1,
+                                     MW_DSBMT_VCHR_HDR DVH1,
+                                     MW_BRNCH     BR,
+                                     MW_AREA      AR
+                               WHERE     AP1.LOAN_APP_SEQ = DVH1.LOAN_APP_SEQ
+                                     AND AP1.BRNCH_SEQ = BR.BRNCH_SEQ
+                                     AND BR.AREA_SEQ = AR.AREA_SEQ
+                                     AND AP1.CRNT_REC_FLG = 1
+                                     AND AP1.PRD_SEQ != 29
+                                     AND DVH1.CRNT_REC_FLG = 1
+                                     AND TRUNC (DVH1.DSBMT_DT) BETWEEN TO_DATE (
+                                                                           :FROMDATE)
+                                                                   AND TO_DATE (
+                                                                           :TODATE)
+                                     AND AR.REG_SEQ = :REG_SEQ
+                            GROUP BY CASE
+                                         WHEN :AREA_SEQ <> -1 THEN BR.BRNCH_SEQ
+                                         ELSE BR.AREA_SEQ
+                                     END,
+                                     LAST_DAY (TRUNC (DVH1.DSBMT_DT))) REP_TOT,
+                           (  SELECT CASE
+                                         WHEN :AREA_SEQ <> -1 THEN BR.BRNCH_SEQ
+                                         ELSE BR.AREA_SEQ
+                                     END
+                                         AS SEQ,
+                                     LAST_DAY (TRUNC (DVH1.DSBMT_DT))
+                                         DSB_DT,
+                                     COUNT (DISTINCT AP1.CLNT_SEQ)
+                                         CLNTS
+                                FROM MW_LOAN_APP  AP1,
+                                     MW_DSBMT_VCHR_HDR DVH1,
+                                     MW_BRNCH     BR,
+                                     MW_AREA      AR
+                               WHERE     AP1.LOAN_APP_SEQ = DVH1.LOAN_APP_SEQ
+                                     AND AP1.CRNT_REC_FLG = 1
+                                     AND AP1.BRNCH_SEQ = BR.BRNCH_SEQ
+                                     AND BR.AREA_SEQ = AR.AREA_SEQ
+                                     AND AP1.PRD_SEQ != 29
+                                     AND AP1.LOAN_CYCL_NUM > 1
+                                     AND DVH1.CRNT_REC_FLG = 1
+                                     AND TRUNC (DVH1.DSBMT_DT) BETWEEN TO_DATE (
+                                                                           :FROMDATE)
+                                                                   AND TO_DATE (
+                                                                           :TODATE)
+                                     AND AR.REG_SEQ = :REG_SEQ
+                            GROUP BY CASE
+                                         WHEN :AREA_SEQ <> -1 THEN BR.BRNCH_SEQ
+                                         ELSE BR.AREA_SEQ
+                                     END,
+                                     LAST_DAY (TRUNC (DVH1.DSBMT_DT))) REP
+                     WHERE     REP_TOT.SEQ(+) =
+                               CASE
+                                   WHEN :AREA_SEQ <> -1 THEN BR.BRNCH_SEQ
+                                   ELSE BR.AREA_SEQ
+                               END
+                           AND REP.SEQ(+) =
+                               CASE
+                                   WHEN :AREA_SEQ <> -1 THEN BR.BRNCH_SEQ
+                                   ELSE BR.AREA_SEQ
+                               END
+                           AND REP_TOT.CLNTS > 0
+                           AND REP_TOT.DSB_DT(+) = REP.DSB_DT
+                  GROUP BY CASE
+                               WHEN :AREA_SEQ <> -1 THEN BR.BRNCH_SEQ
+                               ELSE BR.AREA_SEQ
+                           END) ROR,
+                 (  SELECT SEQ,
+                           SUM (
+                               CASE
+                                   WHEN TOT_DAYS BETWEEN 0 AND 7 THEN 1
+                                   ELSE 0
+                               END)
+                               AS TAT_7_DAYS,
+                           SUM (
+                               CASE
+                                   WHEN TOT_DAYS BETWEEN 8 AND 15 THEN 1
+                                   ELSE 0
+                               END)
+                               AS TAT_15_DAYS,
+                           SUM (CASE WHEN TOT_DAYS <= 30 THEN 1 ELSE 0 END)
+                               AS TAT_DIVISOR
+                      FROM (SELECT CASE
+                                       WHEN :AREA_SEQ <> -1 THEN BR.BRNCH_SEQ
+                                       ELSE MA.AREA_SEQ
+                                   END
+                                       AS SEQ,
+                                   ap.Loan_App_Seq,
+                                   TRUNC (
+                                         jv_dt
+                                       - LST_LOAN_CMPLTN_DTL (
+                                             ap.loan_app_seq))
+                                       tot_days
+                              FROM mw_loan_app    ap,
+                                   mw_dsbmt_vchr_hdr vdh,
+                                   mw_brnch       br,
+                                   mw_area        ma,
+                                   mw_prd         prd,
+                                   mw_prd_grp     grp,
+                                   mw_jv_hdr      jh
+                             WHERE     vdh.loan_app_seq = ap.loan_app_seq
+                                   AND br.BRNCH_SEQ = AP.BRNCH_SEQ
+                                   AND ma.AREA_SEQ = br.AREA_SEQ
+                                   AND prd.prd_seq = ap.prd_seq
+                                   AND grp.PRD_GRP_SEQ = prd.PRD_GRP_SEQ
+                                   AND jh.enty_seq = vdh.dsbmt_hdr_seq
+                                   AND JH.enty_typ = 'Disbursement'
+                                   AND grp.CRNT_REC_FLG = 1
+                                   AND prd.crnt_rec_flg = 1
+                                   AND ma.CRNT_REC_FLG = 1
+                                   AND br.CRNT_REC_FLG = 1
+                                   AND vdh.crnt_rec_flg = 1
+                                   AND ap.crnt_rec_flg = 1
+                                   AND ap.loan_app_sts = 703
+                                   AND ap.CRNT_REC_FLG = 1
+                                   AND ap.prd_seq NOT IN (2,
+                                                          3,
+                                                          5,
+                                                          13,
+                                                          14,
+                                                          29)
+                                   AND TRUNC (jv_dt) BETWEEN TO_DATE ( :FROMDATE)
+                                                         AND TO_DATE ( :TODATE)
+                                   AND MA.REG_SEQ =
+                                       DECODE ( :REG_SEQ, -1, MA.REG_SEQ, :REG_SEQ)
+                                   AND MA.AREA_SEQ =
+                                       DECODE ( :AREA_SEQ,
+                                               -1, MA.AREA_SEQ,
+                                               :AREA_SEQ)
+                                   AND TRUNC (
+                                             jv_dt
+                                           - LST_LOAN_CMPLTN_DTL (
+                                                 ap.loan_app_seq))
+                                           IS NOT NULL)
+                  GROUP BY SEQ) TAT
+           WHERE     OST.SEQ = FM.SEQ(+)
+                 AND OST.SEQ = EARLY_MATURE.SEQ(+)
+                 AND OST.SEQ = COMP_CLNTS.SEQ(+)
+                 AND OST.SEQ = REP_CLNTS.SEQ(+)
+                 AND OST.SEQ = TMP.SEQ(+)
+                 AND OST.SEQ = ROR.SEQ(+)
+                 AND OST.SEQ = TAT.SEQ(+)
+        GROUP BY OST.SEQ,
+                 OST.NM,
+                 OST.ost_AMT,
+                 --
+                 ROR.DSB_TOT,
+                 ROR.REP,
+                 --
+                 REP_CLNTS.REPEATED_CLIENTS,
+                 --
+                 COMP_CLNTS.COMPLETED_CLIENTS,
+                 --
+                 EARLY_MATURE.EARLY_MATURITY_60_DAYS,
+                 --
+                 FM.TOTAL_FEMALE,
+                 FM.NEW_FEMALE,
+                 FM.REPEATED_FEMALE,
+                 FM.TOTAL,
+                 FM.TOTAL_NEW,
+                 FM.TOTAL_REPEATED,
+                 --
+                 TAT.TAT_7_DAYS,
+                 TAT.TAT_15_DAYS,
+                 TAT.TAT_DIVISOR)

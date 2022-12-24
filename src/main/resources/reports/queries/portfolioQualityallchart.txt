@@ -1,0 +1,247 @@
+/* Formatted on 27/10/2022 11:05:38 am (QP5 v5.326) */
+  SELECT (CASE
+              WHEN SUM (NVL (outstanding, 0)) > 0
+              THEN
+                  ROUND (
+                      (SUM (NVL (par, 0)) / SUM (NVL (outstanding, 0))) * 100,
+                      2)
+              ELSE
+                  0
+          END)
+             par,
+         TO_CHAR (cph.par_date, 'dd-Mon-yyyy')
+             AS Par_DATE,
+         --product_id,
+         MIN (
+             (  SELECT MIN (
+                           (CASE
+                                WHEN SUM (NVL (outstanding, 0)) > 0
+                                THEN
+                                    ROUND (
+                                          (  SUM (NVL (cph1.par, 0))
+                                           / SUM (NVL (outstanding, 0)))
+                                        * 100,
+                                        2)
+                                ELSE
+                                    0
+                            END))
+                           par
+                  FROM KASHF_REPORTING.new_par_history cph1, mw_brnch b1
+                 WHERE     cph1.BRANCH_CD = b1.brnch_Seq
+                       AND b.CRNT_REC_FLG = 1
+                       AND TRUNC (cph1.par_date) BETWEEN   TRUNC (
+                                                               TO_DATE (
+                                                                   :asOfDate,
+                                                                   'dd-Mon-yyyy'))
+                                                         - 7
+                                                     AND TRUNC (
+                                                             TO_DATE (
+                                                                 :asOfDate,
+                                                                 'dd-Mon-yyyy'))
+                       AND cph1.product_id NOT IN (8)
+              GROUP BY TO_CHAR (cph1.par_date, 'dd-Mon-yyyy')))
+             min_all,
+         MAX (
+             (  SELECT MAX (
+                           (CASE
+                                WHEN SUM (NVL (outstanding, 0)) > 0
+                                THEN
+                                    ROUND (
+                                          (  SUM (NVL (cph1.par, 0))
+                                           / SUM (NVL (outstanding, 0)))
+                                        * 100,
+                                        2)
+                                ELSE
+                                    0
+                            END))
+                           par
+                  FROM KASHF_REPORTING.new_par_history cph1, mw_brnch b1
+                 WHERE     cph1.BRANCH_CD = b1.brnch_Seq
+                       AND b.CRNT_REC_FLG = 1
+                       AND TRUNC (cph1.par_date) BETWEEN   TRUNC (
+                                                               TO_DATE (
+                                                                   :asOfDate,
+                                                                   'dd-Mon-yyyy'))
+                                                         - 7
+                                                     AND TRUNC (
+                                                             TO_DATE (
+                                                                 :asOfDate,
+                                                                 'dd-Mon-yyyy'))
+                       AND cph1.product_id NOT IN (8)
+              GROUP BY TO_CHAR (cph1.par_date, 'dd-Mon-yyyy')))
+             MAX_all
+    FROM KASHF_REPORTING.new_par_history cph, mw_brnch b
+   WHERE     cph.BRANCH_CD = b.brnch_Seq
+         AND b.CRNT_REC_FLG = 1
+         AND product_id NOT IN (8)
+         AND :p_type = 1
+         AND TRUNC (par_date) BETWEEN   TRUNC (
+                                            TO_DATE ( :asOfDate, 'dd-Mon-yyyy'))
+                                      - 7
+                                  AND TRUNC (
+                                          TO_DATE ( :asOfDate, 'dd-Mon-yyyy'))
+GROUP BY TO_CHAR (par_date, 'dd-Mon-yyyy'), FLAG, b.CRNT_REC_FLG
+UNION ALL
+  SELECT (CASE
+              WHEN SUM (NVL (res_outstanding, 0)) > 0
+              THEN
+                  ROUND (
+                        (  SUM (NVL (res_par, 0))
+                         / SUM (NVL (res_outstanding, 0)))
+                      * 100,
+                      2)
+              ELSE
+                  0
+          END)
+             res_par,
+         TO_CHAR (cph.par_date, 'dd-Mon-yyyy')
+             AS Par_DATE,
+      --   product_id,
+         MIN (
+             (  SELECT MIN (
+                           (CASE
+                                WHEN SUM (NVL (res_outstanding, 0)) > 0
+                                THEN
+                                    ROUND (
+                                          (  SUM (NVL (cph1.res_par, 0))
+                                           / SUM (NVL (res_outstanding, 0)))
+                                        * 100,
+                                        2)
+                                ELSE
+                                    0
+                            END))
+                           res_par
+                  FROM KASHF_REPORTING.new_par_history cph1, mw_brnch b1
+                 WHERE     cph1.BRANCH_CD = b1.brnch_Seq
+                       AND b.CRNT_REC_FLG = 1
+                       AND TRUNC (cph1.par_date) BETWEEN   TRUNC (
+                                                               TO_DATE (
+                                                                   :asOfDate,
+                                                                   'dd-Mon-yyyy'))
+                                                         - 7
+                                                     AND TRUNC (
+                                                             TO_DATE (
+                                                                 :asOfDate,
+                                                                 'dd-Mon-yyyy'))
+                       AND cph1.product_id NOT IN (8)
+              GROUP BY TO_CHAR (cph1.par_date, 'dd-Mon-yyyy')))
+             min_all,
+         MAX (
+             (  SELECT MAX (
+                           (CASE
+                                WHEN SUM (NVL (res_outstanding, 0)) > 0
+                                THEN
+                                    ROUND (
+                                          (  SUM (NVL (cph1.res_par, 0))
+                                           / SUM (NVL (res_outstanding, 0)))
+                                        * 100,
+                                        2)
+                                ELSE
+                                    0
+                            END))
+                           res_par
+                  FROM KASHF_REPORTING.new_par_history cph1, mw_brnch b1
+                 WHERE     cph1.BRANCH_CD = b1.brnch_Seq
+                       AND b.CRNT_REC_FLG = 1
+                       AND TRUNC (cph1.par_date) BETWEEN   TRUNC (
+                                                               TO_DATE (
+                                                                   :asOfDate,
+                                                                   'dd-Mon-yyyy'))
+                                                         - 7
+                                                     AND TRUNC (
+                                                             TO_DATE (
+                                                                 :asOfDate,
+                                                                 'dd-Mon-yyyy'))
+                       AND cph1.product_id NOT IN (8)
+              GROUP BY TO_CHAR (cph1.par_date, 'dd-Mon-yyyy')))
+             MAX_all
+    FROM KASHF_REPORTING.new_par_history cph, mw_brnch b
+   WHERE     cph.BRANCH_CD = b.brnch_Seq
+         AND b.CRNT_REC_FLG = 1
+         AND product_id NOT IN (8)
+         AND :p_type = 2
+         AND TRUNC (par_date) BETWEEN   TRUNC (
+                                            TO_DATE ( :asOfDate, 'dd-Mon-yyyy'))
+                                      - 7
+                                  AND TRUNC (
+                                          TO_DATE ( :asOfDate, 'dd-Mon-yyyy'))
+GROUP BY TO_CHAR (par_date, 'dd-Mon-yyyy'), FLAG, b.CRNT_REC_FLG
+--ORDER BY FLAG, TO_DATE (par_date, 'dd-Mon-yyyy')
+UNION ALL
+
+  SELECT (CASE
+              WHEN SUM (NVL (nonres_outstanding, 0)) > 0
+              THEN
+                  ROUND (
+                        (  SUM (NVL (nonres_par, 0))
+                         / SUM (NVL (nonres_outstanding, 0)))
+                      * 100, 2)
+              ELSE
+                  0
+          END)
+             nonres_par,
+         TO_CHAR (cph.par_date, 'dd-Mon-yyyy')
+             AS Par_DATE,
+       --  product_id,
+         MIN (
+             (  SELECT MIN (
+                           (CASE
+                                WHEN SUM (NVL (nonres_outstanding, 0)) > 0
+                                THEN
+                                    ROUND (
+                                          (  SUM (NVL (cph1.nonres_par, 0))
+                                           / SUM (NVL (nonres_outstanding, 0)))
+                                        * 100, 2)
+                                ELSE
+                                    0
+                            END))
+                           nonres_par
+                  FROM KASHF_REPORTING.new_par_history cph1, mw_brnch b1
+                 WHERE     cph1.BRANCH_CD = b1.brnch_Seq
+                       AND b.CRNT_REC_FLG = 1
+                       AND TRUNC (cph1.par_date) BETWEEN   TRUNC (
+                                                               TO_DATE (
+                                                                   :asOfDate,
+                                                                   'dd-Mon-yyyy'))
+                                                         - 7
+                                                     AND TRUNC (
+                                                             TO_DATE (
+                                                                 :asOfDate,
+                                                                 'dd-Mon-yyyy'))
+                       AND cph1.product_id not in (8)
+              GROUP BY TO_CHAR (cph1.par_date, 'dd-Mon-yyyy')))
+             min_all,
+         MAX (
+             (  SELECT MAX (
+                           (CASE
+                                WHEN SUM (NVL (nonres_outstanding, 0)) > 0
+                                THEN
+                                    ROUND (
+                                          (  SUM (NVL (cph1.nonres_par, 0))
+                                           / SUM (NVL (nonres_outstanding, 0)))
+                                        * 100, 2)
+                                ELSE
+                                    0
+                            END))
+                           nonres_par
+                  FROM KASHF_REPORTING.new_par_history cph1, mw_brnch b1
+                 WHERE     cph1.BRANCH_CD = b1.brnch_Seq
+                       AND b.CRNT_REC_FLG = 1
+                       AND TRUNC (cph1.par_date) BETWEEN   TRUNC (
+                                                               TO_DATE (
+                                                                   :asOfDate,
+                                                                   'dd-Mon-yyyy'))
+                                                         - 7
+                                                     AND TRUNC (
+                                                             TO_DATE (
+                                                                 :asOfDate,
+                                                                 'dd-Mon-yyyy'))
+                       AND cph1.product_id not in (8)
+              GROUP BY TO_CHAR (cph1.par_date, 'dd-Mon-yyyy')))
+             MAX_all
+from KASHF_REPORTING.new_par_history cph,
+mw_brnch b
+where cph.BRANCH_CD = b.brnch_Seq and b.CRNT_REC_FLG = 1
+and product_id not in (8) AND  :p_type = 3
+and  trunc(par_date) between  trunc(to_date(:asOfDate,'dd-Mon-yyyy'))-7 and trunc(to_date(:asOfDate,'dd-Mon-yyyy'))
+group by to_char(par_date,'dd-Mon-yyyy'), FLAG, b.CRNT_REC_FLG

@@ -1,0 +1,54 @@
+/*****************************************************************************
+ OBJECTIVE := This query will be used to get CNIC verisys status
+     -------------------------------------------------------------------------
+     REVISIONS:
+     Ver        Date          Author                 Description
+     ---------  -----------   -------------------    -------------------------
+     1.0        08-JUN-2022    M. Ali Khubaib        Created this Query.
+*****************************************************************************/
+  SELECT REG_NM,
+         AREA_NM,
+         BRNCH_NM,
+         SUM (TOTAL)
+             AS TOTAL_REQUESTS,
+         SUM (TOTAL_ERRORS)
+             AS TOTAL_ERRORS,
+         SUM (ERROR_STATUS)
+             AS NADRA_NEVER_ISSUE_ERR,
+         ROUND ((SUM (TOTAL_ERRORS) / SUM (TOTAL) * 100), 2)
+             AS TOTAL_ERROR_PERCENT
+    FROM (  SELECT RE.REG_NM,
+                   AR.AREA_NM,
+                   BR.BRNCH_NM,
+                   TRUNC (V.LAST_UPD_DT)
+                       AS LAST_UPD_DT,
+                   COUNT (1)
+                       AS TOTAL,
+                   CASE WHEN V.KASHF_STATUS = 'E' THEN COUNT (1) END
+                       AS TOTAL_ERRORS,
+                   CASE
+                       WHEN V.VREMARKS LIKE
+                                '%NADRA has never issued an identity card %'
+                       THEN
+                           COUNT (1)
+                   END
+                       AS ERROR_STATUS
+              FROM MW_CNIC_VERISYS V,
+                   MW_LOAN_APP  LA,
+                   MW_REG             RE,
+                   MW_AREA            AR,
+                   MW_BRNCH           BR
+             WHERE     V.LOAN_APP_SEQ = LA.LOAN_APP_SEQ
+                   AND LA.BRNCH_SEQ = BR.BRNCH_SEQ
+                   AND BR.AREA_SEQ = AR.AREA_SEQ
+                   AND AR.REG_SEQ = RE.REG_SEQ
+                   AND TRUNC (V.LAST_UPD_DT) BETWEEN TO_DATE ( :P_FROM_DATE)
+                                                 AND TO_DATE ( :P_TO_DATE)
+          GROUP BY RE.REG_NM,
+                   AR.AREA_NM,
+                   BR.BRNCH_NM,
+                   TRUNC (V.LAST_UPD_DT),
+                   V.KASHF_STATUS,
+                   V.VREMARKS)
+GROUP BY REG_NM, AREA_NM, BRNCH_NM
+ORDER BY 1, 2, 3

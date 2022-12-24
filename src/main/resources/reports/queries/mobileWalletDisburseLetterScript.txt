@@ -1,0 +1,96 @@
+SELECT SUM (DISB_AMOUNT)
+  FROM (SELECT NVL (
+                   SUM (
+       (
+        SELECT SUM(NVL(CASE WHEN MJD.CRDT_DBT_FLG = 0 THEN MJD.AMT END,0) -
+                NVL(CASE WHEN MJD.CRDT_DBT_FLG = 1 THEN MJD.AMT END,0))
+          FROM MW_JV_HDR MJH,
+               MW_JV_DTL MJD
+         WHERE MJH.JV_HDR_SEQ = MJD.JV_HDR_SEQ
+               AND MJH.ENTY_SEQ = DVH.DSBMT_HDR_SEQ
+               AND UPPER (MJH.ENTY_TYP) = 'DISBURSEMENT'
+               AND MJD.GL_ACCT_NUM = TYP.GL_ACCT_NUM)),0
+        ) DISB_AMOUNT
+          FROM MW_LOAN_APP  LA
+               JOIN MW_BRNCH BRNCH
+                   ON     BRNCH.BRNCH_SEQ = LA.BRNCH_SEQ
+                      AND BRNCH.CRNT_REC_FLG = 1
+               JOIN MW_DSBMT_VCHR_HDR DVH
+                   ON     DVH.LOAN_APP_SEQ = LA.LOAN_APP_SEQ
+                      AND DVH.CRNT_REC_FLG = 1
+               JOIN MW_DSBMT_VCHR_DTL DVD
+                   ON     DVH.DSBMT_HDR_SEQ = DVD.DSBMT_HDR_SEQ
+                      AND DVD.CRNT_REC_FLG = 1
+               JOIN MW_TYPS TYP
+                   ON     TYP.TYP_SEQ = DVD.PYMT_TYPS_SEQ
+                      AND TYP.CRNT_REC_FLG = 1
+               --
+               JOIN MW_PRD PRD
+                   ON     PRD.PRD_SEQ = LA.PRD_SEQ
+                      AND PRD.CRNT_REC_FLG = 1
+                      AND PRD.PRD_GRP_SEQ NOT IN (6)
+         WHERE     LA.CRNT_REC_FLG = 1
+               AND TYP.TYP_ID =
+                   (CASE
+                        WHEN :typId = -1
+                        THEN
+                            (  SELECT TYPS.TYP_ID
+                                 FROM MW_TYPS TYPS
+                                WHERE     TYPS.TYP_SEQ = TYP.TYP_SEQ
+                                      AND TYPS.BRNCH_SEQ <> -1
+                             GROUP BY TYPS.TYP_ID)
+                        ELSE
+                            :typId
+                    END)
+               --AND TYP.TYP_ID = 16228
+               AND TRUNC (DVH.DSBMT_DT) BETWEEN TO_DATE ( :frmdt,
+                                                         'DD-Mon-RRRR')
+                                            AND TO_DATE ( :todt,
+                                                         'DD-Mon-RRRR')
+        UNION
+        SELECT NVL (
+                   SUM (
+                       (SELECT SUM(NVL(CASE WHEN MJD.CRDT_DBT_FLG = 0 THEN MJD.AMT END,0) -
+							NVL(CASE WHEN MJD.CRDT_DBT_FLG = 1 THEN MJD.AMT END,0))
+                          FROM MW_JV_HDR MJH, MW_JV_DTL MJD
+                         WHERE     MJH.JV_HDR_SEQ = MJD.JV_HDR_SEQ
+                               AND MJH.ENTY_SEQ = EP.EXP_SEQ
+                               AND UPPER (MJH.ENTY_TYP) = 'EXPENSE'
+                               AND MJD.GL_ACCT_NUM = TYP.GL_ACCT_NUM)),
+                   0)
+                   DISB_AMOUNT
+          FROM MW_LOAN_APP  LA
+               JOIN MW_BRNCH BRNCH
+                   ON     BRNCH.BRNCH_SEQ = LA.BRNCH_SEQ
+                      AND BRNCH.CRNT_REC_FLG = 1
+               JOIN MW_DSBMT_VCHR_HDR DVH
+                   ON     DVH.LOAN_APP_SEQ = LA.LOAN_APP_SEQ
+                      AND DVH.CRNT_REC_FLG = 1
+               JOIN MW_PRD PRD
+                   ON     PRD.PRD_SEQ = LA.PRD_SEQ
+                      AND PRD.CRNT_REC_FLG = 1
+                      AND PRD.PRD_GRP_SEQ IN (6)
+               JOIN MW_EXP EP ON to_number(EP.EXP_REF )= LA.LOAN_APP_SEQ
+                AND EP.POST_FLG = 1
+                AND EP.CRNT_REC_FLG = 1
+                AND EP.DEL_FLG = 0
+             JOIN MW_TYPS TYP
+                 ON TYP.TYP_SEQ = EP.PYMT_TYP_SEQ AND TYP.CRNT_REC_FLG = 1
+                 AND TYP.TYP_ID =
+                   (CASE
+                        WHEN :typId = -1
+                        THEN
+                            (  SELECT TYPS.TYP_ID
+                                 FROM MW_TYPS TYPS
+                                WHERE     TYPS.TYP_SEQ = TYP.TYP_SEQ
+                                      AND TYPS.BRNCH_SEQ <> -1
+                             GROUP BY TYPS.TYP_ID)
+                        ELSE
+                            :typId
+                    END)
+                 --AND TYP.TYP_ID = 16228
+         WHERE TRUNC (EP.EFF_START_DT) BETWEEN TO_DATE ( :frmdt,
+                                                            'DD-Mon-RRRR')
+                                               AND TO_DATE ( :todt,
+                                                            'DD-Mon-RRRR') 
+             )

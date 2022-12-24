@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="UBLOmniDues_Excel" pageWidth="1300" pageHeight="595" orientation="Landscape"
+              whenNoDataType="AllSectionsNoDetail" columnWidth="1300" leftMargin="0" rightMargin="0" topMargin="0"
+              bottomMargin="0" isIgnorePagination="true" uuid="6ed18ed8-16a7-4f11-9195-5bce791d2dd6">
+    <property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+    <property name="com.jaspersoft.studio.data.defaultdataadapter" value="MWX_DB"/>
+    <property name="com.jaspersoft.studio.report.description" value=""/>
+    <property name="net.sf.jasperreports.export.xls.detect.cell.type" value="true"/>
+    <parameter name="curr_user" class="java.lang.String"/>
+    <parameter name="LOGO_IMG" class="java.lang.String"/>
+    <queryString language="SQL">
+        <![CDATA[SELECT reg_nm REGION_NAME, brnch_nm BRANCH_DESC, clnt_seq CLIENT_PARTY_ID, clnt_name NAME, '0000000000000' CNIC, SPZ_NAME HUSBAND,
+SUM(next_due) DUE_AMOUNT, 0 SAVING_AMOUNT,
+--to_char(dsbmt_dt, 'D/MM/yyyy') disb_dt,
+to_char(to_date(sysdate-1), 'D/MM/yyyy') disb_dt,
+--to_char(MAX(loan_end_date), 'D/MM/yyyy') end_dt,
+TO_CHAR (TO_DATE (sysdate-1+25), 'D/MM/yyyy') end_dt,
+BRNCH_PH_NUM
+FROM (
+SELECT loan_disb.clnt_seq, loan_disb.loan_app_seq, loan_disb.dsbmt_dt,
+loan_disb.reg_nm, loan_disb.area_nm, loan_disb.brnch_nm, loan_disb.brnch_cd,
+loan_disb.cnic_num, loan_disb.clnt_name, loan_disb.spz_name, loan_disb.BRNCH_PH_NUM,
+NVL((SELECT NVL (psd.PPAL_AMT_DUE, 0) + NVL (psd.TOT_CHRG_DUE, 0) +
+NVL((SELECT sum(AMT) FROM MW_PYMT_SCHED_CHRG psc WHERE psc.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq AND crnt_rec_flg = 1),0) total
+FROM MW_PYMT_SCHED_HDR psh
+INNER JOIN MW_PYMT_SCHED_DTL psd
+ON psh.PYMT_SCHED_HDR_SEQ = psd.PYMT_SCHED_HDR_SEQ
+WHERE psh.CRNT_REC_FLG = 1
+AND psd.CRNT_REC_FLG = 1
+AND psh.loan_app_seq = loan_disb.loan_app_seq
+AND psd.PYMT_SCHED_DTL_SEQ =
+(SELECT MIN (innpsd.PYMT_SCHED_DTL_SEQ)
+FROM MW_PYMT_SCHED_HDR innpsh, MW_PYMT_SCHED_DTL innpsd
+WHERE innpsh.PYMT_SCHED_HDR_SEQ = innpsd.PYMT_SCHED_HDR_SEQ
+AND innpsh.PYMT_SCHED_HDR_SEQ = psh.PYMT_SCHED_HDR_SEQ
+AND innpsh.loan_app_seq = psh.loan_app_seq
+AND innpsh.CRNT_REC_FLG = 1
+AND innpsd.CRNT_REC_FLG = 1
+AND innpsd.PYMT_STS_KEY = 945)),0) next_due,
+(SELECT MAX (psd.due_dt)
+FROM MW_PYMT_SCHED_HDR psh
+INNER JOIN MW_PYMT_SCHED_DTL psd ON psh.PYMT_SCHED_HDR_SEQ = psd.PYMT_SCHED_HDR_SEQ
+WHERE psd.CRNT_REC_FLG = 1
+AND psd.PYMT_STS_KEY = 945 AND psh.LOAN_APP_SEQ = loan_disb.loan_app_seq) LOAN_END_DATE
+FROM (
+SELECT mr.reg_nm,
+ma.area_nm,
+mb.brnch_nm,
+mb.brnch_cd,
+ap.clnt_seq,
+ap.loan_app_seq,
+mc.frst_nm || ' ' || mc.last_nm AS CLNT_NAME,
+cnic_num,
+(mc.spz_frst_nm || ' ' || mc.spz_last_nm) AS SPZ_NAME,
+dvh.dsbmt_dt dsbmt_dt,
+mb.BRNCH_PH_NUM
+FROM mw_loan_app ap
+INNER JOIN mw_clnt mc ON ap.clnt_seq = mc.clnt_seq
+INNER JOIN mw_dsbmt_vchr_hdr dvh ON dvh.loan_app_seq = ap.loan_app_seq
+INNER JOIN mw_port mp ON mp.port_seq = ap.port_seq
+INNER JOIN mw_brnch mb ON mb.brnch_seq = mp.brnch_seq
+INNER JOIN mw_area ma ON ma.area_seq = mb.area_seq
+INNER JOIN mw_reg mr ON mr.reg_seq = ma.reg_seq
+WHERE ap.crnt_rec_flg = 1
+AND dvh.crnt_rec_flg = 1
+AND mp.crnt_rec_flg = 1
+AND mb.crnt_rec_flg = 1
+AND ma.crnt_rec_flg = 1
+AND mr.crnt_rec_flg = 1
+-- AND BRNCH_CD = 1
+AND ap.loan_app_sts = 703
+AND trunc (dvh.dsbmt_dt) <= sysdate -1) loan_disb
+)
+where next_due > 0
+group by reg_nm, area_nm, brnch_nm, brnch_cd, cnic_num, clnt_name, clnt_seq, SPZ_NAME, dsbmt_dt,BRNCH_PH_NUM
+order by brnch_cd, clnt_name fetch first 100 rows only]]>
+    </queryString>
+    <field name="REGION_NAME" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="REGION_NAME"/>
+    </field>
+    <field name="BRANCH_DESC" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="BRANCH_DESC"/>
+    </field>
+    <field name="CLIENT_PARTY_ID" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="CLIENT_PARTY_ID"/>
+    </field>
+    <field name="NAME" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="NAME"/>
+    </field>
+    <field name="CNIC" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="CNIC"/>
+    </field>
+    <field name="HUSBAND" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="HUSBAND"/>
+    </field>
+    <field name="DUE_AMOUNT" class="java.lang.Long">
+        <property name="com.jaspersoft.studio.field.label" value="DUE_AMOUNT"/>
+    </field>
+    <field name="SAVING_AMOUNT" class="java.lang.Long">
+        <property name="com.jaspersoft.studio.field.label" value="SAVING_AMOUNT"/>
+    </field>
+    <field name="DISB_DT" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="DISB_DT"/>
+    </field>
+    <field name="END_DT" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="END_DT"/>
+    </field>
+    <field name="BRNCH_PH_NUM" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.label" value="BRNCH_PH_NUM"/>
+    </field>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <columnHeader>
+        <band height="25" splitType="Stretch">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+            <staticText>
+                <reportElement x="0" y="0" width="155" height="25" uuid="68b431c0-9c26-4b90-995f-5a0f042c174c"/>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Branch Name]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="155" y="0" width="120" height="25" uuid="a58e0e87-75a7-4bc1-8b69-6f6d58a3db3f">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Client ID]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="545" y="0" width="160" height="25" uuid="342b780b-e03e-430a-a090-1eda324147d2">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Client's Husband]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="705" y="0" width="110" height="25" uuid="f2e2be83-bd59-43b8-99d8-09016742613f">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Loan Installment Amount]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="815" y="0" width="95" height="25" uuid="079e58a2-9992-42c3-8965-f59a4bb8b233">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Saving Amount]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="275" y="0" width="160" height="25" uuid="9741d7c0-c707-4f2b-8d92-34746e7bcf83">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Client Name]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="910" y="0" width="95" height="25" uuid="d01eac3e-bcf4-4e70-a2e8-c3b38843bd61">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Total Amount]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="1005" y="0" width="125" height="25" uuid="d9d8dc37-f13a-4cb9-8853-821f7d2eff26">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[CELL # for SMS Alert]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="1130" y="0" width="85" height="25" uuid="358a0384-4786-4e66-b758-03dc1cffac72"/>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Billing Month]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="1215" y="0" width="85" height="25" uuid="25e20aa4-3517-4347-9059-61974c17d18f">
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Due Date]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="435" y="0" width="110" height="25" uuid="4a4e328b-4751-4662-a67a-703f73f7893d">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8" isBold="false"/>
+                </textElement>
+                <text><![CDATA[Client Cnic No.]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+    <detail>
+        <band height="17" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="0" width="155" height="17" uuid="82dc89b5-5b6a-48fb-addb-5d0ae44bfe76">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                              value="6a73b5c3-1dd2-4c84-8051-46f3dfef9478"/>
+                    <property name="com.jaspersoft.studio.unit.x" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8"/>
+                    <paragraph leftIndent="1" rightIndent="0"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{BRANCH_DESC}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="155" y="0" width="120" height="17" uuid="fad84ec6-0642-45cb-9579-f29a0746a285">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                              value="d9ef5bbf-5a80-4cc1-bf0c-7404d0fed3c6"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8"/>
+                    <paragraph leftIndent="0" rightIndent="1"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{CLIENT_PARTY_ID}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="275" y="0" width="160" height="17" uuid="c6ac5528-bbcd-4113-8f23-da3710214bec">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                              value="93e4b378-e2ce-4cb0-9b8e-414f15992947"/>
+                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8"/>
+                    <paragraph leftIndent="1" rightIndent="0"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="545" y="0" width="160" height="17" uuid="1cb2b27b-9266-4495-ad68-398e9f92d3b7">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                              value="8c29160d-9d4c-4f18-80a4-4a000a80ba43"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="8"/>
+                    <paragraph leftIndent="1" rightIndent="0"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{HUSBAND}!= null ? $F{HUSBAND} : ""]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0">
+                <reportElement x="705" y="0" width="110" height="17" uuid="38b92e48-c3c7-4982-b0c0-842342ba6ce6">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                              value="c1b41a33-fbbc-454d-b4b6-105154c6633b"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8"/>
+                    <paragraph leftIndent="0" rightIndent="1"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{DUE_AMOUNT} != null ? $F{DUE_AMOUNT} : 0]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="1215" y="0" width="85" height="17" uuid="3d84fb2a-4660-4503-8124-7f54e56ccf05">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                              value="8000eff5-ef48-4dc8-8a3d-b69b25719f72"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                    <paragraph leftIndent="0" rightIndent="1"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{END_DT}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="1130" y="0" width="85" height="17" uuid="c1985994-f1a1-4466-aa70-aaa434892df5">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                              value="8000eff5-ef48-4dc8-8a3d-b69b25719f72"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                    <paragraph leftIndent="0" rightIndent="1"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{DISB_DT} != null ?$F{DISB_DT} : ""]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="1005" y="0" width="125" height="17" uuid="903d41cb-e7b4-4150-a8fe-5963776c63b9">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                              value="8000eff5-ef48-4dc8-8a3d-b69b25719f72"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8"/>
+                    <paragraph leftIndent="0" rightIndent="1"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{BRNCH_PH_NUM}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0">
+                <reportElement x="910" y="0" width="95" height="17" uuid="71ddf137-240c-47ef-8142-683a1a7aac3f">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                              value="8000eff5-ef48-4dc8-8a3d-b69b25719f72"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8"/>
+                    <paragraph leftIndent="0" rightIndent="1"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{DUE_AMOUNT} != null ? $F{DUE_AMOUNT} : 0]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0">
+                <reportElement x="815" y="0" width="95" height="17" uuid="55521d4e-2204-4248-bd96-5697313708cb">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                              value="8000eff5-ef48-4dc8-8a3d-b69b25719f72"/>
+                    <property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8"/>
+                    <paragraph leftIndent="0" rightIndent="1"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{SAVING_AMOUNT} != null ? $F{SAVING_AMOUNT} : 0]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="435" y="0" width="110" height="17" uuid="baa136b0-3d7e-4e70-b9eb-7be0771a4ba9">
+                    <property name="com.jaspersoft.studio.spreadsheet.connectionID"
+                              value="93e4b378-e2ce-4cb0-9b8e-414f15992947"/>
+                    <property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+                </reportElement>
+                <box>
+                    <pen lineWidth="0.25"/>
+                </box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8"/>
+                    <paragraph leftIndent="1" rightIndent="0"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{CNIC}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+</jasperReport>

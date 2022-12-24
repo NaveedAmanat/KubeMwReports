@@ -1,0 +1,86 @@
+----------CREATED BY AISHA KHAN 1/24/2022-------------LOANS ABOVE 80K-------------
+
+with 
+qry as
+(
+select reg.reg_nm region,ar.area_nm area,br.brnch_nm branch,lap.clnt_seq clnt,loan_app_sts,loan_cycl_num,lap.prd_seq prd_seq,lap.aprvd_loan_amt dsb_amt,
+(case when get_od_info(lap.loan_app_seq,to_date(:todt, 'dd-MM-yyyy'),'ps') > 0 then 1  else 0 end) par_1
+from mw_loan_app lap  
+join mw_dsbmt_vchr_hdr dhdr on lap.loan_app_seq = dhdr.loan_app_seq
+and dhdr.crnt_rec_flg=lap.crnt_rec_flg 
+join mw_port prt on lap.PORT_SEQ = prt.PORT_SEQ
+and prt.crnt_rec_flg=dhdr.crnt_rec_flg 
+join mw_brnch br on prt.brnch_seq = br.brnch_seq
+--and br.brnch_seq=9
+and prt.crnt_rec_flg=br.crnt_rec_flg 
+join mw_area ar on ar.area_seq = br.area_seq
+and ar.crnt_rec_flg=br.crnt_rec_flg
+--AND AR.AREA_SEQ =4
+join mw_reg reg on reg.reg_seq=ar.reg_seq
+and ar.crnt_rec_flg=reg.crnt_rec_flg 
+where reg.reg_seq = DECODE(:REG_SEQ, -1, REG.REG_SEQ, :REG_SEQ) --NVL ( :reg_seq, reg.reg_seq)
+                AND ar.area_seq = DECODE(:AREA_SEQ, -1, AR.AREA_SEQ, :AREA_SEQ) --NVL ( :AREA_seq, ar.area_seq) 
+and lap.crnt_rec_flg=1 
+and trunc(dhdr.DSBMT_DT) between TO_DATE(:fromdt, 'dd-MM-yyyy') and TO_DATE(:todt, 'dd-MM-yyyy') AND loan_cycl_num>1
+and lap.prd_seq<>29  
+)
+--------------------------------------BRANCH WISE--------------------
+
+select a.region,a.area,a.branch,b.total_clnts_disb,
+                          NVL(("80K-100K_clnt"),0) "80K-100K_clnt",NVL(round(("80K-100K"/nvl("80K-100K_clnt",1))*100,2),0) "80K-100K_par%",
+                          NVL(("101K-120K_clnt"),0) "101K-120K_clnt",NVL(round(("101K-120K"/nvl("101K-120K_clnt",1))*100,2),0) "101K-120K_par%",
+                          NVL(("121K-140K_clnt"),0) "121K-140K_clnt",NVL(round(("121K-140K"/nvl("121K-140K_clnt",1))*100,2),0) "121K-140K_par%",
+                          NVL(("141K-150K_clnt"),0) "141K-150K_clnt",NVL(round(("141K-150K"/nvl("141K-150K_clnt",1))*100,2),0) "141K-150K_par%",
+                          NVL(("151K-200K_clnt"),0) "151K-200K_clnt",NVL(round(("151K-200K"/nvl("151K-200K_clnt",1))*100,2),0) "151K-200K_par%",
+                          NVL(("Above 200K_clnt"),0) "Above 200K_clnt",NVL(round(("Above 200K"/nvl("Above 200K_clnt",1))*100,2),0) "above_200K_par%",
+                          NVL("80K-100K",0) "80K-100K",
+                          NVL("101K-120K",0) "101K-120K",
+                          NVL("121K-140K",0) "121K-140K",
+                          NVL("141K-150K",0) "141K-150K",
+                          NVL("151K-200K",0) "151K-200K",
+                          NVL("Above 200K",0) "Above 200K"
+from 
+(select region,area,branch,count ( clnt) total_clnts_disb
+from qry
+group by area ,region,branch
+) B FULL OUTER JOIN
+(
+select region,area,BRANCH,
+                          sum("80K-100K_clnt") "80K-100K_clnt",
+                          sum("101K-120K_clnt") "101K-120K_clnt",
+                          sum("121K-140K_clnt") "121K-140K_clnt",
+                          sum("141K-150K_clnt") "141K-150K_clnt",
+                          sum("151K-200K_clnt") "151K-200K_clnt",
+                          sum("Above 200K_clnt") "Above 200K_clnt"
+from (select region,area,BRANCH,  
+ (CASE WHEN dsb_amt BETWEEN 80000 AND 100000 THEN COUNT(clnt) END) "80K-100K_clnt",
+ (CASE WHEN dsb_amt BETWEEN 100001 AND 120000 THEN COUNT(clnt) END) "101K-120K_clnt",
+ (CASE WHEN dsb_amt BETWEEN 120001 AND 140000 THEN COUNT(clnt) END) "121K-140K_clnt",
+ (CASE WHEN dsb_amt BETWEEN 140001 AND 150000 THEN COUNT(clnt) END) "141K-150K_clnt",
+ (CASE WHEN dsb_amt BETWEEN 150001 AND 200000 THEN COUNT(clnt) END) "151K-200K_clnt",
+ (CASE WHEN dsb_amt >200000 THEN COUNT(clnt) END) "Above 200K_clnt"
+FROM QRY 
+group by REGION,AREA,BRANCH,dsb_amt
+)
+group by REGION,AREA,BRANCH) A  ON B.BRANCH=A.BRANCH FULL OUTER JOIN 
+(
+select region,area,BRANCH,
+                          NVL(sum("80K-100K"),0) "80K-100K",
+                          NVL(sum("101K-120K"),0) "101K-120K",
+                          NVL(sum("121K-140K"),0) "121K-140K",
+                          NVL(sum("141K-150K"),0) "141K-150K",
+                          NVL(sum("151K-200K"),0) "151K-200K",
+                          NVL(sum("Above 200K"),0) "Above 200K"
+from (select region,area,BRANCH,  
+ (CASE WHEN dsb_amt BETWEEN 80000 AND 100000 THEN COUNT(par_1) END) "80K-100K",
+ (CASE WHEN dsb_amt BETWEEN 100001 AND 120000 THEN COUNT(par_1) END) "101K-120K",
+ (CASE WHEN dsb_amt BETWEEN 120001 AND 140000 THEN COUNT(par_1) END) "121K-140K",
+ (CASE WHEN dsb_amt BETWEEN 140001 AND 150000 THEN COUNT(par_1) END) "141K-150K",
+ (CASE WHEN dsb_amt BETWEEN 150001 AND 200000 THEN COUNT(par_1) END) "151K-200K",
+ (CASE WHEN dsb_amt >200000 THEN COUNT(par_1) END) "Above 200K"
+
+FROM QRY where par_1=1
+group by REGION,AREA,BRANCH,dsb_amt
+) 
+group by REGION,AREA,BRANCH) c on B.branch=c.branch 
+order by region, area, branch

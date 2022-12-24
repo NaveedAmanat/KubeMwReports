@@ -1,0 +1,120 @@
+  SELECT TRUNC (DVH.DSBMT_DT)
+           DSBMT_DT,
+       BRNCH.BRNCH_NM,
+       LA.LOAN_ID,
+       CLNT.CLNT_ID
+           CLNT_SEQ_1,
+       LA.CLNT_SEQ,
+       CLNT.FRST_NM || ' ' || CLNT.LAST_NM
+           CLNT_NM,
+       CLNT.CNIC_NUM
+           CLNT_CNIC,
+       DVD.INSTR_NUM
+           REMITANCE_ACC_#,
+       (
+        SELECT SUM(NVL(CASE WHEN MJD.CRDT_DBT_FLG = 0 THEN MJD.AMT END,0) -
+                NVL(CASE WHEN MJD.CRDT_DBT_FLG = 1 THEN MJD.AMT END,0))
+          FROM MW_JV_HDR MJH,
+               MW_JV_DTL MJD
+         WHERE MJH.JV_HDR_SEQ = MJD.JV_HDR_SEQ
+               AND MJH.ENTY_SEQ = DVH.DSBMT_HDR_SEQ
+               AND UPPER (MJH.ENTY_TYP) = 'DISBURSEMENT'
+               AND MJD.GL_ACCT_NUM = TYP.GL_ACCT_NUM
+        ) DISB_AMOUNT,
+       TYP.TYP_STR REMITTANCE_TYP,
+       BRNCH.BRNCH_NM || ', ' || BRNCH.BRNCH_PH_NUM || ', ' || ADDR.OTH_DTL BRNCH_ADDR
+    FROM MW_LOAN_APP LA
+          JOIN MW_CLNT CLNT
+           ON CLNT.CLNT_SEQ = LA.CLNT_SEQ AND CLNT.CRNT_REC_FLG = 1
+         JOIN MW_BRNCH BRNCH
+             ON BRNCH.BRNCH_SEQ = LA.BRNCH_SEQ AND BRNCH.CRNT_REC_FLG = 1
+         JOIN MW_DSBMT_VCHR_HDR DVH
+             ON DVH.LOAN_APP_SEQ = LA.LOAN_APP_SEQ AND DVH.CRNT_REC_FLG = 1
+         JOIN MW_DSBMT_VCHR_DTL DVD
+             ON DVH.DSBMT_HDR_SEQ = DVD.DSBMT_HDR_SEQ AND DVD.CRNT_REC_FLG = 1
+         JOIN MW_TYPS TYP
+             ON TYP.TYP_SEQ = DVD.PYMT_TYPS_SEQ AND TYP.CRNT_REC_FLG = 1
+         JOIN MW_PRD PRD
+             ON     PRD.PRD_SEQ = LA.PRD_SEQ
+                AND PRD.CRNT_REC_FLG = 1
+                AND PRD.PRD_GRP_SEQ NOT IN (6)
+         JOIN MW_ADDR_REL AREL
+           ON     AREL.ENTY_KEY = BRNCH.BRNCH_SEQ
+              AND UPPER(AREL.ENTY_TYP) = 'BRANCH'
+              AND AREL.CRNT_REC_FLG = 1
+       JOIN MW_ADDR ADDR
+           ON ADDR.ADDR_SEQ = AREL.ADDR_SEQ AND ADDR.CRNT_REC_FLG = 1
+   WHERE     LA.CRNT_REC_FLG = 1
+         AND TYP.TYP_ID =
+             (CASE
+                  WHEN :typId = -1
+                  THEN
+                      (  SELECT TYPS.TYP_ID
+                           FROM MW_TYPS TYPS
+                          WHERE     TYPS.TYP_SEQ = TYP.TYP_SEQ
+                                AND TYPS.BRNCH_SEQ <> -1
+                       GROUP BY TYPS.TYP_ID)
+                  ELSE
+                      :typId
+              END)
+         AND UPPER (TYP.TYP_STR) LIKE '%MOBILE WALLET%'
+         AND TRUNC (DVH.DSBMT_DT) BETWEEN TO_DATE (:frmdt, 'DD-Mon-RRRR') AND TO_DATE (:todt, 'DD-Mon-RRRR')
+UNION
+  -- SALE-01
+  SELECT TRUNC (EP.EFF_START_DT) DSBMT_DT,
+       BRNCH.BRNCH_NM,
+       LA.LOAN_ID,
+       CLNT.CLNT_ID
+           CLNT_SEQ_1,
+       LA.CLNT_SEQ,
+       CLNT.FRST_NM || ' ' || CLNT.LAST_NM
+           CLNT_NM,
+       CLNT.CNIC_NUM
+           CLNT_CNIC,
+       EP.INSTR_NUM
+           REMITANCE_ACC_#,
+       (SELECT SUM(NVL(CASE WHEN MJD.CRDT_DBT_FLG = 0 THEN MJD.AMT END,0) -
+                NVL(CASE WHEN MJD.CRDT_DBT_FLG = 1 THEN MJD.AMT END,0))
+          FROM MW_JV_HDR MJH, MW_JV_DTL MJD
+         WHERE     MJH.JV_HDR_SEQ = MJD.JV_HDR_SEQ
+               AND MJH.ENTY_SEQ = EP.EXP_SEQ
+               AND UPPER (MJH.ENTY_TYP) = 'EXPENSE'
+               AND MJD.GL_ACCT_NUM = TYP.GL_ACCT_NUM)
+           DISB_AMOUNT,
+       TYP.TYP_STR
+           REMITTANCE_TYP,
+       BRNCH.BRNCH_NM || ', ' || BRNCH.BRNCH_PH_NUM || ', ' || ADDR.OTH_DTL
+           BRNCH_ADDR
+    FROM MW_LOAN_APP LA
+         JOIN MW_CLNT CLNT
+           ON CLNT.CLNT_SEQ = LA.CLNT_SEQ AND CLNT.CRNT_REC_FLG = 1
+         JOIN MW_BRNCH BRNCH
+             ON BRNCH.BRNCH_SEQ = LA.BRNCH_SEQ AND BRNCH.CRNT_REC_FLG = 1
+         JOIN MW_PRD PRD
+             ON PRD.PRD_SEQ = LA.PRD_SEQ AND PRD.CRNT_REC_FLG = 1 AND PRD.PRD_GRP_SEQ IN (6)
+         JOIN MW_EXP EP ON EP.EXP_REF = LA.LOAN_APP_SEQ
+                AND EP.POST_FLG = 1
+                AND EP.CRNT_REC_FLG = 1
+                AND EP.DEL_FLG = 0
+         JOIN MW_TYPS TYP
+             ON TYP.TYP_SEQ = EP.PYMT_TYP_SEQ AND TYP.CRNT_REC_FLG = 1
+         JOIN MW_ADDR_REL AREL
+           ON     AREL.ENTY_KEY = BRNCH.BRNCH_SEQ
+              AND AREL.ENTY_TYP = 'Branch'
+              AND AREL.CRNT_REC_FLG = 1
+         JOIN MW_ADDR ADDR
+           ON ADDR.ADDR_SEQ = AREL.ADDR_SEQ AND ADDR.CRNT_REC_FLG = 1
+   WHERE TYP.TYP_ID =
+                    ((CASE
+                          WHEN :typId = -1
+                          THEN
+                              (  SELECT TYPS.TYP_id
+                                   FROM MW_TYPS TYPS
+                                  WHERE     TYPS.TYP_SEQ = TYP.TYP_SEQ
+                                        AND TYPS.BRNCH_SEQ <> -1
+                               GROUP BY TYPS.TYP_id)
+                          ELSE
+                             :typId
+                      END))
+         AND TRUNC (EP.EFF_START_DT) BETWEEN TO_DATE ( :frmdt, 'DD-Mon-RRRR')
+                                         AND TO_DATE ( :todt, 'DD-Mon-RRRR')

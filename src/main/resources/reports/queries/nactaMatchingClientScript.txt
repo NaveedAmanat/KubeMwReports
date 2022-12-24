@@ -1,0 +1,29 @@
+select b.BRNCH_NM BRANCH_NAME, c.CNIC_NUM, c.FRST_NM ||' '||c.LAST_NM name,
+la.CLNT_SEQ CLIENT_ID, 'CLIENT' PARTY_TYPE
+from 
+MW_BRNCH b,
+mw_clnt c,
+mw_loan_app la,
+mw_port mp,
+mw_nacta_list li
+where c.CLNT_SEQ = la.CLNT_SEQ and c.CRNT_REC_FLG = 1
+and la.LOAN_APP_STS = 703 and la.CRNT_REC_FLG = 1
+and la.PORT_SEQ = mp.PORT_SEQ and mp.CRNT_REC_FLG = 1
+and mp.BRNCH_SEQ = b.BRNCH_SEQ and b.CRNT_REC_FLG = 1
+and to_char(c.CNIC_NUM) = li.CNIC_NUM
+
+UNION ALL
+select b.BRNCH_NM, rel.CNIC_NUM, rel.FRST_NM ||' '||rel.LAST_NM,
+la.CLNT_SEQ, 'RELATIVE'
+from 
+MW_BRNCH b,
+mw_clnt_rel rel,
+mw_loan_app la,
+mw_port mp,
+mw_nacta_list li
+where rel.loan_app_seq = la.loan_app_seq and rel.CRNT_REC_FLG = 1
+and la.LOAN_APP_STS = 703 and la.CRNT_REC_FLG = 1
+and la.PORT_SEQ = mp.PORT_SEQ and mp.CRNT_REC_FLG = 1
+and mp.BRNCH_SEQ = b.BRNCH_SEQ and b.CRNT_REC_FLG = 1
+and to_char(rel.CNIC_NUM) = li.CNIC_NUM
+order by 1

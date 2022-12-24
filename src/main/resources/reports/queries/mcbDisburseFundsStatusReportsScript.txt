@@ -1,0 +1,114 @@
+SELECT DET.REG_NM,
+       DET.REG_SEQ,
+       DET.BRNCH_NM,
+       DET.BRNCH_SEQ,
+       DET.AREA_NM,
+       DET.AREA_SEQ,
+       TRUNC (DH.DSBMT_DT) DISURSEMENT_DATE,
+       CLNT.CLNT_ID
+           CLIENT_ID,
+       CLNT.FRST_NM || ' ' || CLNT.LAST_NM
+           CLIENT_NAME,
+       MB.MOB_WAL_NO
+           WALLET_NUM,
+       LP.LOAN_APP_SEQ
+           XPIN_NUMBER,
+       CLNT.CNIC_NUM
+           CNIC,
+       DD.AMT
+           AMOUNT,
+       CLNT.PH_NUM
+           CONTACT_NUM,
+       DSQ.DSBMT_STS_DT
+           FUND_TRANSFER_DATE,
+       (SELECT VAL.REF_CD_DSCR
+          FROM MW_REF_CD_VAL VAL
+         WHERE VAL.REF_CD_SEQ = DSQ.ADC_STS_SEQ AND VAL.CRNT_REC_FLG = 1)
+           TRANS_STATUS,
+       DSQ.ADC_STS_DT
+           TRANS_DATE,
+       PRD.PRD_NM
+           PRODUCT,
+       TP.TYP_STR
+           MODE_OF_DISBURSEMENT,
+       DSQ.REMARKS
+           REASON
+  FROM MW_LOAN_APP                       LP,
+       MW_DSBMT_VCHR_HDR                 DH,
+       MW_DSBMT_VCHR_DTL                 DD,
+       KASHF_REPORTING.V_ORG_EMP_DETAIL  DET,
+       MW_CLNT                           CLNT,
+       MW_ADC_DSBMT_QUE                  DSQ,
+       MW_PRD                            PRD,
+       MW_TYPS                           TP,
+       MW_MOB_WAL_INFO                   MB
+ WHERE     LP.PORT_SEQ = DET.PORT_SEQ
+       AND LP.LOAN_APP_SEQ = DH.LOAN_APP_SEQ
+       AND DH.DSBMT_HDR_SEQ = DD.DSBMT_HDR_SEQ
+       AND CLNT.CLNT_SEQ = LP.CLNT_SEQ
+       AND DD.DSBMT_DTL_KEY = DSQ.DSBMT_DTL_KEY
+       AND DD.PYMT_TYPS_SEQ = TP.TYP_SEQ(+)
+       AND DH.MOB_WAL_SEQ = MB.MOB_WAL_SEQ(+)
+       AND LP.PRD_SEQ = PRD.PRD_SEQ AND PRD.PRD_GRP_SEQ != 6
+       AND ( (LP.CRNT_REC_FLG = 1 ) OR (LP.CRNT_REC_FLG = 0 AND LP.LOAN_APP_STS IN (1285)))
+       AND TRUNC (DH.DSBMT_DT) BETWEEN :P_DATE_FROM AND :P_DATE_TO
+       AND DET.BRNCH_SEQ = DECODE ( :P_BRNCH_SEQ, -1, DET.BRNCH_SEQ, :P_BRNCH_SEQ)
+UNION
+SELECT DET.REG_NM,
+       DET.REG_SEQ,
+       DET.BRNCH_NM,
+       DET.BRNCH_SEQ,
+       DET.AREA_NM,
+       DET.AREA_SEQ,
+       TRUNC (EP.EFF_START_DT) DISURSEMENT_DATE,
+       CLNT.CLNT_ID
+           CLIENT_ID,
+       CLNT.FRST_NM || ' ' || CLNT.LAST_NM
+           CLIENT_NAME,
+       MB.MOB_WAL_NO
+           WALLET_NUM,
+       LP.LOAN_APP_SEQ
+           XPIN_NUMBER,
+       CLNT.CNIC_NUM
+           CNIC,
+       DD.AMT
+           AMOUNT,
+       CLNT.PH_NUM
+           CONTACT_NUM,
+       DSQ.DSBMT_STS_DT
+           FUND_TRANSFER_DATE,
+       (SELECT VAL.REF_CD_DSCR
+          FROM MW_REF_CD_VAL VAL
+         WHERE VAL.REF_CD_SEQ = DSQ.ADC_STS_SEQ AND VAL.CRNT_REC_FLG = 1)
+           TRANS_STATUS,
+       DSQ.ADC_STS_DT
+           TRANS_DATE,
+       PRD.PRD_NM
+           PRODUCT,
+       TP.TYP_STR
+           MODE_OF_DISBURSEMENT,
+       DSQ.REMARKS
+           REASON
+  FROM MW_LOAN_APP                       LP,
+       MW_DSBMT_VCHR_HDR                 DH,
+       MW_DSBMT_VCHR_DTL                 DD,
+       KASHF_REPORTING.V_ORG_EMP_DETAIL  DET,
+       MW_CLNT                           CLNT,
+       MW_ADC_DSBMT_QUE                  DSQ,
+       MW_PRD                            PRD,
+       MW_TYPS                           TP,
+       MW_MOB_WAL_INFO                   MB,
+       MW_EXP                            EP                 
+ WHERE     LP.PORT_SEQ = DET.PORT_SEQ
+       AND LP.LOAN_APP_SEQ = DH.LOAN_APP_SEQ
+       AND DH.DSBMT_HDR_SEQ = DD.DSBMT_HDR_SEQ
+       AND EP.EXP_REF = LP.LOAN_APP_SEQ
+       AND CLNT.CLNT_SEQ = LP.CLNT_SEQ
+       AND DD.DSBMT_DTL_KEY = DSQ.DSBMT_DTL_KEY
+       AND EP.PYMT_TYP_SEQ = TP.TYP_SEQ AND TP.TYP_ID = '0007'
+       --AND DD.PYMT_TYPS_SEQ = TP.TYP_SEQ(+)
+       AND DH.MOB_WAL_SEQ = MB.MOB_WAL_SEQ(+)
+       AND LP.PRD_SEQ = PRD.PRD_SEQ AND PRD.PRD_GRP_SEQ = 6
+       AND ( (LP.CRNT_REC_FLG = 1 ) OR (LP.CRNT_REC_FLG = 0 AND LP.LOAN_APP_STS IN (1285)))
+       AND TRUNC (EP.EFF_START_DT) BETWEEN :P_DATE_FROM AND :P_DATE_TO
+       AND DET.BRNCH_SEQ = DECODE ( :P_BRNCH_SEQ, -1, DET.BRNCH_SEQ, :P_BRNCH_SEQ)

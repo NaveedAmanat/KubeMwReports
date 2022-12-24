@@ -1,0 +1,58 @@
+
+SELECT ost.gender,
+       dsb.dsb_clnts,
+       dsb.dsb_amt,
+       ost.OST_CLIENTS,
+       ost.OST_AMT
+  FROM (  SELECT CASE
+                     WHEN cl.gndr_key = 18 THEN 'MALE'
+                     WHEN cl.gndr_key = 19 THEN 'FEMALE'
+                     WHEN cl.gndr_key = 20 THEN 'TRANSGENDER'
+                 END
+                     gender,
+                 COUNT (LOAN_CYCLE_ID)
+                     OST_CLIENTS,
+                   ROUND (SUM (NVL (OUTSTANDING_PRINCIPAL, 0)))
+                 + ROUND (SUM (NVL (OUTSTANDING_SC, 0)))
+                     OST_AMT
+            FROM KASHF_REPORTING.con_mon_asofdate_rschd CPM, mw_clnt cl
+           WHERE     CPM.CUSTOMER_ID = cl.clnt_seq
+                 AND cl.crnt_rec_flg = 1
+                 AND (   CPM.LOAN_COMPLETION_DATE IS NULL
+                      OR CPM.LOAN_COMPLETION_DATE >
+                         TO_DATE ( :to_dt, 'dd-mm-RRRR'))
+--                  AND disbursed_date BETWEEN ADD_MONTHS (
+--                                                TO_DATE ( :to_dt, 'dd-MM-RRRR'),
+--                                                -1)
+--                                        AND TO_DATE ( :to_dt, 'dd-mm-RRRR')
+                 AND (NVL (OUTSTANDING_PRINCIPAL, 0) + NVL (OUTSTANDING_SC, 0)) >
+                     0
+                 AND CPM.PRODUCT_ID NOT IN (8)
+                 AND TRUNC (cpm.trn_date) = TO_DATE ( :to_dt, 'dd-mm-RRRR')
+        GROUP BY cl.gndr_key) ost,
+       (  SELECT CASE
+                     WHEN cl.gndr_key = 18 THEN 'MALE'
+                     WHEN cl.gndr_key = 19 THEN 'FEMALE'
+                     WHEN cl.gndr_key = 20 THEN 'TRANSGENDER'
+                 END
+                     gender,
+                 COUNT (lap.loan_app_seq)
+                     dsb_clnts,
+                 SUM (lap.aprvd_loan_amt)
+                     dsb_amt
+            FROM mw_loan_app lap, mw_dsbmt_vchr_hdr dhdr, mw_clnt cl
+           WHERE     lap.loan_app_seq = dhdr.loan_app_seq
+                 AND lap.CLNT_SEQ = CL.CLNT_SEQ
+                 AND lap.crnt_rec_flg = 1
+                 AND CL.crnt_rec_flg = 1
+                 AND dhdr.crnt_rec_flg = 1
+                 AND lap.loan_app_seq <> -1
+                 and lap.prd_seq not in (13,14)
+                 AND TRUNC (DHDR.DSBMT_DT) BETWEEN ADD_MONTHS (
+                                                       TO_DATE ( :to_dt,
+                                                                'dd-MM-RRRR'),
+                                                       -1)
+                                               AND TO_DATE ( :to_dt,
+                                                            'dd-MM-RRRR')
+        GROUP BY cl.gndr_key) dsb
+ WHERE ost.gender = dsb.gender

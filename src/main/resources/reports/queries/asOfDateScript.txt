@@ -1,0 +1,6 @@
+SELECT CASE
+           WHEN TO_CHAR (TO_DATE (SYSDATE), 'D') = 2 THEN TRUNC (SYSDATE) - 2
+           ELSE TRUNC (SYSDATE) - 1
+       END
+           ASOFDATE
+  FROM DUAL

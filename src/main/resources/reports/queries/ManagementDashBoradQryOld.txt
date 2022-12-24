@@ -1,0 +1,310 @@
+            select distinct cp.REG_NM, OUTS.loans, OUTS_unrech.loans clnts_unrech, OUTS_rech.loans clnts_rech, OUTS_new.loans clnts_new, 
+            OUTS_new.DSB_AMT dsb_amt_new,
+            OUTS.OUTS_CRNT, OUTS_unrech.OUTS_CRNT OUTS_unrech, OUTS_rech.OUTS_CRNT OUTS_rech,OUTS_new.OUTS_CRNT OUTS_new,
+            (case when P_1.OUTS_p1 > 0 then round(nvl(p_1.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) par_p1_perc,
+            (case when P_1_unrech.OUTS_p1 > 0 then round(nvl(P_1_unrech.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) par_p1_perc_unrech,
+            (case when P_1_rech.OUTS_p1 > 0 then round(nvl(P_1_rech.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) par_p1_perc_rech,
+            (case when P_1_new.OUTS_p1 > 0 then round(nvl(P_1_new.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) par_p1_perc_new,
+            (case when P_3.OUTS_p1 > 0 then round(nvl(p_3.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) par_p3_perc,
+            (case when P_3_unrech.OUTS_p1 > 0 then round(nvl(P_3_unrech.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) par_p3_perc_unrech,
+            (case when P_3_rech.OUTS_p1 > 0 then round(nvl(P_3_rech.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) par_p3_perc_rech,
+            (case when P_3_new.OUTS_p1 > 0 then round(nvl(P_3_new.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) par_p3_perc_new,
+            OUTS_rech_grc1.loans OUTS_rech_grc1, OUTS_rech_grc2.loans OUTS_rech_grc2, OUTS_rech_grc3.loans OUTS_rech_grc3, OUTS_rech_grc4.loans OUTS_rech_grc4,
+            (case when P_1_rech_grc1.OUTS_p1 > 0 then round(nvl(P_1_rech_grc1.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) P_1_rech_grc1,
+            (case when P_1_rech_grc2.OUTS_p1 > 0 then round(nvl(P_1_rech_grc2.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) P_1_rech_grc2,
+            (case when P_1_rech_grc3.OUTS_p1 > 0 then round(nvl(P_1_rech_grc3.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) P_1_rech_grc3,
+            (case when P_1_rech_grc4.OUTS_p1 > 0 then round(nvl(P_1_rech_grc4.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) P_1_rech_grc4,            
+            (case when P_3_rech_grc1.OUTS_p1 > 0 then round(nvl(P_3_rech_grc1.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) P_3_rech_grc1,
+            (case when P_3_rech_grc2.OUTS_p1 > 0 then round(nvl(P_3_rech_grc2.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) P_3_rech_grc2,
+            (case when P_3_rech_grc3.OUTS_p1 > 0 then round(nvl(P_3_rech_grc3.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) P_3_rech_grc3,
+            (case when P_3_rech_grc4.OUTS_p1 > 0 then round(nvl(P_3_rech_grc4.OUTS_p1,1) / nvl(OUTS.OUTS_CRNT,1) * 100 ,2) else 0 end) P_3_rech_grc4
+            from PRE_COVID_APR20_OUTS_INFO cp,
+              (
+              SELECT cp.REG_NM,
+              COUNT(cp.loan_app_seq) loans, 
+                ROUND(SUM(NVL(cp.DSB_AMT,0))) DSB_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_crnt
+                FROM PRE_COVID_APR20_OUTS_INFO cp 
+                where ROUND((NVL(cp.OUTS_PRN_CRNT,0))) + ROUND((NVL(cp.OUTS_SC_CRNT,0))) > 0
+                GROUP BY cp.REG_NM                                                                     
+                )OUTS, 
+                (
+              SELECT cp.REG_NM, 
+              COUNT(cp.loan_app_seq) loans, 
+                ROUND(SUM(NVL(cp.DSB_AMT,0))) DSB_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_crnt
+                FROM PRE_COVID_APR20_OUTS_INFO cp 
+                where ROUND((NVL(cp.OUTS_PRN_CRNT,0))) + ROUND((NVL(cp.OUTS_SC_CRNT,0))) > 0
+                and cp.DSBMT_DT <= '30-apr-2020'
+                and cp.OVERDUE_DAYS > 29
+                GROUP BY cp.REG_NM                                                                      
+                )OUTS_unrech,  
+                  (
+              SELECT cp.REG_NM, 
+              COUNT(cp.loan_app_seq) loans, 
+                ROUND(SUM(NVL(cp.DSB_AMT,0))) DSB_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_crnt
+                FROM PRE_COVID_APR20_OUTS_INFO cp 
+                where ROUND((NVL(cp.OUTS_PRN_CRNT,0))) + ROUND((NVL(cp.OUTS_SC_CRNT,0))) > 0
+                and cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29
+                GROUP BY cp.REG_NM                                                                      
+                )OUTS_rech, 
+                (
+              SELECT cp.REG_NM, 
+              COUNT(cp.loan_app_seq) loans, 
+                ROUND(SUM(NVL(cp.DSB_AMT,0))) DSB_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_crnt
+                FROM PRE_COVID_APR20_OUTS_INFO cp 
+                where ROUND((NVL(cp.OUTS_PRN_CRNT,0))) + ROUND((NVL(cp.OUTS_SC_CRNT,0))) > 0
+                and cp.GRACE_PERD is null and cp.DSBMT_DT > '30-apr-2020'
+                GROUP BY cp.REG_NM                                                                      
+                )OUTS_new,               
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0)                           
+                GROUP BY cp.REG_NM 
+                )P_1,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE (cp.OVERDUE_AMOUNT > 0 or cp.OVERDUE_AMOUNT_SC > 0)
+                and cp.OVERDUE_DAYS > 29
+                and cp.DSBMT_DT <= '30-apr-2020'
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0)                           
+                GROUP BY cp.REG_NM 
+                )P_1_unrech,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29  
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0)                           
+                GROUP BY cp.REG_NM 
+                )P_1_rech,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE cp.GRACE_PERD is null and cp.DSBMT_DT > '30-apr-2020'
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0)  
+                and cp.OD_DYS_CRNT > 29.50                         
+                GROUP BY cp.REG_NM 
+                )P_1_new,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0) 
+                and cp.OD_DYS_CRNT > 29.50                           
+                GROUP BY cp.REG_NM 
+                )P_3,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE (cp.OVERDUE_AMOUNT > 0 or cp.OVERDUE_AMOUNT_SC > 0)
+                and cp.OVERDUE_DAYS > 29
+                and cp.DSBMT_DT <= '30-apr-2020'
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0)  
+                and cp.OD_DYS_CRNT > 29.50                          
+                GROUP BY cp.REG_NM 
+                )P_3_unrech,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29  
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0) 
+                and cp.OD_DYS_CRNT > 29.50                           
+                GROUP BY cp.REG_NM 
+                )P_3_rech,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE cp.GRACE_PERD is null and cp.DSBMT_DT > '30-apr-2020'
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0) 
+                and cp.OD_DYS_CRNT > 29.50                           
+                GROUP BY cp.REG_NM 
+                )P_3_new,
+                 (
+              SELECT cp.REG_NM, 
+              COUNT(cp.loan_app_seq) loans, 
+                ROUND(SUM(NVL(cp.DSB_AMT,0))) DSB_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_crnt
+                FROM PRE_COVID_APR20_OUTS_INFO cp 
+                where ROUND((NVL(cp.OUTS_PRN_CRNT,0))) + ROUND((NVL(cp.OUTS_SC_CRNT,0))) > 0
+                and cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29
+                and cp.GRACE_PERD is null
+                GROUP BY cp.REG_NM                                                                      
+                )OUTS_rech_grc1, 
+                 (
+              SELECT cp.REG_NM, 
+              COUNT(cp.loan_app_seq) loans, 
+                ROUND(SUM(NVL(cp.DSB_AMT,0))) DSB_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_crnt
+                FROM PRE_COVID_APR20_OUTS_INFO cp 
+                where ROUND((NVL(cp.OUTS_PRN_CRNT,0))) + ROUND((NVL(cp.OUTS_SC_CRNT,0))) > 0
+                and cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29
+                and cp.GRACE_PERD = 1
+                GROUP BY cp.REG_NM                                                                      
+                )OUTS_rech_grc2, 
+                 (
+              SELECT cp.REG_NM, 
+              COUNT(cp.loan_app_seq) loans, 
+                ROUND(SUM(NVL(cp.DSB_AMT,0))) DSB_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_crnt
+                FROM PRE_COVID_APR20_OUTS_INFO cp 
+                where ROUND((NVL(cp.OUTS_PRN_CRNT,0))) + ROUND((NVL(cp.OUTS_SC_CRNT,0))) > 0
+                and cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29
+                and cp.GRACE_PERD = 2
+                GROUP BY cp.REG_NM                                                                      
+                )OUTS_rech_grc3, 
+                 (
+              SELECT cp.REG_NM, 
+              COUNT(cp.loan_app_seq) loans, 
+                ROUND(SUM(NVL(cp.DSB_AMT,0))) DSB_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_crnt
+                FROM PRE_COVID_APR20_OUTS_INFO cp 
+                where ROUND((NVL(cp.OUTS_PRN_CRNT,0))) + ROUND((NVL(cp.OUTS_SC_CRNT,0))) > 0
+                and cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29
+                and cp.GRACE_PERD > 2
+                GROUP BY cp.REG_NM                                                                      
+                )OUTS_rech_grc4,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29
+                and cp.GRACE_PERD is null 
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0)                           
+                GROUP BY cp.REG_NM 
+                )P_1_rech_grc1,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29
+                and cp.GRACE_PERD  = 1  
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0)                           
+                GROUP BY cp.REG_NM 
+                )P_1_rech_grc2,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29
+                and cp.GRACE_PERD = 2
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0)                           
+                GROUP BY cp.REG_NM 
+                )P_1_rech_grc3,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29
+                and cp.GRACE_PERD > 2 
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0)                           
+                GROUP BY cp.REG_NM 
+                )P_1_rech_grc4,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29
+                and cp.GRACE_PERD is null
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0)    
+                and cp.OD_DYS_CRNT > 29.50                       
+                GROUP BY cp.REG_NM 
+                )P_3_rech_grc1,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29
+                and cp.GRACE_PERD = 1
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0)   
+                and cp.OD_DYS_CRNT > 29.50                        
+                GROUP BY cp.REG_NM 
+                )P_3_rech_grc2,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29
+                and cp.GRACE_PERD = 2 
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0) 
+                and cp.OD_DYS_CRNT > 29.50                          
+                GROUP BY cp.REG_NM 
+                )P_3_rech_grc3,
+                (  
+                SELECT cp.REG_NM, COUNT(cp.LOAN_APP_SEQ) loans_p1, 
+                ROUND(SUM(NVL(cp.OD_AMT_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OD_AMT_SC_CRNT,0))) OD_AMT,
+                ROUND(SUM(NVL(cp.OUTS_PRN_CRNT,0))) + ROUND(SUM(NVL(cp.OUTS_SC_CRNT,0))) outs_p1                
+                FROM PRE_COVID_APR20_OUTS_INFO cp     
+                WHERE cp.DSBMT_DT <= '30-apr-2020'                
+                and cp.OVERDUE_DAYS <= 29
+                and cp.GRACE_PERD > 2
+                and (cp.OD_AMT_PRN_CRNT > 0 or cp.OD_AMT_SC_CRNT > 0)   
+                and cp.OD_DYS_CRNT > 29.50                        
+                GROUP BY cp.REG_NM 
+                )P_3_rech_grc4
+         where cp.REG_NM = OUTS.REG_NM(+)  
+         and cp.REG_NM = OUTS_unrech.REG_NM(+)
+         and cp.REG_NM = OUTS_rech.REG_NM(+)  
+         and cp.REG_NM = OUTS_new.REG_NM(+)            
+         and cp.REG_NM = P_1.REG_NM(+)     
+         and cp.REG_NM = P_1_unrech.REG_NM(+)
+         and cp.REG_NM = P_1_rech.REG_NM(+)
+         and cp.REG_NM = P_1_new.REG_NM(+)
+         and cp.REG_NM = P_3.REG_NM(+)     
+         and cp.REG_NM = P_3_unrech.REG_NM(+)
+         and cp.REG_NM = P_3_rech.REG_NM(+)
+         and cp.REG_NM = P_3_new.REG_NM(+)
+         and cp.REG_NM = OUTS_rech_grc1.REG_NM(+)
+         and cp.REG_NM = OUTS_rech_grc2.REG_NM(+)
+         and cp.REG_NM = OUTS_rech_grc3.REG_NM(+)
+         and cp.REG_NM = OUTS_rech_grc4.REG_NM(+)
+         and cp.REG_NM = P_1_rech_grc1.REG_NM(+)
+         and cp.REG_NM = P_1_rech_grc2.REG_NM(+)
+         and cp.REG_NM = P_1_rech_grc3.REG_NM(+)
+         and cp.REG_NM = P_1_rech_grc4.REG_NM(+)
+         and cp.REG_NM = P_3_rech_grc1.REG_NM(+)
+         and cp.REG_NM = P_3_rech_grc2.REG_NM(+)
+         and cp.REG_NM = P_3_rech_grc3.REG_NM(+)
+         and cp.REG_NM = P_3_rech_grc4.REG_NM(+)
+         
+         
+         

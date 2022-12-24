@@ -1,0 +1,95 @@
+/* Formatted on 24/08/2022 3:31:07 pm (QP5 v5.326) */
+SELECT DET.REG_NM,
+       DET.REG_SEQ,
+       DET.BRNCH_NM,
+       DET.BRNCH_SEQ,
+       DET.AREA_NM,
+       DET.AREA_SEQ,
+       CASE
+           WHEN TRUNC (DH.DSBMT_DT) IN ('01-JAN-1901', '01-JAN-2001')
+           THEN
+               (SELECT TRUNC (EP.EFF_START_DT)
+                  FROM MW_EXP EP
+                 WHERE     EP.EXP_REF = TO_CHAR (LP.LOAN_APP_SEQ)
+                       AND EP.CRNT_REC_FLG = 1)
+           ELSE
+               TRUNC (DH.DSBMT_DT)
+       END
+           DISURSEMENT_DATE,
+       CLNT.CLNT_ID
+           CLIENT_ID,
+       CLNT.FRST_NM || ' ' || CLNT.LAST_NM
+           CLIENT_NAME,
+       MB.MOB_WAL_NO
+           WALLET_NUM,
+       LP.LOAN_APP_SEQ
+           XPIN_NUMBER,
+       CLNT.CNIC_NUM
+           CNIC,
+       DD.AMT
+           AMOUNT,
+       CLNT.PH_NUM
+           CONTACT_NUM,
+       DSQ.DSBMT_STS_DT
+           FUND_TRANSFER_DATE,
+       (SELECT VAL.REF_CD_DSCR
+          FROM MW_REF_CD_VAL VAL
+         WHERE VAL.REF_CD_SEQ = DSQ.ADC_STS_SEQ AND VAL.CRNT_REC_FLG = 1)
+           TRANS_STATUS,
+       DSQ.ADC_STS_DT
+           TRANS_DATE,
+       PRD.PRD_NM
+           PRODUCT,
+       TP.TYP_STR
+           MODE_OF_DISBURSEMENT,
+       DSQ.REMARKS
+           REASON,
+       DSQ.REVRSL_REQ_DT
+           REVERSAL_LOG_DATE,
+       DSQ.LAST_UPD_DT
+           REQUEST_CLOSE_DATE
+  FROM MW_LOAN_APP                       LP,
+       MW_DSBMT_VCHR_HDR                 DH,
+       MW_DSBMT_VCHR_DTL                 DD,
+       KASHF_REPORTING.V_ORG_EMP_DETAIL  DET,
+       MW_CLNT                           CLNT,
+       MW_ADC_DSBMT_QUE                  DSQ,
+       MW_PRD                            PRD,
+       MW_TYPS                           TP,
+       MW_MOB_WAL_INFO                   MB
+ WHERE     LP.PORT_SEQ = DET.PORT_SEQ
+       AND LP.LOAN_APP_SEQ = DH.LOAN_APP_SEQ
+       AND DH.DSBMT_HDR_SEQ = DD.DSBMT_HDR_SEQ
+       AND CLNT.CLNT_SEQ = LP.CLNT_SEQ
+       AND DD.DSBMT_DTL_KEY = DSQ.DSBMT_DTL_KEY
+       AND DD.PYMT_TYPS_SEQ = TP.TYP_SEQ(+)
+       AND DH.MOB_WAL_SEQ = MB.MOB_WAL_SEQ(+)
+       AND LP.PRD_SEQ = PRD.PRD_SEQ
+       AND DSQ.REMARKS IS NOT NULL
+       AND LP.LOAN_APP_STS IN (SELECT STS
+                                 FROM (SELECT 1 TP, 703 STS FROM DUAL
+                                       UNION ALL
+                                       SELECT 1 TP, 1305 STS FROM DUAL
+                                       UNION ALL
+                                       SELECT 0 TP, 1285 STS FROM DUAL
+                                       UNION ALL
+                                       SELECT 0 TP, 703 STS FROM DUAL
+                                       UNION ALL
+                                       SELECT 0 TP, 1305 STS FROM DUAL)
+                                WHERE TP = :TYP)
+       AND (   ( :P_DATE_TO <=
+                CASE
+                    WHEN :TYP = 1
+                    THEN
+                        (CASE
+                             WHEN TRUNC (DH.DSBMT_DT) IN
+                                      ('01-JAN-1901', '01-JAN-2001')
+                             THEN
+                                 TRUNC (DH.LAST_UPD_DT)
+                             ELSE
+                                 TRUNC (DH.DSBMT_DT)
+                         END)
+                END)
+            OR TRUNC (DSQ.LAST_UPD_DT) BETWEEN :P_DATE_FROM AND :P_DATE_TO)
+       AND DET.BRNCH_SEQ =
+           DECODE ( :P_BRNCH_SEQ, -1, DET.BRNCH_SEQ, :P_BRNCH_SEQ)

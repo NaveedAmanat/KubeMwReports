@@ -1,0 +1,203 @@
+with qry as
+    (
+    SELECT case when :role_type = 'bm' then emp.emp_nm when :brnchSeq <> -1 then emp.emp_nm else mb.brnch_nm end emp_nm,
+       grp.PRD_GRP_NM,
+       grp.PRD_GRP_SEQ,
+       ap.PRD_SEQ,
+       ap.LOAN_CYCL_NUM,
+       (CASE
+            WHEN ap.APRVD_LOAN_AMT BETWEEN 0 AND 20000 THEN '1.Amt--- Upto 20,000'
+            WHEN ap.APRVD_LOAN_AMT BETWEEN 20001 AND 30000 THEN '2.Amtbtw 20,001 to 30,000'
+            WHEN ap.APRVD_LOAN_AMT BETWEEN 30001 AND 50000 THEN '3.Amtbtw 30,001 to 50,000'
+            WHEN ap.APRVD_LOAN_AMT BETWEEN 50001 AND 70000 THEN '4.Amtbtw 50,001 to 70,000'
+            WHEN ap.APRVD_LOAN_AMT BETWEEN 70001 AND 90000 THEN '5.Amtbtw 70,001 to 90,000'
+            WHEN ap.APRVD_LOAN_AMT BETWEEN 90001 AND 100000 THEN '6.Amtbtw 90,001 to 100,000'
+            WHEN ap.APRVD_LOAN_AMT BETWEEN 100001 AND 120000 THEN '7.Amtbtw 100,001 to 120,000'
+            ELSE '8.Amt--- Over 120,000'
+        END)
+           AMT_RNG,
+       ap.loan_app_seq
+           loan_cnt,
+       ap.APRVD_LOAN_AMT
+           APRVD_LOAN_AMT,
+                           NVL (
+                               (SELECT   NVL (
+                                             SUM (
+                                                   NVL (PPAL_AMT_DUE, 0)
+                                                 + NVL (TOT_CHRG_DUE, 0)
+                                                 + NVL (
+                                                       (SELECT SUM (NVL (psc.AMT, 0))
+                                                          FROM mw_pymt_sched_chrg psc
+                                                         WHERE     psc.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                               AND psc.crnt_rec_flg = 1),
+                                                       0)),
+                                             0)
+                                       - NVL (
+                                             SUM (
+                                                 (SELECT SUM (NVL (rdtl.pymt_amt, 0))
+                                                    FROM mw_rcvry_dtl  rdtl
+                                                         INNER JOIN mw_rcvry_trx rht
+                                                             ON rht.RCVRY_TRX_SEQ = rdtl.RCVRY_TRX_SEQ
+                                                   WHERE     rdtl.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                         AND rdtl.crnt_rec_flg = 1
+                                                         AND rht.crnt_rec_flg = 1
+                                                         AND TRUNC (rht.PYMT_DT) <= trunc(to_date(:todt, 'dd-MM-yyyy')))),
+                                             0)
+                                  FROM mw_loan_app  inap
+                                       JOIN mw_pymt_sched_hdr psh
+                                           ON psh.loan_app_seq = inap.loan_app_seq AND psh.crnt_rec_flg = 1
+                                       JOIN mw_pymt_sched_dtl psd
+                                           ON     psd.pymt_sched_hdr_seq = psh.pymt_sched_hdr_seq
+                                              AND psd.crnt_rec_flg = 1
+                                 WHERE inap.LOAN_APP_SEQ = ap.LOAN_APP_SEQ AND inap.crnt_rec_flg = 1),
+                               0)           
+           ost_amt,
+       NVL (
+                               (SELECT   NVL (
+                                             SUM (
+                                                   NVL (PPAL_AMT_DUE, 0)
+                                                 + NVL (TOT_CHRG_DUE, 0)
+                                                 + NVL (
+                                                       (SELECT SUM (NVL (psc.AMT, 0))
+                                                          FROM mw_pymt_sched_chrg psc
+                                                         WHERE     psc.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                               AND psc.crnt_rec_flg = 1),
+                                                       0)),
+                                             0)
+                                       - NVL (
+                                             SUM (
+                                                 (SELECT SUM (NVL (rdtl.pymt_amt, 0))
+                                                    FROM mw_rcvry_dtl  rdtl
+                                                         INNER JOIN mw_rcvry_trx rht
+                                                             ON rht.RCVRY_TRX_SEQ = rdtl.RCVRY_TRX_SEQ
+                                                   WHERE     rdtl.pymt_sched_dtl_seq = psd.pymt_sched_dtl_seq
+                                                         AND rdtl.crnt_rec_flg = 1
+                                                         AND rht.crnt_rec_flg = 1
+                                                         AND TRUNC (rht.PYMT_DT) <= trunc(to_date(:todt, 'dd-MM-yyyy')))),
+                                             0)
+                                  FROM mw_loan_app  inap
+                                       JOIN mw_pymt_sched_hdr psh ON psh.loan_app_seq = inap.loan_app_seq
+                                       JOIN mw_pymt_sched_dtl psd
+                                           ON psd.pymt_sched_hdr_seq = psh.pymt_sched_hdr_seq
+                                 WHERE     inap.LOAN_APP_SEQ = ap.LOAN_APP_SEQ
+                                       AND inap.crnt_rec_flg = 1
+                                       AND psh.crnt_rec_flg = 1
+                                       AND psd.crnt_rec_flg = 1
+                                       AND psd.pymt_sts_key IN (945, 948, 1145)
+                                       AND psd.due_dt <= to_date(:todt, 'dd-MM-yyyy')),
+                               0)
+           od_amt,
+       GET_OD_INFO (ap.loan_app_seq, TO_DATE ( :todt, 'dd-MM-yyyy'), 'd')
+           od_dys
+  FROM mw_loan_app        ap
+       JOIN mw_clnt cl ON cl.clnt_seq = ap.clnt_seq AND cl.crnt_rec_flg = 1
+       JOIN mw_prd prd ON ap.PRD_SEQ = prd.PRD_SEQ AND prd.CRNT_REC_FLG = 1
+       JOIN mw_prd_grp grp ON grp.PRD_GRP_SEQ = prd.PRD_GRP_SEQ AND grp.CRNT_REC_FLG = 1
+       JOIN mw_port prt ON prt.port_seq = ap.port_seq AND prt.crnt_rec_flg = 1 AND prt.brnch_seq = (CASE WHEN :brnchSeq = -1 THEN prt.brnch_seq ELSE :brnchSeq END)
+       INNER JOIN mw_brnch mb on mb.BRNCH_SEQ = prt.BRNCH_SEQ and mb.CRNT_REC_FLG = 1
+       JOIN mw_port_emp_rel erl ON erl.port_seq = prt.port_seq AND erl.crnt_rec_flg = 1
+       JOIN mw_emp emp ON emp.emp_seq = erl.emp_seq,
+       mw_dsbmt_vchr_hdr  dvh
+ WHERE     (   (ap.loan_app_sts = 703 AND TRUNC (ap.loan_app_sts_dt) <= TO_DATE ( :todt, 'dd-MM-yyyy') AND ap.crnt_rec_flg = 1)
+            OR (    ap.loan_app_sts = 704
+                AND TRUNC (ap.loan_app_sts_dt) > TO_DATE ( :todt, 'dd-MM-yyyy')
+                AND TRUNC (dvh.dsbmt_dt) <= TO_DATE ( :todt, 'dd-MM-yyyy')
+                AND ap.crnt_rec_flg = 1)
+            OR (ap.loan_app_sts = 1245 AND TRUNC (ap.loan_app_sts_dt) > TO_DATE ( :todt, 'dd-MM-yyyy')))
+       AND dvh.loan_app_seq = ap.loan_app_seq
+       AND dvh.crnt_rec_flg = 1
+       AND prt.PORT_SEQ IN (SELECT port_seq
+                               FROM mw_acl acl
+                              WHERE acl.user_id = :p_user)
+       AND ap.PRD_SEQ NOT IN (2, 5, 13, 14)
+       AND NOT EXISTS
+               (SELECT ctl.loan_app_seq
+                  FROM mw_clnt_tag_list ctl
+                 WHERE     ctl.loan_app_seq = ap.loan_app_seq
+                       AND TRUNC (ctl.eff_start_dt) <= TO_DATE ( :todt, 'dd-MM-yyyy')
+                       AND ctl.tags_seq = 4
+                       AND ctl.crnt_rec_flg = 1)
+    )
+    select 1 ord, PRD_GRP_NM, count(loan_cnt) tot_clnt, 
+    sum(APRVD_LOAN_AMT) APRVD_LOAN_AMT, sum(ost_amt) ost_amt,
+    count(case when od_amt > 0 then loan_cnt end) par_1_dy_cnt,
+    sum(case when (od_dys >0) then od_amt end) par_1_day_od_amt,
+    sum(case when od_amt > 0 then ost_amt end) par_1_dy_amt,
+    count(case when (od_dys <= 3.5 and od_amt > 0) then loan_cnt end) par_1_4_day_cnt,
+    sum(case when (od_dys <= 3.5) then od_amt end) par_1_4_day_od_amt,
+    sum(case when (od_dys <= 3.5 and od_amt > 0) then ost_amt end) par_1_4_day_amt,
+    count(case when od_dys between 3.6 and 13.5 then loan_cnt end) par_5_15_day_cnt,
+    sum(case when od_dys between 3.6 and 13.5 then od_amt end) par_5_15_day_od_amt,
+    sum(case when od_dys between 3.6 and 13.5 then ost_amt end) par_5_15_day_amt,
+    count(case when od_dys between 13.6 and 28.5 then loan_cnt end) par_16_30_day_cnt,
+    sum(case when od_dys between 13.6 and 28.5 then od_amt end) par_16_30_day_od_amt,
+    sum(case when od_dys between 13.6 and 28.5 then ost_amt end) par_16_30_day_amt,
+    count(case when od_dys > 28.5 then loan_cnt end) par_over_30_day_cnt,
+    sum(case when od_dys > 28.5 then od_amt end) par_over_30_day_od_amt,
+    sum(case when od_dys > 28.5 then ost_amt end) par_over_30_amt    
+    from qry q where ost_amt > 0
+    group by q.PRD_GRP_NM
+    union
+    select 2 ord, EMP_NM, count(loan_cnt) tot_clnt, 
+    sum(APRVD_LOAN_AMT) APRVD_LOAN_AMT, sum(ost_amt) ost_amt,
+    count(case when od_amt > 0 then loan_cnt end) par_1_dy_cnt,
+    sum(case when (od_dys >0) then od_amt end) par_1_day_od_amt,
+    sum(case when od_amt > 0 then ost_amt end) par_1_dy_amt,
+     count(case when (od_dys <= 3.5 and od_amt > 0) then loan_cnt end) par_1_4_day_cnt,
+    sum(case when (od_dys <= 3.5) then od_amt end) par_1_4_day_od_amt,
+    sum(case when (od_dys <= 3.5 and od_amt > 0) then ost_amt end) par_1_4_day_amt,
+    count(case when od_dys between 3.6 and 13.5 then loan_cnt end) par_5_15_day_cnt,
+    sum(case when od_dys between 3.6 and 13.5 then od_amt end) par_5_15_day_od_amt,
+    sum(case when od_dys between 3.6 and 13.5 then ost_amt end) par_5_15_day_amt,
+    count(case when od_dys between 13.6 and 28.5 then loan_cnt end) par_16_30_day_cnt,
+    sum(case when od_dys between 13.6 and 28.5 then od_amt end) par_16_30_day_od_amt,
+    sum(case when od_dys between 13.6 and 28.5 then ost_amt end) par_16_30_day_amt,
+    count(case when od_dys > 28.5 then loan_cnt end) par_over_30_day_cnt,
+    sum(case when od_dys > 28.5 then od_amt end) par_over_30_day_od_amt,
+    sum(case when od_dys > 28.5 then ost_amt end) par_over_30_amt    
+    from qry q where ost_amt > 0
+    and q.PRD_GRP_SEQ<>19
+    group by q.EMP_NM
+    union    
+    select 3 ord, 'Loan Cycle - '||lpad(LOAN_CYCL_NUM,2,'0'), count(loan_cnt) tot_clnt, 
+    sum(APRVD_LOAN_AMT) APRVD_LOAN_AMT, sum(ost_amt) ost_amt,
+    count(case when od_amt > 0 then loan_cnt end) par_1_dy_cnt,
+    sum(case when (od_dys >0) then od_amt end) par_1_day_od_amt,
+    sum(case when od_amt > 0 then ost_amt end) par_1_dy_amt,
+     count(case when (od_dys <= 3.5 and od_amt > 0) then loan_cnt end) par_1_4_day_cnt,
+    sum(case when (od_dys <= 3.5) then od_amt end) par_1_4_day_od_amt,
+    sum(case when (od_dys <= 3.5 and od_amt > 0) then ost_amt end) par_1_4_day_amt,
+    count(case when od_dys between 3.6 and 13.5 then loan_cnt end) par_5_15_day_cnt,
+    sum(case when od_dys between 3.6 and 13.5 then od_amt end) par_5_15_day_od_amt,
+    sum(case when od_dys between 3.6 and 13.5 then ost_amt end) par_5_15_day_amt,
+    count(case when od_dys between 13.6 and 28.5 then loan_cnt end) par_16_30_day_cnt,
+    sum(case when od_dys between 13.6 and 28.5 then od_amt end) par_16_30_day_od_amt,
+    sum(case when od_dys between 13.6 and 28.5 then ost_amt end) par_16_30_day_amt,
+    count(case when od_dys > 28.5 then loan_cnt end) par_over_30_day_cnt,
+    sum(case when od_dys > 28.5 then od_amt end) par_over_30_day_od_amt,
+    sum(case when od_dys > 28.5 then ost_amt end) par_over_30_amt    
+    from qry q where ost_amt > 0
+    and q.PRD_GRP_SEQ<>19
+    group by 'Loan Cycle - '||lpad(LOAN_CYCL_NUM,2,'0')
+    union    
+    select 4 ord, AMT_RNG, count(loan_cnt) tot_clnt, 
+    sum(APRVD_LOAN_AMT) APRVD_LOAN_AMT, sum(ost_amt) ost_amt,
+    count(case when od_amt > 0 then loan_cnt end) par_1_dy_cnt,
+    sum(case when (od_dys >0) then od_amt end) par_1_day_od_amt,
+    sum(case when od_amt > 0 then ost_amt end) par_1_dy_amt,
+     count(case when (od_dys <= 3.5 and od_amt > 0) then loan_cnt end) par_1_4_day_cnt,
+    sum(case when (od_dys <= 3.5) then od_amt end) par_1_4_day_od_amt,
+    sum(case when (od_dys <= 3.5 and od_amt > 0) then ost_amt end) par_1_4_day_amt,
+    count(case when od_dys between 3.6 and 13.5 then loan_cnt end) par_5_15_day_cnt,
+    sum(case when od_dys between 3.6 and 13.5 then od_amt end) par_5_15_day_od_amt,
+    sum(case when od_dys between 3.6 and 13.5 then ost_amt end) par_5_15_day_amt,
+    count(case when od_dys between 13.6 and 28.5 then loan_cnt end) par_16_30_day_cnt,
+    sum(case when od_dys between 13.6 and 28.5 then od_amt end) par_16_30_day_od_amt,
+    sum(case when od_dys between 13.6 and 28.5 then ost_amt end) par_16_30_day_amt,
+    count(case when od_dys > 28.5 then loan_cnt end) par_over_30_day_cnt,
+    sum(case when od_dys > 28.5 then od_amt end) par_over_30_day_od_amt,
+    sum(case when od_dys > 28.5 then ost_amt end) par_over_30_amt    
+    from qry q where ost_amt > 0
+    and q.PRD_GRP_SEQ<>19
+    group by AMT_RNG
+    order by 1,2

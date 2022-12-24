@@ -1,0 +1,28 @@
+  ------------targets------------
+
+  SELECT CASE WHEN :AREA_SEQ <>-1 THEN ma.area_nm ELSE reg.reg_nm END AS name_1,
+       CASE WHEN :AREA_SEQ <>-1 THEN MB.BRNCH_NM ELSE ma.area_nm END AS name_2,   
+         SUM (CASE WHEN tgt.prd_seq<>19 THEN tgt.trgt_clients END) trgt_clients,
+         SUM (tgt.trgt_amt)         trgt_amt,
+         CASE WHEN :AREA_SEQ <>-1 THEN MB.brnch_seq ELSE MA.area_seq END     AS seq
+    FROM mw_brnch_trgt tgt
+         JOIN mw_prd_grp prdgrp
+             ON TGT.prd_seq = prdgrp.prd_grp_seq AND prdgrp.crnt_rec_flg = 1
+         JOIN mw_brnch mb ON mb.BRNCH_SEQ = tgt.BRNCH_SEQ
+         JOIN mw_area ma ON ma.AREA_SEQ = mb.AREA_SEQ
+         JOIN mw_reg reg ON ma.REG_SEQ = reg.reg_seq
+   WHERE     tgt.del_flg = 0
+         AND tgt.prd_seq != 8
+         AND ma.CRNT_REC_FLG = 1
+         AND mb.Crnt_rec_flg = 1
+         AND reg.reg_seq = DECODE(:REG_SEQ, -1, REG.REG_SEQ, :REG_SEQ) 
+         AND ma.area_seq = DECODE(:AREA_SEQ, -1, ma.AREA_SEQ, :AREA_SEQ)
+         --and mb.brnch_seq=98
+         AND tgt.trgt_perd BETWEEN (TO_CHAR (TO_DATE ( :frmdt, 'dd-MM-yyyy'),
+                                             'YYYYMM'))
+                               AND TO_CHAR (TO_DATE ( :todt, 'dd-MM-yyyy'),
+                                            'YYYYMM')
+--AND tgt.brnch_seq = :branch
+GROUP BY CASE WHEN :AREA_SEQ <>-1 THEN MA.AREA_NM ELSE REG.reg_NM END,
+                   CASE WHEN :AREA_SEQ <>-1 THEN MB.BRNCH_NM ELSE MA.AREA_NM END  ,   
+                   CASE WHEN :AREA_SEQ <>-1 THEN MB.brnch_seq ELSE MA.area_seq END

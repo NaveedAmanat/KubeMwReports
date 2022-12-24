@@ -1,0 +1,65 @@
+SELECT INQ.ADC_RESPONSE,
+         INQ.INQUIRY_SEQ,
+         INQ.CRTD_DT,
+         BRNCH.BRNCH_NM,
+         EMP.EMP_NM,
+         CLNT.CLNT_ID,
+         'VALID'  AS STATUS,
+         INQ.LOAN_APP_SEQ,
+         INQ.CRTD_BY,
+         INQ.REMARKS,
+         (SELECT COUNT (iq.CLNT_SEQ)
+            FROM ADC.ADC_INQUIRIES iq
+                 JOIN ADC.ADC_REF_CD_VAL VNDR
+                     ON     VNDR.REF_CD_VAL_SEQ = iq.REF_CD_VNDR_SEQ
+                        AND VNDR.REF_CD_GRP_CODE = '0001'
+                        AND VNDR.REF_CD_VAL_CODE IN ('0001', '0004')
+                        AND VNDR.CRNT_REC_FLG = iq.CRNT_REC_FLG
+                 JOIN ADC.ADC_REF_CD_VAL IRS
+                     ON     IRS.REF_CD_VAL_SEQ = iq.REF_CD_RESP_STS_SEQ
+                        AND IRS.REF_CD_GRP_CODE IN ('0003', '0009')
+                        AND IRS.REF_CD_VAL_CODE = '0000'
+                        AND IRS.CRNT_REC_FLG = iq.CRNT_REC_FLG
+                 JOIN MW_LOAN_APP LA
+                     ON     LA.LOAN_APP_SEQ = iq.LOAN_APP_SEQ
+                        AND LA.CLNT_SEQ = iq.CLNT_SEQ
+                        AND LA.CRNT_REC_FLG = iq.CRNT_REC_FLG
+           WHERE     iq.CLNT_SEQ = INQ.CLNT_SEQ
+                 AND iq.crnt_rec_flg = 1
+                 AND TRUNC (iq.CRTD_DT) BETWEEN TO_DATE ( :frmdt,
+                                                         'dd-MON-yyyy')
+                                            AND TO_DATE ( :todt, 'dd-MON-yyyy'))
+             NO_COUNT,
+         VNDR.REF_CD_VAL_DESC
+    FROM ADC.ADC_INQUIRIES INQ
+         JOIN ADC.ADC_REF_CD_VAL VNDR
+             ON     VNDR.REF_CD_VAL_SEQ = INQ.REF_CD_VNDR_SEQ
+                AND VNDR.REF_CD_GRP_CODE = '0001'
+                AND VNDR.REF_CD_VAL_CODE  = :adcSeq 
+                AND VNDR.CRNT_REC_FLG = INQ.CRNT_REC_FLG
+         JOIN ADC.ADC_REF_CD_VAL IRS
+             ON     IRS.REF_CD_VAL_SEQ = INQ.REF_CD_RESP_STS_SEQ
+                AND IRS.REF_CD_GRP_CODE IN ('0003', '0009')
+                AND IRS.REF_CD_VAL_CODE = '0000'
+         JOIN MW_BRNCH BRNCH
+             ON     BRNCH.BRNCH_SEQ = INQ.BRNCH_SEQ
+                AND BRNCH.CRNT_REC_FLG = INQ.CRNT_REC_FLG
+         JOIN MW_LOAN_APP LA
+             ON     LA.LOAN_APP_SEQ = INQ.LOAN_APP_SEQ
+                AND LA.CLNT_SEQ = INQ.CLNT_SEQ
+                AND LA.CRNT_REC_FLG = INQ.CRNT_REC_FLG
+         JOIN MW_CLNT CLNT
+             ON LA.CLNT_SEQ = CLNT.CLNT_SEQ AND CLNT.CRNT_REC_FLG = 1
+         JOIN MW_PORT PORT
+             ON     PORT.CRNT_REC_FLG = LA.CRNT_REC_FLG
+                AND PORT.PORT_SEQ = LA.PORT_SEQ
+         JOIN MW_PORT_EMP_REL REL
+             ON     REL.PORT_SEQ = PORT.PORT_SEQ
+                AND REL.CRNT_REC_FLG = REL.CRNT_REC_FLG
+         JOIN MW_EMP EMP ON EMP.EMP_SEQ = REL.EMP_SEQ
+   WHERE     TRUNC (INQ.CRTD_DT) BETWEEN TO_DATE ( :frmdt, 'dd-MON-yyyy')
+                                     AND TO_DATE ( :todt, 'dd-MON-yyyy')
+         AND INQ.CRNT_REC_FLG = 1
+         AND BRNCH.BRNCH_SEQ =
+             (CASE WHEN :brnchSeq = -1 THEN BRNCH.BRNCH_SEQ ELSE :brnchSeq END)
+ORDER BY INQ.CRTD_DT
